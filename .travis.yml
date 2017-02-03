@@ -15,7 +15,8 @@ before_deploy:
 install: true
 
 script:
-- ./cmd/...
+  - go test -v ./internal/...
+  - go test -v ./cmd/...
 
 deploy:
    - provider: script
