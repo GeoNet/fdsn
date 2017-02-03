@@ -1,0 +1,25 @@
+sudo: required
+
+language: go
+go:
+- 1.7.4
+services:
+  - docker
+
+before_deploy:
+  - docker --version
+  - pip install --user awscli
+  - export PATH=$PATH:$HOME/.local/bin
+  - eval $(aws ecr get-login --region ap-southeast-2) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
+
+install: true
+
+script:
+- ./cmd/...
+
+deploy:
+   - provider: script
+     skip_cleanup: true
+     script: ./build-push.sh fdsn-s3-consumer
+     on: 
+       branch: master 
