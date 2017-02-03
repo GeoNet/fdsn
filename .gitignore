@@ -1,0 +1,4 @@
+.idea/
+fdsn.iml
+docker-build-tmp/
+cmd/fdsn-s3-consumer/fdsn-s3-consumer
