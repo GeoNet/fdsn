@@ -9,6 +9,8 @@ If a file is successfully loaded it is deleted.
 Sync SC3ML from AWS using:
 
    aws s3 sync s3://seiscompml07 /work/seiscomp07 --exclude "*"  --include "2015p*"
+
+The aws s3 command may need adjust to avoid the upload and error key prefixes.
 */
 
 import (

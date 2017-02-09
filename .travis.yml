@@ -28,6 +28,6 @@ script:
 deploy:
    - provider: script
      skip_cleanup: true
-     script: ./build-push.sh fdsn-s3-consumer
+     script: ./build-push.sh fdsn-s3-consumer fdsn-ws
      on: 
        branch: master 
