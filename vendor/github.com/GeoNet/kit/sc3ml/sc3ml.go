@@ -1,11 +1,18 @@
-//Package sc3ml is for parsing SeisComPML.
+/*
+Package sc3ml is for parsing SeisComPML.
+*/
 package sc3ml
 
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"time"
 )
+
+var sc3ml07 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.7" version="0.7">`)
+var sc3ml08 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.8" version="0.8">`)
+var sc3ml09 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.9" version="0.9">`)
 
 type Seiscomp struct {
 	EventParameters EventParameters `xml:"EventParameters"`
@@ -130,7 +137,18 @@ type Amplitude struct {
 // Unmarshal unmarshals the SeisComPML in b and initialises all
 // the objects referenced by ID in the SeisComPML e.g., PreferredOrigin,
 // PreferredMagnitude etc.
+//
+// Support SC3ML versions are 0.7, 0.8, 0.9
+// Any other versions will result in a error.
 func Unmarshal(b []byte, s *Seiscomp) error {
+	switch {
+	case bytes.Contains(b, sc3ml07):
+	case bytes.Contains(b, sc3ml08):
+	case bytes.Contains(b, sc3ml09):
+	default:
+		return errors.New("unsupported SC3ML version.")
+	}
+
 	if err := xml.Unmarshal(b, s); err != nil {
 		return err
 	}

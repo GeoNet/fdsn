@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "3JsW/vlMhZWOm9tAS+ZoOYUy8aQ=",
+			"path": "github.com/GeoNet/kit/sc3ml",
+			"revision": "2f9da4f307c2035e47546391da8701a642fc9598",
+			"revisionTime": "2017-02-06T08:02:36Z"
+		},
+		{
 			"checksumSHA1": "FcAtIa3dCgJBin+SrFiTOEU/bsA=",
 			"path": "github.com/GeoNet/mtr/internal",
 			"revision": "7c1e1f26bcfc6fee1c05da0e383a14b1f66a284f",

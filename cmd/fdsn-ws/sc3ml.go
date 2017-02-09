@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/GeoNet/fdsn/internal/kit/sc3ml"
+	"github.com/GeoNet/kit/sc3ml"
 	"github.com/GeoNet/weft"
 	"github.com/fatih/structs"
 	"github.com/lib/pq"
