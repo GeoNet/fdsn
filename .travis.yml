@@ -12,6 +12,13 @@ before_deploy:
   - export PATH=$PATH:$HOME/.local/bin
   - eval $(aws ecr get-login --region ap-southeast-2) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
 
+# trying to fix postgis bug which comes on the travis infrastructure that has sudo.
+before_install:
+ - export DEBIAN_FRONTEND=noninteractive;
+   sudo -E apt-get -yq update &>> ~/apt-get-update.log;
+   sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install postgresql-9.5-postgis-2.3
+ - sudo apt-get install -y xsltproc
+ 
 install: true
 
 addons:
