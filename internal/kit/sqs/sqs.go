@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"os"
@@ -22,7 +23,9 @@ type SQS struct {
 // New returns an SQS using the default AWS credentials chain.
 // This consults (in order) environment vars, config files, ec2 and ecs roles.
 // It is an error if the AWS_REGION environment variable is not set.
-func New() (SQS, error) {
+// Requests with recoverable errors will be retried with the default retrier
+// with back off up to maxRetries times.
+func New(maxRetries int) (SQS, error) {
 	if os.Getenv("AWS_REGION") == "" {
 		return SQS{}, errors.New("AWS_REGION is not set")
 	}
@@ -31,6 +34,11 @@ func New() (SQS, error) {
 	if err != nil {
 		return SQS{}, err
 	}
+
+	// logging can be made more verbose e.g.,
+	//sess.Config.WithLogLevel(aws.LogDebugWithRequestRetries)
+
+	sess.Config.Retryer = client.DefaultRetryer{NumMaxRetries: maxRetries}
 
 	return SQS{client: sqs.New(sess)}, nil
 }
