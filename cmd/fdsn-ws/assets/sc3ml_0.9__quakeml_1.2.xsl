@@ -129,25 +129,22 @@
         xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         xmlns:scs="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.9"
         xmlns:qml="http://quakeml.org/xmlns/quakeml/1.0"
-        xmlns="http://quakeml.org/xmlns/bed/1.2"
         xmlns:q="http://quakeml.org/xmlns/quakeml/1.2"
         exclude-result-prefixes="scs qml xsl">
-    <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
+    <xsl:output method="xml" encoding="UTF-8" indent="no" omit-xml-declaration="yes"/>
     <xsl:strip-space elements="*"/>
 
     <!-- Define some global variables -->
     <!-- CHANGE ME: Please change the ID_PREFIX to the reverse DNS name of your
          institute -->
-    <xsl:variable name="ID_PREFIX" select="'smi:org.gfz-potsdam.de/geofon/'"/>
+    <xsl:variable name="ID_PREFIX" select="'smi:nz.org.geonet/'"/>
     <xsl:variable name="PID" select="'publicID'"/>
 
     <!-- Starting point: Match the root node and select the one and only
          EventParameters node -->
     <xsl:template match="/">
         <xsl:variable name="scsRoot" select="."/>
-        <q:quakeml>
             <xsl:for-each select="$scsRoot/scs:seiscomp/scs:EventParameters">
-                <eventParameters>
                     <!-- Mandatory publicID attribute -->
                     <xsl:attribute name="{$PID}">
                         <xsl:call-template name="convertOptionalID">
@@ -156,9 +153,7 @@
                     </xsl:attribute>
 
                     <xsl:apply-templates/>
-                </eventParameters>
             </xsl:for-each>
-        </q:quakeml>
     </xsl:template>
 
     <!-- event -->
