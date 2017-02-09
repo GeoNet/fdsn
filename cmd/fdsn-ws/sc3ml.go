@@ -20,6 +20,8 @@ import (
 const deleted = `not existing`
 
 var sc3ml07 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.7" version="0.7">`)
+var sc3ml08 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.8" version="0.8">`)
+var sc3ml09 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.9" version="0.9">`)
 
 var key = os.Getenv("FDSN_KEY")
 
@@ -115,6 +117,8 @@ toQuakeMLEvent converts seisComPML to a QuakeML event fragment using an XSLT.
 Supported versions of SC3ML are
 
    * 0.7
+   * 0.8
+   * 0.9
 
 The xslt source is from http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.7/sc3ml_0.7__quakeml_1.2.xsl
 It has been edited to output only an Event fragment without the parent elements and namespaces.  e.g.,
@@ -145,6 +149,10 @@ func toQuakeMLEvent(seisComPML []byte) (string, error) {
 	switch {
 	case bytes.Contains(seisComPML, sc3ml07):
 		cmd.Args = append(cmd.Args, "assets/sc3ml_0.7__quakeml_1.2.xsl")
+	case bytes.Contains(seisComPML, sc3ml08):
+		cmd.Args = append(cmd.Args, "assets/sc3ml_0.8__quakeml_1.2.xsl")
+	case bytes.Contains(seisComPML, sc3ml09):
+		cmd.Args = append(cmd.Args, "assets/sc3ml_0.9__quakeml_1.2.xsl")
 	default:
 		return "", fmt.Errorf("found no %s", "XSLT")
 	}
