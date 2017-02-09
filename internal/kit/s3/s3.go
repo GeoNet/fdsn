@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"os"
@@ -17,7 +18,9 @@ type S3 struct {
 // New returns an S3 using the default AWS credentials chain.
 // This consults (in order) environment vars, config files, ec2 and ecs roles.
 // It is an error if the AWS_REGION environment variable is not set.
-func New() (S3, error) {
+// Requests with recoverable errors will be retried with the default retrier
+// with back off up to maxRetries times.
+func New(maxRetries int) (S3, error) {
 	if os.Getenv("AWS_REGION") == "" {
 		return S3{}, errors.New("AWS_REGION is not set")
 	}
@@ -26,6 +29,11 @@ func New() (S3, error) {
 	if err != nil {
 		return S3{}, err
 	}
+
+	// logging can be made more verbose e.g.,
+	//sess.Config.WithLogLevel(aws.LogDebugWithRequestRetries)
+
+	sess.Config.Retryer = client.DefaultRetryer{NumMaxRetries: maxRetries}
 
 	return S3{client: s3.New(sess)}, nil
 }

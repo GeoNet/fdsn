@@ -1,0 +1,2 @@
+CREATE DATABASE fdsn WITH OWNER geonetadmin TEMPLATE template0 ENCODING 'UTF8' ;
+ALTER DATABASE fdsn SET timezone TO UTC;

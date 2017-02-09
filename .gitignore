@@ -2,3 +2,5 @@
 fdsn.iml
 docker-build-tmp/
 cmd/fdsn-s3-consumer/fdsn-s3-consumer
+cmd/fdsn-ws/fdsn-ws
+cmd/fdsn-ws-event-loader/fdsn-ws-event-loader
