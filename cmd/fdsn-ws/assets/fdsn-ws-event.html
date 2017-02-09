@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>FDSNWS - Event</title>
+</head>
+<body>
+<h1>FDSNWS Event Web Service</h1>
+<p>The event Web service provides access to contributed origin and magnitude
+    estimates in <a href="https://quake.ethz.ch/quakeml">QuakeML</a> format.
+    Events may be filtered e.g. by hypocenter, time and magnitude parameters. The
+    request type is <em>HTTP-GET</em>. Please refer to <a
+            href="http://www.fdsn.org/webservices">http://www.fdsn.org/webservice</a> for
+    a complete service description.</p>
+
+<h2>Available URLs</h2>
+<ul>
+    <li><a href="/fdsnws/event/1/query">query</a></li>
+    <li><a href="/fdsnws/event/1/catalogs">catalogs</a></li>
+    <li><a href="/fdsnws/event/1/contributors">contributors</a></li>
+    <li><a href="/fdsnws/event/1/version">version</a></li>
+    <li><a href="/fdsnws/event/1/application.wadl">application.wadl</a></li>
+</ul>
+
+<h2>Feature Notes</h2>
+<ul>
+    <li>The result set is limited to 10,000 events.  Queries that would return more than 10,000 events receive an HTTP
+    413 response and will need to be broken in to smaller queries.</li>
+</ul>
+</body>
+</html>

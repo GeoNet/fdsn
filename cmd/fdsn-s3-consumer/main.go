@@ -42,6 +42,7 @@ func main() {
 
 	var err error
 
+	// TODO backoff and retries.
 	s3Client, err = s3.New()
 	if err != nil {
 		log.Fatalf("creating S3 client: %s", err)
