@@ -15,6 +15,18 @@
 			"revisionTime": "2017-01-09T21:49:25Z"
 		},
 		{
+			"checksumSHA1": "SV/TI9CPHR3ByitbOxKr0FD41Kc=",
+			"path": "github.com/GeoNet/weft",
+			"revision": "8137e22f20fd81bef44ac0b49677a8fc2bf4b504",
+			"revisionTime": "2016-11-13T20:39:39Z"
+		},
+		{
+			"checksumSHA1": "CwCYfTEDZW1roi1++adKmYF3m8Y=",
+			"path": "github.com/GeoNet/weft/wefttest",
+			"revision": "8137e22f20fd81bef44ac0b49677a8fc2bf4b504",
+			"revisionTime": "2016-11-13T20:39:39Z"
+		},
+		{
 			"checksumSHA1": "CBkrMzvLXmGD/guNcRCzPHTO66c=",
 			"path": "github.com/aws/aws-sdk-go/aws",
 			"revision": "25fa088918bba994b0f4ad6537739f7e88d9a7f8",
@@ -171,6 +183,12 @@
 			"revisionTime": "2017-01-27T18:35:24Z"
 		},
 		{
+			"checksumSHA1": "40Ns85VYa4smQPcewZ7SOdfLnKU=",
+			"path": "github.com/fatih/structs",
+			"revision": "1de5ce037865f641d8eb22007e31cc5292a54e12",
+			"revisionTime": "2016-12-30T12:22:56Z"
+		},
+		{
 			"checksumSHA1": "FCeEm2BWZV/n4oTy+SGd/k0Ab5c=",
 			"origin": "github.com/aws/aws-sdk-go/vendor/github.com/go-ini/ini",
 			"path": "github.com/go-ini/ini",
@@ -178,11 +196,29 @@
 			"revisionTime": "2017-01-27T18:35:24Z"
 		},
 		{
+			"checksumSHA1": "aeNt5+WZd7yhD1Di2Rkojj2SUFk=",
+			"path": "github.com/gorilla/schema",
+			"revision": "0164a00ab4cd01d814d8cd5bf63fd9fcea30e23b",
+			"revisionTime": "2016-08-17T19:01:22Z"
+		},
+		{
 			"checksumSHA1": "0ZrwvB6KoGPj2PoDNSEJwxQ6Mog=",
 			"origin": "github.com/aws/aws-sdk-go/vendor/github.com/jmespath/go-jmespath",
 			"path": "github.com/jmespath/go-jmespath",
 			"revision": "25fa088918bba994b0f4ad6537739f7e88d9a7f8",
 			"revisionTime": "2017-01-27T18:35:24Z"
+		},
+		{
+			"checksumSHA1": "dNYxHiBLalTqluak2/Z8c3RsSEM=",
+			"path": "github.com/lib/pq",
+			"revision": "50761b0867bd1d9d069276790bcd4a3bccf2324a",
+			"revisionTime": "2016-08-31T22:25:20Z"
+		},
+		{
+			"checksumSHA1": "xppHi82MLqVx1eyQmbhTesAEjx8=",
+			"path": "github.com/lib/pq/oid",
+			"revision": "50761b0867bd1d9d069276790bcd4a3bccf2324a",
+			"revisionTime": "2016-08-31T22:25:20Z"
 		}
 	],
 	"rootPath": "github.com/GeoNet/fdsn"

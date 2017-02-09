@@ -14,9 +14,16 @@ before_deploy:
 
 install: true
 
+addons:
+  postgresql: '9.5'
+
+before_script:
+- psql -U postgres -c "create extension postgis"
+- ./etc/scripts/initdb.sh
+
 script:
   - go test -v ./internal/...
-  - go test -v ./cmd/...
+  - ./all.sh
 
 deploy:
    - provider: script
