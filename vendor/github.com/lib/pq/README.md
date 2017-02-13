@@ -20,11 +20,11 @@ variables.
 
 Example:
 
-	PGHOST=/run/postgresql go test github.com/lib/pq
+	PGHOST=/var/run/postgresql go test github.com/lib/pq
 
 Optionally, a benchmark suite can be run as part of the tests:
 
-	PGHOST=/run/postgresql go test -bench .
+	PGHOST=/var/run/postgresql go test -bench .
 
 ## Features
 
@@ -85,7 +85,7 @@ code still exists in here.
 * Keith Rarick (kr)
 * Kir Shatrov (kirs)
 * Lann Martin (lann)
-* Maciek Sakrejda (uhoh-itsmaciek)
+* Maciek Sakrejda (deafbybeheading)
 * Marc Brinkmann (mbr)
 * Marko Tiikkaja (johto)
 * Matt Newberry (MattNewberry)
