@@ -17,12 +17,6 @@ func init() {
 		r.URL.Host = os.Getenv("FDSN_STATION")
 	}
 
-	dataDirector := func(r *http.Request) {
-		r.Host = os.Getenv("FDSN_DATA")
-		r.URL.Scheme = "http"
-		r.URL.Host = os.Getenv("FDSN_DATA")
-	}
-
 	mux = http.NewServeMux()
 	// fdsn-ws-event
 	mux.HandleFunc("/fdsnws/event/1", weft.MakeHandlerAPI(fdsnEventV1Index))
@@ -35,8 +29,15 @@ func init() {
 	// fdsn-ws-station is proxied
 	mux.Handle("/fdsnws/station/", &httputil.ReverseProxy{Director: stationDirector})
 
-	// fdsn-ws-dataselect is proxied
-	mux.Handle("/fdsnws/dataselect/", &httputil.ReverseProxy{Director: dataDirector})
+	// This service implements the dataselect spec from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf.
+	mux.HandleFunc("/fdsnws/dataselect/1", weft.MakeHandlerAPI(fdsnDataselectV1Index))
+	// Using MakeHandlerPage so we can use POST and write to the response body (MakeHandlerAPI has a nil response body)
+	//mux.HandleFunc("/fdsnws/dataselect/1/query", weft.MakeHandlerPage(fdsnDataselectV1Handler))
+	mux.HandleFunc("/fdsnws/dataselect/1/query", weft.MakeStreamHandlerAPI(fdsnDataselectV1Handler))
+	// Spec says we have to handle queryauth.  We ignore the user/passwd by using the same handler as for no auth.
+	mux.HandleFunc("/fdsnws/dataselect/1/queryauth", weft.MakeStreamHandlerAPI(fdsnDataselectV1Handler))
+	mux.HandleFunc("/fdsnws/dataselect/1/version", weft.MakeHandlerAPI(fdsnDataselectVersion))
+	mux.HandleFunc("/fdsnws/dataselect/1/application.wadl", weft.MakeHandlerAPI(fdsnDataselectWadl))
 
 	mux.HandleFunc("/sc3ml", weft.MakeHandlerAPI(s3ml))
 

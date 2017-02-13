@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "9V6Js9WXvuU428v1N4DyWJjNKKQ=",
+			"checksumSHA1": "rX7p0wa12Y27e5J6l59Yl+Y4l5A=",
 			"path": "github.com/GeoNet/collect/mseed",
-			"revision": "3b04b5290cf7e1a98bfcdd777d66280c8d928935",
-			"revisionTime": "2017-02-08T21:16:19Z"
+			"revision": "e600b7d5ae916c62b505c882cae9207116b55d8e",
+			"revisionTime": "2017-02-20T21:00:36Z"
 		},
 		{
 			"checksumSHA1": "3JsW/vlMhZWOm9tAS+ZoOYUy8aQ=",

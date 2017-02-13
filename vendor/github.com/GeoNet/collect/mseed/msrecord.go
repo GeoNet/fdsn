@@ -107,8 +107,24 @@ func (m *MSRecord) Print(details int8) {
 	C.msr_print((*_Ctype_struct_MSRecord_s)(m), C.flag(details))
 }
 
-func (m *MSRecord) Unpack(buf []byte, maxlen int, dataflag int, verbose int) {
-	C.msr_unpack(((*C.char)(unsafe.Pointer(&buf[0]))), C.int(maxlen), (**_Ctype_struct_MSRecord_s)((unsafe.Pointer)(&m)), C.flag(dataflag), C.flag(verbose))
+func (m *MSRecord) Unpack(buf []byte, maxlen int, dataflag int, verbose int) error {
+	cErr := (int)(C.msr_unpack(((*C.char)(unsafe.Pointer(&buf[0]))), C.int(maxlen), (**_Ctype_struct_MSRecord_s)((unsafe.Pointer)(&m)), C.flag(dataflag), C.flag(verbose)))
+
+	switch cErr {
+	case C.MS_NOERROR:
+	case C.MS_GENERROR:
+		return errors.New("msr_unpack: generic unspecified error reading miniseed data")
+	case C.MS_NOTSEED:
+		return errors.New("msr_unpack: data is not in SEED format")
+	case C.MS_OUTOFRANGE:
+		return errors.New("msr_unpack: data record length is out of range")
+	case C.MS_UNKNOWNFORMAT:
+		return errors.New("msr_unpack: data has unknown encoding format")
+	default:
+		return errors.New("msr_unpack: non-zero return code")
+	}
+
+	return nil
 }
 
 func (m *MSRecord) SrcName(quality int8) string {

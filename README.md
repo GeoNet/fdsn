@@ -24,6 +24,8 @@ handled with separate XSLT to be consistent with upstream changes):
 
 The only version of QuakeML created and stored is 1.2
 
+FDSN dataselect has been implemented, querying and serving data from miniseed files off S3.
+
 ## fdsn-s3-consumer
 
 Receives notifications for SeisComPML (SC3ML) event data uploads to S3 and posts the SC3ML to the fdsn-ws event service.
