@@ -14,7 +14,7 @@ FDSN_STATION_XML_META_KEY= (eg. file name)
 The fdsn-station service will download and cache it in "etc/" for later use (when the service restarts).
 
 Downloading and unmarshaling the fdsn-station xml could take long : Unmarshaling a 174MB xml takes about 10 seconds in my MacBookPro(2017), and downloading it takes much longer. 
-The will /fdsnws/station/1/query keep returning 500 error with "Station data not ready" message until the xml is fully unmarshaled.
+The service (/fdsnws/station/1/query) will keep returning 500 error with "Station data not ready" message until the xml is fully unmarshaled.
 
 ###Testing
 There's a small fdsn-station-test.xml file in "etc/" for testing.
@@ -27,9 +27,11 @@ In the directory fdsn-ws, issue the command:
 xsdgen -o fdsn_station_type.go etc/fdsn-station-1.0.xsd
 ```
 However xsdgen doesn't really generates the final go file we wanted. These are issues and workarounds to apply:
-1. The generated fields' tags in struct contains xmlns. This caused unnecessary url for EACH tag when we marshaling the  xml.
+
+* The generated fields' tags in struct contains xmlns. This caused unnecessary url for EACH tag when we marshaling the  xml.
 To resolve this, we'll have to manually remove all "http://www.fdsn.org/xml/station/1" in the tags of generated go file.
-2. An issue has been reported here: https://github.com/droyo/go-xml/issues/9.
+
+* An issue has been reported here: https://github.com/droyo/go-xml/issues/9.
 To resolve this, we'll have to manually add "FloatType" as the base type for `LongitudeBaseType` and `LatitudeBaseType`. For example,
 ```
 type LongitudeBaseType struct {
@@ -39,7 +41,8 @@ type LongitudeBaseType struct {
 	MinusError float64 `xml:"minusError,attr"`
 }
 ```
-3. The incorrect interpreted "RootType" in the struct.
+
+* The incorrect interpreted "RootType" in the struct.
 In the xsd definition "RootType" is a type name, not a field name. But xsdgen misinterpreted it.
 To resolve this, find the "type RootType struct" in the generated go file and change from:
 ```
