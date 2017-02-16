@@ -11,12 +11,6 @@ import (
 var mux *http.ServeMux
 
 func init() {
-	stationDirector := func(r *http.Request) {
-		r.Host = os.Getenv("FDSN_STATION")
-		r.URL.Scheme = "http"
-		r.URL.Host = os.Getenv("FDSN_STATION")
-	}
-
 	dataDirector := func(r *http.Request) {
 		r.Host = os.Getenv("FDSN_DATA")
 		r.URL.Scheme = "http"
@@ -32,8 +26,11 @@ func init() {
 	mux.HandleFunc("/fdsnws/event/1/contributors", weft.MakeHandlerAPI(fdsnEventContributors))
 	mux.HandleFunc("/fdsnws/event/1/application.wadl", weft.MakeHandlerAPI(fdsnEventWadl))
 
-	// fdsn-ws-station is proxied
-	mux.Handle("/fdsnws/station/", &httputil.ReverseProxy{Director: stationDirector})
+	// fdsn-ws-station
+	mux.HandleFunc("/fdsnws/station/1", weft.MakeHandlerAPI(fdsnStationV1Index))
+	mux.HandleFunc("/fdsnws/station/1/query", weft.MakeHandlerAPI(fdsnStationV1Handler))
+	mux.HandleFunc("/fdsnws/station/1/version", weft.MakeHandlerAPI(fdsnStationVersion))
+	mux.HandleFunc("/fdsnws/station/1/application.wadl", weft.MakeHandlerAPI(fdsnStationWadl))
 
 	// fdsn-ws-dataselect is proxied
 	mux.Handle("/fdsnws/dataselect/", &httputil.ReverseProxy{Director: dataDirector})
