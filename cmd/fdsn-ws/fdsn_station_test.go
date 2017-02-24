@@ -25,6 +25,7 @@ func TestStationV1Query(t *testing.T) {
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query"}.Do(ts.URL)
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00"}.Do(ts.URL)
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query?minlat=-41&maxlon=177"}.Do(ts.URL)
+
 }
 
 func TestStationFilter(t *testing.T) {
@@ -57,7 +58,7 @@ func TestStationFilter(t *testing.T) {
 		t.Error(err)
 	}
 
-	c.doFilter(e)
+	c.doFilter([]fdsnStationV1Parm{e,})
 
 	if len(c.Network) != 1 {
 		t.Errorf("Incorrect filter result. No valid record.")
@@ -73,7 +74,7 @@ func TestStationFilter(t *testing.T) {
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
 	}
-	c.doFilter(e)
+	c.doFilter([]fdsnStationV1Parm{e,})
 
 	if len(c.Network) != 1 {
 		t.Errorf("Incorrect filter result. No valid record.")
@@ -89,7 +90,7 @@ func TestStationFilter(t *testing.T) {
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
 	}
-	c.doFilter(e)
+	c.doFilter([]fdsnStationV1Parm{e,})
 
 	if len(c.Network) != 1 {
 		t.Errorf("Incorrect filter result. No valid record.")
@@ -108,7 +109,7 @@ func TestStationFilter(t *testing.T) {
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
 	}
-	c.doFilter(e)
+	c.doFilter([]fdsnStationV1Parm{e,})
 
 	if len(c.Network) != 1 {
 		t.Errorf("Incorrect filter result. No valid record.")
@@ -116,6 +117,31 @@ func TestStationFilter(t *testing.T) {
 
 	if len(c.Network[0].Station) != 1 {
 		t.Errorf("Incorrect filter result. Expect 1 got %d", len(c.Network[0].Station))
+	}
+
+	if len(c.Network[0].Station[0].Channel) != 3 {
+		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+	// Simulates POST Test.
+	// The spaces between fields should be ignored.
+	postBody :=`level=   channel
+		NZ ARA* * EHE*      2001-01-01T00:00:00 *
+		NZ ARH* * EHN*  2001-01-01T00:00:00 *`
+	var vs []fdsnStationV1Parm
+	if vs, err = parseStationV1Post(postBody); err!= nil {
+		t.Error(err)
+	}
+
+	c = fdsnStations
+	c.doFilter(vs)
+
+	if len(c.Network) != 1 {
+		t.Errorf("Incorrect filter result. No valid record.")
+	}
+
+	if len(c.Network[0].Station) != 2 {
+		t.Errorf("Incorrect filter result. Expect 2 got %d", len(c.Network[0].Station))
 	}
 
 	if len(c.Network[0].Station[0].Channel) != 3 {
