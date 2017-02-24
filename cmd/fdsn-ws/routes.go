@@ -28,7 +28,7 @@ func init() {
 
 	// fdsn-ws-station
 	mux.HandleFunc("/fdsnws/station/1", weft.MakeHandlerAPI(fdsnStationV1Index))
-	mux.HandleFunc("/fdsnws/station/1/query", weft.MakeHandlerAPI(fdsnStationV1Handler))
+	mux.HandleFunc("/fdsnws/station/1/query", weft.MakeHandlerPage(fdsnStationV1Handler))
 	mux.HandleFunc("/fdsnws/station/1/version", weft.MakeHandlerAPI(fdsnStationVersion))
 	mux.HandleFunc("/fdsnws/station/1/application.wadl", weft.MakeHandlerAPI(fdsnStationWadl))
 
