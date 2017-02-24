@@ -352,7 +352,7 @@ type RestrictedStatusType string
 // of the institution sending the message) and one or more Network containers or one or
 // more Station containers.
 type FDSNStationXML struct {
-	XmlNs		  string 		`xml:"xmlns,attr" default:"http://www.fdsn.org/xml/station/1"`
+	XmlNs         string        `xml:"xmlns,attr" default:"http://www.fdsn.org/xml/station/1"`
 	SchemaVersion float64       `xml:"schemaVersion,attr"`
 	Items         []string      `xml:",any"`
 	Source        string        `xml:"Source"`
