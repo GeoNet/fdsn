@@ -16,16 +16,16 @@ if [ ! -f all.sh ]; then
 	exit 1
 fi
 
-projects=`find cmd -maxdepth 2 -name '*.go' -print | awk -F "/" '{print $2}' | sort -u | egrep -v vendor`
+projects=`find cmd -maxdepth 2 -name '*.go' -print | awk -F "/" '{print $1 "/" $2}' | sort -u | egrep -v vendor`
 
 for i in ${projects[@]}; do
 	if [ -f ${i}/env.list ]; then
-		export $(cat ${i}/env.list | grep = | xargs) 
+		export $(cat ${i}/env.list | grep = | xargs)
 	fi
 
-	go test  -v ./cmd/${i}
+	go test  -v ./${i}
 
 	if [ -f ${i}/env.list ]; then
-		unset $(cat ${i}/env.list | grep = | awk -F "=" '{print $1}') 
+		unset $(cat ${i}/env.list | grep = | awk -F "=" '{print $1}')
 	fi
 done
