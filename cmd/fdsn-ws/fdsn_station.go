@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/xml"
 	"fmt"
@@ -15,7 +16,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"bufio"
 )
 
 const (
@@ -153,7 +153,7 @@ func init() {
 		}
 
 		if err = xml.Unmarshal(b, &fdsnStations); err != nil {
-			log.Printf("error unmarshaling fdsn-station.xml", err.Error())
+			log.Println("error unmarshaling fdsn station xml", err.Error())
 		} else {
 			log.Println("Done loading stations:", len(fdsnStations.Network[0].Station))
 			stationsLoaded = true
@@ -168,18 +168,18 @@ func parseStationV1Post(body string) ([]fdsnStationV1Parm, error) {
 	scanner := bufio.NewScanner(strings.NewReader(body))
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		if line=="" {
+		if line == "" {
 			continue
 		}
-		if tokens := strings.Split(line, "="); len(tokens)==2 {
+		if tokens := strings.Split(line, "="); len(tokens) == 2 {
 			switch tokens[0] {
 			case "level":
 				level = strings.TrimSpace(tokens[1])
-				if _, err:=levelValue(level); err!=nil {
+				if _, err := levelValue(level); err != nil {
 					return ret, err
 				}
 			}
-		} else if tokens := strings.Fields(line); len(tokens)==6 {
+		} else if tokens := strings.Fields(line); len(tokens) == 6 {
 			// NET STA LOC CHA STARTTIME ENDTIME
 			// IU COLA 00 LH? 2012-01-01T00:00:00 2012-01-01T12:00:00
 			// IU ANMO 10 BH? 2013-07-01T00:00:00 2013-02-07T12:00:00
@@ -196,13 +196,13 @@ func parseStationV1Post(body string) ([]fdsnStationV1Parm, error) {
 			}
 			v.Add("Level", level)
 
-			p, err:= parseStationV1(v)
-			if err!=nil {
+			p, err := parseStationV1(v)
+			if err != nil {
 				return ret, err
 			}
 			ret = append(ret, p)
 		} else {
-			return ret , fmt.Errorf("Invalid query format (POST).")
+			return ret, fmt.Errorf("Invalid query format (POST).")
 		}
 	}
 
@@ -263,7 +263,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Parm, error) {
 	}
 
 	e.LevelValue, err = levelValue(e.Level)
-	if err!=nil {
+	if err != nil {
 		return e, err
 	}
 
@@ -368,7 +368,7 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 		if err != nil {
 			return weft.BadRequest(err.Error())
 		}
-		params = []fdsnStationV1Parm{p,}
+		params = []fdsnStationV1Parm{p}
 	case "POST":
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -390,7 +390,7 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 		return weft.BadRequest(err.Error())
 	}
 
-	if len(by)==0 {
+	if len(by) == 0 {
 		return &weft.Result{Ok: false, Code: http.StatusNoContent, Msg: "The query resut is empty."}
 	}
 
@@ -428,7 +428,7 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Parm) bool {
 	matchedParams := make([]fdsnStationV1Parm, 0)
 	ss := make([]StationType, 0)
 
-	for _, p:=range params {
+	for _, p := range params {
 		if !p.validStartEnd(time.Time(n.StartDate), time.Time(n.EndDate), STATION_LEVEL_NETWORK) {
 			continue
 		}
@@ -443,7 +443,7 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Parm) bool {
 		matchedParams = append(matchedParams, p)
 	}
 
-	if len(matchedParams)==0 {
+	if len(matchedParams) == 0 {
 		// No match for any criterion, skip this node
 		return false
 	}
@@ -456,7 +456,7 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Parm) bool {
 
 	// Special case: when requested level is deeper than this level,
 	// but no child node from this node, then we should skip this node.
-	if params[0].LevelValue > STATION_LEVEL_NETWORK  && len(ss) == 0 {
+	if params[0].LevelValue > STATION_LEVEL_NETWORK && len(ss) == 0 {
 		return false
 	}
 
@@ -464,7 +464,7 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Parm) bool {
 	n.Station = ss
 
 	// Parent will keep this node if it's not empty
-	return len(ss) >0
+	return len(ss) > 0
 }
 
 func (s *StationType) doFilter(params []fdsnStationV1Parm) bool {
@@ -473,7 +473,7 @@ func (s *StationType) doFilter(params []fdsnStationV1Parm) bool {
 
 	matchedParams := make([]fdsnStationV1Parm, 0)
 
-	for _, p:=range params {
+	for _, p := range params {
 		if !p.validStartEnd(time.Time(s.StartDate), time.Time(s.EndDate), STATION_LEVEL_STATION) {
 			continue
 		}
@@ -491,7 +491,7 @@ func (s *StationType) doFilter(params []fdsnStationV1Parm) bool {
 		matchedParams = append(matchedParams, p)
 	}
 
-	if len(matchedParams)==0 {
+	if len(matchedParams) == 0 {
 		// No match for any criterion, skip this node
 		return false
 	}
@@ -515,7 +515,7 @@ func (s *StationType) doFilter(params []fdsnStationV1Parm) bool {
 }
 
 func (c *ChannelType) doFilter(params []fdsnStationV1Parm) bool {
-	for _, p:=range params {
+	for _, p := range params {
 		if !p.validStartEnd(time.Time(c.StartDate), time.Time(c.EndDate), STATION_LEVEL_CHANNEL) {
 			continue
 		}
@@ -557,7 +557,9 @@ func genRegex(input string) []string {
 		if s == "--" {
 			result[i] = "^$"
 		} else {
-			result[i] = "^" + strings.Replace(s, "*", ".*", -1) + "$"
+			s = strings.Replace(s, "*", ".*", -1)
+			s = strings.Replace(s, "?", ".?", -1)
+			result[i] = "^" + s + "$"
 		}
 	}
 

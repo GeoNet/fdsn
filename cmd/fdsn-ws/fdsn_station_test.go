@@ -58,7 +58,7 @@ func TestStationFilter(t *testing.T) {
 		t.Error(err)
 	}
 
-	c.doFilter([]fdsnStationV1Parm{e,})
+	c.doFilter([]fdsnStationV1Parm{e})
 
 	if len(c.Network) != 1 {
 		t.Errorf("Incorrect filter result. No valid record.")
@@ -74,7 +74,7 @@ func TestStationFilter(t *testing.T) {
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
 	}
-	c.doFilter([]fdsnStationV1Parm{e,})
+	c.doFilter([]fdsnStationV1Parm{e})
 
 	if len(c.Network) != 1 {
 		t.Errorf("Incorrect filter result. No valid record.")
@@ -85,12 +85,12 @@ func TestStationFilter(t *testing.T) {
 	}
 
 	// Station code matching
-	v.Set("station", "AR*")
+	v.Set("station", "AR*") // result ARAZ, ARHZ
 
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
 	}
-	c.doFilter([]fdsnStationV1Parm{e,})
+	c.doFilter([]fdsnStationV1Parm{e})
 
 	if len(c.Network) != 1 {
 		t.Errorf("Incorrect filter result. No valid record.")
@@ -98,6 +98,20 @@ func TestStationFilter(t *testing.T) {
 
 	if len(c.Network[0].Station) != 2 {
 		t.Errorf("Incorrect filter result. Expect 2 got %d", len(c.Network[0].Station))
+	}
+
+	v.Set("station", "A?HZ") // result ARHZ
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+	c.doFilter([]fdsnStationV1Parm{e})
+
+	if len(c.Network) != 1 {
+		t.Errorf("Incorrect filter result. No valid record.")
+	}
+
+	if len(c.Network[0].Station) != 1 {
+		t.Errorf("Incorrect filter result. Expect 1 got %d", len(c.Network[0].Station))
 	}
 
 	// Channel code matching
@@ -109,7 +123,7 @@ func TestStationFilter(t *testing.T) {
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
 	}
-	c.doFilter([]fdsnStationV1Parm{e,})
+	c.doFilter([]fdsnStationV1Parm{e})
 
 	if len(c.Network) != 1 {
 		t.Errorf("Incorrect filter result. No valid record.")
@@ -125,11 +139,11 @@ func TestStationFilter(t *testing.T) {
 
 	// Simulates POST Test.
 	// The spaces between fields should be ignored.
-	postBody :=`level=   channel
+	postBody := `level=   channel
 		NZ ARA* * EHE*      2001-01-01T00:00:00 *
-		NZ ARH* * EHN*  2001-01-01T00:00:00 *`
+		NZ ARH? * EHN*  2001-01-01T00:00:00 *`
 	var vs []fdsnStationV1Parm
-	if vs, err = parseStationV1Post(postBody); err!= nil {
+	if vs, err = parseStationV1Post(postBody); err != nil {
 		t.Error(err)
 	}
 
