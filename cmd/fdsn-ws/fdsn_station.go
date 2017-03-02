@@ -480,7 +480,7 @@ func (s *StationType) doFilter(params []fdsnStationV1Parm) bool {
 		if p.StationReg != nil && !matchAnyRegex(s.Code, p.StationReg) {
 			continue
 		}
-		if !p.validLatLng(s.Latitude.Double, s.Longitude.Double) {
+		if !p.validLatLng(s.Latitude.Value, s.Longitude.Value) {
 			continue
 		}
 		if p.LevelValue < STATION_LEVEL_CHANNEL {
@@ -525,7 +525,7 @@ func (c *ChannelType) doFilter(params []fdsnStationV1Parm) bool {
 		if p.LocationReg != nil && !matchAnyRegex(c.LocationCode, p.LocationReg) {
 			continue
 		}
-		if !p.validLatLng(c.Latitude.Double, c.Longitude.Double) {
+		if !p.validLatLng(c.Latitude.Value, c.Longitude.Value) {
 			continue
 		}
 		return true

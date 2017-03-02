@@ -31,17 +31,6 @@ However xsdgen doesn't really generates the final go file we wanted. These are i
 * The generated fields' tags in struct contains xmlns. This caused unnecessary url for EACH tag when we marshaling the  xml.
 To resolve this, we'll have to manually remove all "http://www.fdsn.org/xml/station/1" in the tags of generated go file.
 
-* An issue has been reported here: https://github.com/droyo/go-xml/issues/9.
-To resolve this, we'll have to manually add "FloatType" as the base type for `LongitudeBaseType` and `LatitudeBaseType`. For example,
-```
-type LongitudeBaseType struct {
-	FloatType
-	Unit       string  `xml:"unit,attr"`
-	PlusError  float64 `xml:"plusError,attr"`
-	MinusError float64 `xml:"minusError,attr"`
-}
-```
-
 * The incorrect interpreted "RootType" in the struct.
 In the xsd definition "RootType" is a type name, not a field name. But xsdgen misinterpreted it.
 To resolve this, find the "type RootType struct" in the generated go file and change from:
