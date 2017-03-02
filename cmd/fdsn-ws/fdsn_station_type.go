@@ -6,6 +6,7 @@ import (
 )
 
 type AngleType struct {
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
@@ -16,12 +17,12 @@ type ApproximationType string
 
 // Instrument azimuth, degrees clockwise from North.
 type AzimuthType struct {
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
 }
 
-// The BaseFilterType is derived by all filters.
 type BaseFilterType struct {
 	ResourceId  string    `xml:"resourceId,attr"`
 	Name        string    `xml:"name,attr"`
@@ -31,8 +32,6 @@ type BaseFilterType struct {
 	OutputUnits UnitsType `xml:"OutputUnits"`
 }
 
-// A base node type for derivation from: Network, Station and Channel
-// types.
 type BaseNodeType struct {
 	Code             string               `xml:"code,attr"`
 	StartDate        xsdDateTime          `xml:"startDate,attr"`
@@ -75,12 +74,14 @@ type ChannelType struct {
 }
 
 type ClockDrift struct {
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
 }
 
 type Coefficient struct {
+	Value float64 `xml:",chardata"`
 	FloatNoUnitType
 	Number int `xml:"number,attr"`
 }
@@ -95,8 +96,6 @@ type CoefficientsType struct {
 	Denominator            []FloatType            `xml:"Denominator"`
 }
 
-// Container for a comment or log entry. Corresponds to SEED blockettes
-// 31, 51 and 59.
 type CommentType struct {
 	Value              string       `xml:"Value"`
 	BeginEffectiveTime xsdDateTime  `xml:"BeginEffectiveTime"`
@@ -104,7 +103,6 @@ type CommentType struct {
 	Author             []PersonType `xml:"Author"`
 }
 
-// Corresponds to SEED blockette 57.
 type DecimationType struct {
 	InputSampleRate FrequencyType `xml:"InputSampleRate"`
 	Factor          int           `xml:"Factor"`
@@ -116,6 +114,7 @@ type DecimationType struct {
 // Instrument dip in degrees down from horizontal. Together azimuth and
 // dip describe the direction of the sensitive axis of the instrument.
 type DipType struct {
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
@@ -124,6 +123,7 @@ type DipType struct {
 // Extension of FloatType for distances, elevations, and
 // depths.
 type DistanceType struct {
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
@@ -146,8 +146,6 @@ type EquipmentType struct {
 	CalibrationDate  []xsdDateTime `xml:"CalibrationDate"`
 }
 
-// This type contains a URI and description for external data that users
-// may want to reference in StationXML.
 type ExternalReferenceType struct {
 	URI         string `xml:"URI"`
 	Description string `xml:"Description"`
@@ -163,7 +161,7 @@ type FIRType struct {
 }
 
 type FloatNoUnitType struct {
-	Double     float64 `xml:",chardata"`
+	Value      float64 `xml:",chardata"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
 }
@@ -171,23 +169,19 @@ type FloatNoUnitType struct {
 // Representation of floating-point numbers used as
 // measurements.
 type FloatType struct {
-	Double     float64 `xml:",chardata"`
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
 }
 
 type FrequencyType struct {
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
 }
 
-// Complex type for sensitivity and frequency ranges. This complex type
-// can be used to represent both overall sensitivities and individual stage gains. The
-// FrequencyRangeGroup is an optional construct that defines a pass band in Hertz (
-// FrequencyStart and FrequencyEnd) in which the SensitivityValue is valid within the
-// number of decibels specified in FrequencyDBVariation.
 type GainType struct {
 	Value     float64 `xml:"Value"`
 	Frequency float64 `xml:"Frequency"`
@@ -197,7 +191,7 @@ type GainType struct {
 // this type and then extending it to create the real latitude type is the only way to
 // restrict values while adding datum as an attribute.
 type LatitudeBaseType struct {
-	FloatType
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
@@ -205,17 +199,17 @@ type LatitudeBaseType struct {
 
 // Type for latitude coordinate.
 type LatitudeType struct {
+	Value float64 `xml:",chardata"`
 	LatitudeBaseType
 	Datum string `xml:"datum,attr"`
 }
 
-// Container for log entries.
 type LogType struct {
 	Entry []CommentType `xml:"Entry"`
 }
 
 type LongitudeBaseType struct {
-	FloatType
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
@@ -223,6 +217,7 @@ type LongitudeBaseType struct {
 
 // Type for longitude coordinate.
 type LongitudeType struct {
+	Value float64 `xml:",chardata"`
 	LongitudeBaseType
 	Datum string `xml:"datum,attr"`
 }
@@ -242,8 +237,8 @@ type NetworkType struct {
 type NominalType string
 
 type NumeratorCoefficient struct {
-	Double float64 `xml:",chardata"`
-	I      int     `xml:"i,attr"`
+	Value float64 `xml:",chardata"`
+	I     int     `xml:"i,attr"`
 }
 
 type Operator struct {
@@ -252,9 +247,6 @@ type Operator struct {
 	WebSite string       `xml:"WebSite"`
 }
 
-// Representation of a person's contact information. A person can belong
-// to multiple agencies and have multiple email addresses and phone
-// numbers.
 type PersonType struct {
 	Name   []string          `xml:"Name"`
 	Agency []string          `xml:"Agency"`
@@ -272,8 +264,6 @@ type PhoneNumberType struct {
 	PhoneNumber PhoneNumber `xml:"PhoneNumber"`
 }
 
-// Complex numbers used as poles or zeros in channel
-// response.
 type PoleZeroType struct {
 	Number    int             `xml:"number,attr"`
 	Real      FloatNoUnitType `xml:"Real"`
@@ -322,8 +312,6 @@ type ResponseListType struct {
 	ResponseListElement []ResponseListElementType `xml:"ResponseListElement"`
 }
 
-// This complex type represents channel response and covers SEED
-// blockettes 53 to 56.
 type ResponseStageType struct {
 	Number       int              `xml:"number,attr"`
 	ResourceId   string           `xml:"resourceId,attr"`
@@ -348,9 +336,6 @@ type ResponseType struct {
 // May be one of open, closed, partial
 type RestrictedStatusType string
 
-// Top-level type for Station XML. Required field are Source (network ID
-// of the institution sending the message) and one or more Network containers or one or
-// more Station containers.
 type FDSNStationXML struct {
 	XmlNs         string        `xml:"xmlns,attr" default:"http://www.fdsn.org/xml/station/1"`
 	SchemaVersion float64       `xml:"schemaVersion,attr"`
@@ -363,8 +348,6 @@ type FDSNStationXML struct {
 	Network       []NetworkType `xml:"Network"`
 }
 
-// Sample rate expressed as number of samples in a number of
-// seconds.
 type SampleRateRatioType struct {
 	NumberSamples int `xml:"NumberSamples"`
 	NumberSeconds int `xml:"NumberSeconds"`
@@ -372,6 +355,7 @@ type SampleRateRatioType struct {
 
 // Sample rate in samples per second.
 type SampleRateType struct {
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
@@ -379,6 +363,7 @@ type SampleRateType struct {
 
 // A time value in seconds.
 type SecondType struct {
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
@@ -397,8 +382,6 @@ type SensitivityType struct {
 	FrequencyDBVariation float64   `xml:"FrequencyDBVariation"`
 }
 
-// Description of a site location using name and optional geopolitical
-// boundaries (country, city, etc.).
 type SiteType struct {
 	Items       []string `xml:",any"`
 	Name        string   `xml:"Name"`
@@ -439,14 +422,13 @@ type Symmetry string
 // May be one of TRIGGERED, CONTINUOUS, HEALTH, GEOPHYSICAL, WEATHER, FLAG, SYNTHESIZED, INPUT, EXPERIMENTAL, MAINTENANCE, BEAM
 type Type string
 
-// A type to document units. Corresponds to SEED blockette
-// 34.
 type UnitsType struct {
 	Name        string `xml:"Name"`
 	Description string `xml:"Description"`
 }
 
 type VoltageType struct {
+	Value      float64 `xml:",chardata"`
 	Unit       string  `xml:"unit,attr"`
 	PlusError  float64 `xml:"plusError,attr"`
 	MinusError float64 `xml:"minusError,attr"`
