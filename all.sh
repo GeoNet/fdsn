@@ -16,6 +16,13 @@ if [ ! -f all.sh ]; then
 	exit 1
 fi
 
+# Build the C libraries required by our vendored go wrappers
+make -C vendor/github.com/GeoNet/collect/cvendor/libmseed && \
+make -C vendor/github.com/GeoNet/collect/cvendor/libslink
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
 projects=`find cmd -maxdepth 2 -name '*.go' -print | awk -F "/" '{print $2}' | sort -u | egrep -v vendor`
 
 for i in ${projects[@]}; do

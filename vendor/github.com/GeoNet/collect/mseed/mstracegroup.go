@@ -1,7 +1,7 @@
 package mseed
 
-//#cgo CFLAGS: -I/usr/local/include
-//#cgo LDFLAGS: /usr/local/lib/libmseed.a
+//#cgo CFLAGS: -I${SRCDIR}/../cvendor/libmseed
+//#cgo LDFLAGS: ${SRCDIR}/../cvendor/libmseed/libmseed.a
 //#include <libmseed.h>
 //MSTrace *mst_groupfirst(MSTraceGroup *mstg) {return (MSTrace *) mstg->traces;}
 //MSTrace *mst_groupnext(MSTrace *mst) {return (MSTrace *) mst->next;}
