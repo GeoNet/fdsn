@@ -9,6 +9,6 @@ import (
 
 func (res Result) log(r *http.Request) {
 	if res.Code != http.StatusOK {
-		log.Printf("WARN: %d serving %s: %s", res.Code, r.RequestURI, res.Msg)
+		log.Printf("status: %d serving %s", res.Code, r.RequestURI)
 	}
 }
