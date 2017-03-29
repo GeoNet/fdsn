@@ -22,14 +22,17 @@ make -C vendor/github.com/GeoNet/collect/cvendor/libslink
 
 projects=`find cmd -maxdepth 2 -name '*.go' -print | awk -F "/" '{print $1 "/" $2}' | sort -u | egrep -v vendor`
 
+function runTests {
+    if [ -f ${1}/env.list ]; then
+		export $(cat ${1}/env.list | grep = | xargs)
+	fi
+
+	go test  -v ./${1}
+	return $?
+
+}
+
 for i in ${projects[@]}; do
-	if [ -f ${i}/env.list ]; then
-		export $(cat ${i}/env.list | grep = | xargs)
-	fi
-
-	go test  -v ./${i}
-
-	if [ -f ${i}/env.list ]; then
-		unset $(cat ${i}/env.list | grep = | awk -F "=" '{print $1}')
-	fi
+    # run tests in a subshell so they can freely modify their environment variables
+	(runTests ${i})
 done
