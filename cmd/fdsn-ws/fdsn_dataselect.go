@@ -20,15 +20,19 @@ import (
 )
 
 const (
-	RECORDLEN   int = 512 // the record length of the miniseed records.  Constant for all GNS miniseed files
-	MAX_RETRIES int = 5   // the number of times to retry downloading a file
-	// Currently the largest file in the bucket is ~10 MB so download in a few seconds, especially from S3 to EC2, so use this timeout
+	// the record length of the miniseed records.  Constant for all GNS miniseed files
+	RECORDLEN int = 512
+	// the number of times to retry downloading a file from S3
+	MAX_RETRIES int = 5
+	// Currently the largest file in the bucket is ~10 MB so downloads in a few seconds, especially from S3 to EC2, so use this timeout
 	// to stop and retry the download
 	FETCH_TIMEOUT time.Duration = time.Minute
 	HTTP_TIMEOUT  time.Duration = FETCH_TIMEOUT * time.Duration(MAX_RETRIES)
 	// the max number of worker goroutines downloading files from S3 in parallel.
 	// See https://github.com/aws/aws-sdk-go/issues/190 for detail on why we keep this number small
 	MAX_WORKERS int = 10
+	// the maximum number of queries in a POST request
+	MAX_QUERIES int = 1000
 	// Limit the number of input files (each file is max ~10 MB).  We can handle a large number so could increase or remove this limit.
 	MAX_FILES int64 = 3000
 )
@@ -68,6 +72,11 @@ func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWrit
 	params, res := dataSelectParams(r)
 	if res != nil {
 		return res
+	}
+
+	if len(params) > MAX_QUERIES {
+		message := fmt.Sprintf("Number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)
+		return &weft.Result{Ok: false, Code: http.StatusRequestEntityTooLarge, Msg: message}
 	}
 
 	// Get a list of files to read from S3 (and possibly other sources) that match the query.  Iterate over the records in the files,
