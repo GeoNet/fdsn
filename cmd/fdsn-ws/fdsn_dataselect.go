@@ -180,25 +180,16 @@ func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWrit
 	defer tempFile.Close()
 	defer os.Remove(tempFile.Name())
 
-	// download/parse/write output buffer for files in blocks of 'nWorkers' to avoid large RAM usage
-	for start := 0; start < nFiles; start += nWorkers {
-		end := start + nWorkers
-		if end > nFiles {
-			end = nFiles
-		}
-
-		for _, r := range matches[start:end] {
-			// the goroutine is always finished when it sends on the buff chan
-			select {
-			case <-ctx.Done():
-				return weft.InternalServerError(ctx.Err())
-			case err := <-errChan:
+	for _, r := range matches {
+		select {
+		case <-ctx.Done():
+			return weft.InternalServerError(ctx.Err())
+		case err := <-errChan:
+			return weft.InternalServerError(err)
+		case buff := <-r.buff:
+			if _, err := buff.WriteTo(tempFile); err != nil {
+				quitWorker <- true
 				return weft.InternalServerError(err)
-			case buff := <-r.buff:
-				if _, err := buff.WriteTo(tempFile); err != nil {
-					quitWorker <- true
-					return weft.InternalServerError(err)
-				}
 			}
 		}
 	}
@@ -219,7 +210,6 @@ func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWrit
 	h.Set("Surrogate-Control", "max-age=10")
 	h.Set("Content-Type", "application/vnd.fdsn.mseed")
 	h.Set("Content-Length", strconv.FormatInt(tempFileInfo.Size(), 10))
-	h.Set("Surrogate-Control", "max-age=10")
 
 	if _, err := io.Copy(w, tempFile); err != nil {
 		log.Printf("error copying from tempfile to ResponseWriter: err: %s", err.Error())
