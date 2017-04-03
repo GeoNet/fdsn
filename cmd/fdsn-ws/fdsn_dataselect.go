@@ -238,6 +238,23 @@ func dataSelectParams(r *http.Request) (params []fdsnDataselectV1, res *weft.Res
 		e := fdsnDataselectV1{}
 		values := r.URL.Query()
 
+		// convert all abbreviated params to their expanded form (not available from gorilla/schema)
+		conv := map[string]string{
+			"net":   "network",
+			"sta":   "station",
+			"loc":   "location",
+			"cha":   "channel",
+			"start": "starttime",
+			"end":   "endtime",
+		}
+
+		for abbrev, expanded := range conv {
+			if val, ok := values[abbrev]; ok {
+				values[expanded] = val
+				delete(values, abbrev)
+			}
+		}
+
 		err := decoder.Decode(&e, values)
 		if err != nil {
 			return nil, weft.BadRequest(err.Error())

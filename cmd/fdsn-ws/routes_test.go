@@ -32,6 +32,8 @@ var routes = wt.Requests{
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1", Content: "text/html"},
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/version", Content: "text/plain"},
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?starttime=2017-01-09T00:00:00&endtime=2017-01-09T23:00:00&network=NZ&station=CHST&location=01&channel=LOG", Content: "application/vnd.fdsn.mseed"},
+	// abbreviated params
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?start=2017-01-09T00:00:00&end=2017-01-09T23:00:00&net=NZ&sta=CHST&loc=01&cha=LOG", Content: "application/vnd.fdsn.mseed"},
 	// queryauth is the same as query and currently ignores auth params
 	//{ID: wt.L(), URL: "/fdsnws/dataselect/1/queryauth?starttime=2017-01-09T00:00:00&endtime=2017-01-09T23:00:00&network=NZ&station=CHST&location=01&channel=LOG", Content: "application/vnd.fdsn.mseed"},
 	// an invalid network or no files matching query should give 404 (could also give 204 as per spec)
