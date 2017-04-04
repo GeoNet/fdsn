@@ -33,18 +33,18 @@ NZ ABCD 10 E*? 2017-01-02T00:00:00 2017-01-03T00:00:00
 		{
 			StartTime: Time{t1},
 			EndTime:   Time{t2},
-			Network:   "NZ",
-			Station:   "ALRZ",
-			Location:  "10",
-			Channel:   "EHN",
+			Network:   []string{"NZ"},
+			Station:   []string{"ALRZ"},
+			Location:  []string{"10"},
+			Channel:   []string{"EHN"},
 		},
 		{
 			StartTime: Time{t3},
 			EndTime:   Time{t4},
-			Network:   "NZ",
-			Station:   "ABCD",
-			Location:  "10",
-			Channel:   "E*?",
+			Network:   []string{"NZ"},
+			Station:   []string{"ABCD"},
+			Location:  []string{"10"},
+			Channel:   []string{"E*?"},
 		},
 	}
 
@@ -59,7 +59,7 @@ NZ ABCD 10 E*? 2017-01-02T00:00:00 2017-01-03T00:00:00
 func BenchmarkFetchFile(b *testing.B) {
 	// Download a miniseed file and store as an in-memory ReadCloser for use with the benchmark
 	var err error
-	params := fdsnDataselectV1{Network: "NZ", Station: "ALRZ", Location: "10", Channel: "EHN"}
+	params := fdsnDataselectV1{Network: []string{"NZ"}, Station: []string{"ALRZ"}, Location: []string{"10"}, Channel: []string{"EHN"}}
 	params.StartTime.Time, err = time.Parse(time.RFC3339Nano, "2017-01-08T00:00:00.000000000Z")
 	if err != nil {
 		b.Fatal(err)

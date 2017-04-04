@@ -51,7 +51,14 @@ func (m *mockS3Client) ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2O
 		"NZ.ABCD.01.LOG.D.2013.252",
 		"NZ.ABCD.01.LOG.D.2013.253",
 	}
-	contents := []*s3.Object{{Key: &fileNames[0]}, {Key: &fileNames[1]}}
+	contents := []*s3.Object{
+		{Key: &fileNames[0]},
+		{Key: &fileNames[1]},
+		{Key: &fileNames[2]},
+		{Key: &fileNames[3]},
+		{Key: &fileNames[4]},
+		{Key: &fileNames[5]},
+	}
 	return &s3.ListObjectsV2Output{Contents: contents}, nil
 }
 
@@ -70,16 +77,16 @@ func TestMatchingFiles(t *testing.T) {
 		expectedKeys []string
 		expectedData []byte
 	}{
-		// Normally we use newS3DataSource but we want to construct our own mock s3 client so create a new value instead
+		// Normally we'd use newS3DataSource but we want to construct our own mock s3 client so create a new value instead
 		{fdsnDataselectV1{
 			StartTime: endTime,
 			EndTime:   endTime,
-			Network:   "NZ",
-			Station:   "CHST",
-			Location:  "01",
-			Channel:   "LOG",
+			Network:   []string{"NZ"},
+			Station:   []string{"CHST", "ABCD"},
+			Location:  []string{"01"},
+			Channel:   []string{"LOG"},
 		},
-			[]string{"NZ.CHST.01.LOG.D.2013.252"},
+			[]string{"NZ.CHST.01.LOG.D.2013.252", "NZ.ABCD.01.LOG.D.2013.252"},
 			[]byte(mockFileData),
 		},
 	}
@@ -93,12 +100,11 @@ func TestMatchingFiles(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			expectedKeys := []string{"NZ.CHST.01.LOG.D.2013.252"}
-			if !reflect.DeepEqual(keys, expectedKeys) {
+			if !reflect.DeepEqual(keys, tc.expectedKeys) {
 				t.Errorf("Expected string slice %v but observed %v\n", tc.expectedKeys, keys)
 			}
 
-			for _, key := range expectedKeys {
+			for _, key := range tc.expectedKeys {
 				data, err := ds.getObject(key)
 				if err != nil {
 					t.Error(err)
@@ -131,10 +137,32 @@ func TestCommonString(t *testing.T) {
 	}
 }
 
+func TestCommonSlice(t *testing.T) {
+	// get the common prefix between a slice of input strings, all other chars being set to wildcard.
+	testCases := []struct {
+		inputs             []string
+		wildcard, expected string
+	}{
+		{[]string{"aaaa", "aaab"}, "*", "aaa*"},
+		{[]string{"aaaa", "aaab", "xyab"}, "*", "**a*"},
+		{[]string{"1234", "5678"}, "?", "????"},
+		{[]string{"2016", "2017"}, "?", "201?"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("%s, %s, %s", tc.inputs, tc.expected, tc.wildcard), func(t *testing.T) {
+			observed := commonSlice(tc.inputs, tc.wildcard)
+			if observed != tc.expected {
+				t.Errorf("Expected string %s but observed %s", tc.expected, observed)
+			}
+		})
+	}
+}
+
 func TestRegexp(t *testing.T) {
 	testCases := []struct {
 		inputParams     s3DataSource
-		expectedPattern []string
+		expectedPattern [][]string
 		expectedRegexp  []string
 		expectedPrefix  string
 	}{
@@ -142,14 +170,14 @@ func TestRegexp(t *testing.T) {
 			params: fdsnDataselectV1{
 				StartTime: startTime,
 				EndTime:   startTime,
-				Network:   "NZ",
-				Station:   "ABC",
-				Location:  "XYZ",
-				Channel:   "01",
+				Network:   []string{"NZ"},
+				Station:   []string{"ABC"},
+				Location:  []string{"XYZ"},
+				Channel:   []string{"01"},
 			},
 		},
-			[]string{"NZ", "ABC", "XYZ", "01", "D", "2012", "306"},
-			[]string{"NZ", "ABC", "XYZ", "01", "D", "2012", "306"},
+			[][]string{{"NZ"}, {"ABC"}, {"XYZ"}, {"01"}, {"D"}, {"2012"}, {"306"}},
+			[]string{"(NZ)", "(ABC)", "(XYZ)", "(01)", "(D)", "(2012)", "(306)"},
 			"NZ.ABC.XYZ.01.D.2012.306",
 		},
 
@@ -158,14 +186,14 @@ func TestRegexp(t *testing.T) {
 			params: fdsnDataselectV1{
 				StartTime: endTime,
 				EndTime:   startTime,
-				Network:   "NZ",
-				Station:   "AB*",
-				Location:  "?YZ",
-				Channel:   "0*",
+				Network:   []string{"NZ"},
+				Station:   []string{"AB*"},
+				Location:  []string{"?YZ"},
+				Channel:   []string{"0*"},
 			},
 		},
-			[]string{"NZ", "AB*", "?YZ", "0*", "D", "201?", "*"},
-			[]string{`NZ`, `AB\w*`, `\w{1}YZ`, `0\w*`, `D`, `201\w{1}`, `\w*`},
+			[][]string{{`NZ`}, {`AB*`}, {`?YZ`}, {`0*`}, {`D`}, {`201?`}, {`*`}},
+			[]string{`(NZ)`, `(AB\w*)`, `(\w{1}YZ)`, `(0\w*)`, `(D)`, `(201\w{1})`, `(\w*)`},
 			"NZ.AB",
 		},
 	}

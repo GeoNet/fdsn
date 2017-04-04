@@ -123,10 +123,13 @@ func (s *s3DataSource) matchingKeys() (keys []string, err error) {
 // prefix returns the prefix string to be used when querying all matching keys from an S3 bucket.  This cannot include
 // a full regexp search pattern since AWS does not support this.
 func (s *s3DataSource) prefix() (prefix string) {
-	parts := s.searchPattern()
+	var merged []string
+	for _, params := range s.searchPattern() {
+		merged = append(merged, commonSlice(params, "*"))
+	}
 
 	// s3 prefix does not support wildcards, so truncate if they're present
-	prefix = strings.Join(parts, ".")
+	prefix = strings.Join(merged, ".")
 	prefix = strings.Split(prefix, "*")[0]
 	prefix = strings.Split(prefix, "?")[0]
 	// location can have two spaces or "--", neither of which exist in the S3 key name
@@ -140,20 +143,29 @@ func (s *s3DataSource) prefix() (prefix string) {
 // the '*', '?', ' ' and '--' characters to their regular expression equivalents for pattern matching with Go's regexp.
 func (s *s3DataSource) regexp() (pattern []string) {
 
-	params := s.searchPattern()
-	for idx, param := range params {
-		param = strings.Replace(param, "*", `\w*`, -1)
-		param = strings.Replace(param, "?", `\w{1}`, -1)
-		// blank or missing locations, we convert spaces and two dashes to wildcards for the regexp
-		param = strings.Replace(param, "--", `\w{2}`, -1)
-		param = strings.Replace(param, " ", `\w{1}`, -1)
-		params[idx] = param
+	toPattern := func(params []string) (out string) {
+		var newParams []string
+		for _, param := range params {
+			newParam := strings.Replace(param, "*", `\w*`, -1)
+			newParam = strings.Replace(newParam, "?", `\w{1}`, -1)
+			// blank or missing locations, we convert spaces and two dashes to wildcards for the regexp
+			newParam = strings.Replace(newParam, "--", `\w{2}`, -1)
+			newParam = strings.Replace(newParam, " ", `\w{1}`, -1)
+			newParams = append(newParams, newParam)
+		}
+
+		return "(" + strings.Join(newParams, "|") + ")"
 	}
 
-	return params
+	fields := s.searchPattern()
+	for _, params := range fields {
+		pattern = append(pattern, toPattern(params))
+	}
+
+	return pattern
 }
 
-func (s *s3DataSource) searchPattern() []string {
+func (s *s3DataSource) searchPattern() [][]string {
 	startYear := fmt.Sprintf("%04d", s.params.StartTime.Year())
 	endYear := fmt.Sprintf("%04d", s.params.EndTime.Year())
 	year := commonString(startYear, endYear, "?")
@@ -169,10 +181,29 @@ func (s *s3DataSource) searchPattern() []string {
 		doy = "*"
 	}
 
-	return []string{s.params.Network, s.params.Station, s.params.Location, s.params.Channel, "D", year, doy}
+	return [][]string{s.params.Network, s.params.Station, s.params.Location, s.params.Channel, {"D"}, {year}, {doy}}
 }
 
-// construct a string from two input strings where any non-matching characters are replaced by the string wildCard
+// commonSlice constructs a string from a slice of strings where any non-matching characters are replaced by the string wildCard
+func commonSlice(strs []string, wildcard string) (output string) {
+
+	if len(strs) == 0 {
+		return ""
+	}
+
+	if len(strs) == 1 {
+		return strs[0]
+	}
+
+	output = strs[0]
+	for _, s2 := range strs[1:] {
+		output = commonString(output, s2, wildcard)
+	}
+
+	return output
+}
+
+// commonString constructs a string from two input strings where any non-matching characters are replaced by the string wildCard
 func commonString(s1, s2, wildcard string) (output string) {
 	if s1 == s2 {
 		output = s1

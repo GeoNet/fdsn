@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -43,15 +44,20 @@ var (
 )
 
 type fdsnDataselectV1 struct {
-	StartTime Time   `schema:"starttime"` // limit to data on or after the specified start time.
-	EndTime   Time   `schema:"endtime"`   // limit to data on or before the specified end time.
-	Network   string `schema:"network"`   // network name of data to query
-	Station   string `schema:"station"`   // station name of data to query
-	Location  string `schema:"location"`  // location name of data to query
-	Channel   string `schema:"channel"`   // channel number of data to query
+	StartTime Time     `schema:"starttime"` // limit to data on or after the specified start time.
+	EndTime   Time     `schema:"endtime"`   // limit to data on or before the specified end time.
+	Network   []string `schema:"network"`   // network name of data to query
+	Station   []string `schema:"station"`   // station name of data to query
+	Location  []string `schema:"location"`  // location name of data to query
+	Channel   []string `schema:"channel"`   // channel number of data to query
 }
 
 func init() {
+	// Handle comma separated parameters (eg: net, sta, loc, cha, etc)
+	decoder.RegisterConverter([]string{}, func(input string) reflect.Value {
+		return reflect.ValueOf(strings.Split(input, ","))
+	})
+
 	var err error
 	fdsnDataselectWadlFile, err = ioutil.ReadFile("assets/fdsn-ws-dataselect.wadl")
 	if err != nil {
@@ -238,7 +244,6 @@ func dataSelectParams(r *http.Request) (params []fdsnDataselectV1, res *weft.Res
 		e := fdsnDataselectV1{}
 		values := r.URL.Query()
 
-		// convert all abbreviated params to their expanded form (not available from gorilla/schema)
 		conv := map[string]string{
 			"net":   "network",
 			"sta":   "station",
@@ -248,6 +253,7 @@ func dataSelectParams(r *http.Request) (params []fdsnDataselectV1, res *weft.Res
 			"end":   "endtime",
 		}
 
+		// convert all abbreviated params to their expanded form
 		for abbrev, expanded := range conv {
 			if val, ok := values[abbrev]; ok {
 				values[expanded] = val
@@ -261,17 +267,17 @@ func dataSelectParams(r *http.Request) (params []fdsnDataselectV1, res *weft.Res
 		}
 
 		// Defaults: as per spec we need to include any valid files in the search so use wildcards and broad time range
-		if e.Network == "" {
-			e.Network = "*"
+		if len(e.Network) == 0 {
+			e.Network = []string{"*"}
 		}
-		if e.Station == "" {
-			e.Station = "*"
+		if len(e.Station) == 0 {
+			e.Station = []string{"*"}
 		}
-		if e.Location == "" {
-			e.Location = "*"
+		if len(e.Location) == 0 {
+			e.Location = []string{"*"}
 		}
-		if e.Channel == "" {
-			e.Channel = "*"
+		if len(e.Channel) == 0 {
+			e.Channel = []string{"*"}
 		}
 
 		if e.StartTime.IsZero() {
@@ -521,10 +527,10 @@ func (dsq *dataSelectPostQuery) unmarshal(b []byte) error {
 			fdsnDataselectV1{
 				StartTime: startTime,
 				EndTime:   endTime,
-				Network:   fields[0],
-				Station:   fields[1],
-				Location:  fields[2],
-				Channel:   fields[3],
+				Network:   []string{fields[0]},
+				Station:   []string{fields[1]},
+				Location:  []string{fields[2]},
+				Channel:   []string{fields[3]},
 			})
 	}
 
