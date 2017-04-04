@@ -14,8 +14,6 @@ import (
 	"strings"
 )
 
-const MAX_KEYS int64 = 50000
-
 func newS3Client(p client.ConfigProvider, cfgs ...*aws.Config) s3iface.S3API {
 	return s3.New(p, cfgs...)
 }
@@ -80,17 +78,29 @@ func (s *s3DataSource) getObject(key string) (b []byte, err error) {
 // matchingKeys returns a slice of strings (S3 keys - filenames) that match the search parameters.
 func (s *s3DataSource) matchingKeys() (keys []string, err error) {
 	prefix := s.prefix()
-	maxKeys := MAX_KEYS
 	listParams := &s3.ListObjectsV2Input{
-		Bucket:  &s.bucket,
-		Prefix:  &prefix,
-		MaxKeys: &maxKeys,
+		Bucket: &s.bucket,
+		Prefix: &prefix,
 	}
 
 	var resp *s3.ListObjectsV2Output
 	c := s.s3ClientFunc(s.session)
-	if resp, err = c.ListObjectsV2(listParams); err != nil {
-		return nil, err
+	var contents []*s3.Object
+
+	// poorly documented: if resp.isTruncated is true we need to keep reading in chunks of 1000 until it is false
+	for {
+		if resp, err = c.ListObjectsV2(listParams); err != nil {
+			return nil, err
+		}
+
+		contents = append(contents, resp.Contents...)
+
+		// AWS using pointers to bools (?!) so need to check for nil
+		if resp.IsTruncated == nil || !*resp.IsTruncated {
+			break
+		}
+
+		listParams.ContinuationToken = resp.NextContinuationToken
 	}
 
 	var re *regexp.Regexp
@@ -98,7 +108,7 @@ func (s *s3DataSource) matchingKeys() (keys []string, err error) {
 		return nil, err
 	}
 
-	for _, value := range resp.Contents {
+	for _, value := range contents {
 		if !re.MatchString(*value.Key) {
 			continue
 		}

@@ -346,6 +346,7 @@ loop:
 
 		go func() {
 			var err error
+			// TODO: use GetObjecyWithContext!
 			data, err := m.dataSource.getObject(m.key)
 			res <- chanResponse{index: m.index, buff: data, err: err}
 		}()
