@@ -334,8 +334,7 @@ loop:
 		timeoutCtx, cancel := context.WithTimeout(context.Background(), FETCH_TIMEOUT)
 
 		// downloading the file in another goroutine so we can use select to retry the download.  The existing
-		// goroutine will continue until it errors from a timeout and it's output will be discarded.  Unfortunately AWS doesn't
-		// support context for cancellation/timeouts.
+		// goroutine will continue until it errors from a timeout and it's output will be discarded.
 		type chanResponse struct {
 			index int
 			buff  []byte
@@ -346,7 +345,7 @@ loop:
 
 		go func() {
 			var err error
-			// TODO: use GetObjecyWithContext!
+			// TODO: pass the context to this function when AWS adds context support (soon)
 			data, err := m.dataSource.getObject(m.key)
 			res <- chanResponse{index: m.index, buff: data, err: err}
 		}()

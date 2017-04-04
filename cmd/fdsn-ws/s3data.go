@@ -63,6 +63,8 @@ func (s *s3DataSource) getObject(key string) (b []byte, err error) {
 	// create a new client for each file to download, reuse the session and config
 	c := s.s3ClientFunc(s.session)
 	var output *s3.GetObjectOutput
+
+	// TODO: use GetObjectWithContext when it's available
 	if output, err = c.GetObject(&getParams); err != nil {
 		return nil, err
 	}
