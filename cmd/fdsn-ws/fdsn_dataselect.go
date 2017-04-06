@@ -89,9 +89,10 @@ func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWrit
 	// writing the records that match.
 	var err error
 	var matches []match
+	ctx := r.Context()
 	for _, param := range params {
 		var subset []match
-		if subset, err = matchingKeys(param); err != nil {
+		if subset, err = matchingKeys(ctx, param); err != nil {
 			return weft.BadRequest(err.Error())
 		}
 
@@ -130,7 +131,6 @@ func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWrit
 		matches[i].buff = make(chan bytes.Buffer)
 	}
 
-	ctx := r.Context()
 	inputs := make(chan match, nFiles)
 	quitWorker := make(chan bool)
 	errChan := make(chan error)
@@ -301,14 +301,14 @@ func dataSelectParams(r *http.Request) (params []fdsnDataselectV1, res *weft.Res
 
 // matchingKeys parses the parameters and queries S3 to get a list of matching keys (files), returning an error if
 // parsing fails
-func matchingKeys(param fdsnDataselectV1) (subset []match, err error) {
+func matchingKeys(ctx context.Context, param fdsnDataselectV1) (subset []match, err error) {
 	var ds *s3DataSource
 	ds, err = newS3DataSource(S3_BUCKET, param, MAX_RETRIES)
 	if err != nil {
 		return nil, err
 	}
 
-	keys, err := ds.matchingKeys()
+	keys, err := ds.matchingKeys(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -331,10 +331,10 @@ func (m match) fetch(ctx context.Context) (b []byte, err error) {
 
 loop:
 	for retry := 0; retry < MAX_RETRIES; retry++ {
-		timeoutCtx, cancel := context.WithTimeout(context.Background(), FETCH_TIMEOUT)
+		timeoutCtx, cancel := context.WithTimeout(ctx, FETCH_TIMEOUT)
 
-		// downloading the file in another goroutine so we can use select to retry the download.  The existing
-		// goroutine will continue until it errors from a timeout and it's output will be discarded.
+		// downloading the file in another goroutine so we can use select to retry the download.  Passing the
+		// timeout context so the download will immediately terminate.
 		type chanResponse struct {
 			index int
 			buff  []byte
@@ -345,8 +345,7 @@ loop:
 
 		go func() {
 			var err error
-			// TODO: pass the context to this function when AWS adds context support (soon)
-			data, err := m.dataSource.getObject(m.key)
+			data, err := m.dataSource.getObject(timeoutCtx, m.key)
 			res <- chanResponse{index: m.index, buff: data, err: err}
 		}()
 

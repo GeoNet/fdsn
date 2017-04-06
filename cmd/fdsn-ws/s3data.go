@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
@@ -54,7 +55,7 @@ func newS3DataSource(bucket string, dsParams fdsnDataselectV1, maxRetries int) (
 
 // getS3Object downloads the specified key from an S3 bucket and returns a byte slice containing the data.  This
 // is thread safe and creates it's own S3 client.
-func (s *s3DataSource) getObject(key string) (b []byte, err error) {
+func (s *s3DataSource) getObject(ctx context.Context, key string) (b []byte, err error) {
 	getParams := s3.GetObjectInput{
 		Bucket: &s.bucket,
 		Key:    &key,
@@ -64,8 +65,7 @@ func (s *s3DataSource) getObject(key string) (b []byte, err error) {
 	c := s.s3ClientFunc(s.session)
 	var output *s3.GetObjectOutput
 
-	// TODO: use GetObjectWithContext when it's available
-	if output, err = c.GetObject(&getParams); err != nil {
+	if output, err = c.GetObjectWithContext(ctx, &getParams); err != nil {
 		return nil, err
 	}
 	defer output.Body.Close()
@@ -78,7 +78,7 @@ func (s *s3DataSource) getObject(key string) (b []byte, err error) {
 }
 
 // matchingKeys returns a slice of strings (S3 keys - filenames) that match the search parameters.
-func (s *s3DataSource) matchingKeys() (keys []string, err error) {
+func (s *s3DataSource) matchingKeys(ctx context.Context) (keys []string, err error) {
 	prefix := s.prefix()
 	listParams := &s3.ListObjectsV2Input{
 		Bucket: &s.bucket,
@@ -91,7 +91,7 @@ func (s *s3DataSource) matchingKeys() (keys []string, err error) {
 
 	// poorly documented: if resp.isTruncated is true we need to keep reading in chunks of 1000 until it is false
 	for {
-		if resp, err = c.ListObjectsV2(listParams); err != nil {
+		if resp, err = c.ListObjectsV2WithContext(ctx, listParams); err != nil {
 			return nil, err
 		}
 

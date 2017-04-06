@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
+	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"io/ioutil"
@@ -42,7 +44,7 @@ func newMockS3Client(p client.ConfigProvider, cfgs ...*aws.Config) s3iface.S3API
 }
 
 // mocked out ListObjectsV2 so we can give a known file list without connecting to S3
-func (m *mockS3Client) ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2Output, error) {
+func (c *mockS3Client) ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2Output, error) {
 	fileNames := []string{
 		"NZ.CHST.01.LOG.D.2013.251",
 		"NZ.CHST.01.LOG.D.2013.252",
@@ -62,11 +64,19 @@ func (m *mockS3Client) ListObjectsV2(*s3.ListObjectsV2Input) (*s3.ListObjectsV2O
 	return &s3.ListObjectsV2Output{Contents: contents}, nil
 }
 
+func (c *mockS3Client) ListObjectsV2WithContext(ctx aws.Context, input *s3.ListObjectsV2Input, r ...request.Option) (*s3.ListObjectsV2Output, error) {
+	return c.ListObjectsV2(input)
+}
+
 func (c *mockS3Client) GetObject(input *s3.GetObjectInput) (*s3.GetObjectOutput, error) {
 	// Only implementing what we'll parse, the output.Body which needs to be a ReadCloser
 	rc := ioutil.NopCloser(strings.NewReader(mockFileData))
 	out := s3.GetObjectOutput{Body: rc}
 	return &out, nil
+}
+
+func (c *mockS3Client) GetObjectWithContext(ctx aws.Context, input *s3.GetObjectInput, r ...request.Option) (*s3.GetObjectOutput, error) {
+	return c.GetObject(input)
 }
 
 func TestMatchingFiles(t *testing.T) {
@@ -95,7 +105,7 @@ func TestMatchingFiles(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", tc.p), func(t *testing.T) {
 			ds := s3DataSource{bucket: bucket, params: tc.p, s3ClientFunc: newMockS3Client}
 
-			keys, err := ds.matchingKeys()
+			keys, err := ds.matchingKeys(context.Background())
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -105,7 +115,7 @@ func TestMatchingFiles(t *testing.T) {
 			}
 
 			for _, key := range tc.expectedKeys {
-				data, err := ds.getObject(key)
+				data, err := ds.getObject(context.Background(), key)
 				if err != nil {
 					t.Error(err)
 				}

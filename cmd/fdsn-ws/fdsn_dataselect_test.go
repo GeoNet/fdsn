@@ -72,7 +72,7 @@ func BenchmarkFetchFile(b *testing.B) {
 
 	ds, err := newS3DataSource(S3_BUCKET, params, MAX_RETRIES)
 	var matchingKeys []string
-	matchingKeys, err = ds.matchingKeys()
+	matchingKeys, err = ds.matchingKeys(context.Background())
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func BenchmarkFetchFile(b *testing.B) {
 	}
 
 	var matchData []byte
-	if matchData, err = ds.getObject(matchingKeys[0]); err != nil {
+	if matchData, err = ds.getObject(context.Background(), matchingKeys[0]); err != nil {
 		b.Fatal(err)
 	}
 
