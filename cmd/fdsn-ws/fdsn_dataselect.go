@@ -35,7 +35,7 @@ const (
 	// the maximum number of queries in a POST request
 	MAX_QUERIES int = 1000
 	// Limit the number of input files (each file is max ~10 MB).  We can handle a large number so could increase or remove this limit.
-	MAX_FILES int64 = 3000
+	MAX_FILES int64 = 20000
 )
 
 var (
@@ -329,60 +329,55 @@ type match struct {
 
 func (m match) fetch(ctx context.Context) (b []byte, err error) {
 
-loop:
 	for retry := 0; retry < MAX_RETRIES; retry++ {
-		timeoutCtx, cancel := context.WithTimeout(ctx, FETCH_TIMEOUT)
+		b, err = func() (bs []byte, err error) {
+			timeoutCtx, cancel := context.WithTimeout(ctx, FETCH_TIMEOUT)
+			defer cancel()
 
-		// downloading the file in another goroutine so we can use select to retry the download.  Passing the
-		// timeout context so the download will immediately terminate.
-		type chanResponse struct {
-			index int
-			buff  []byte
-			err   error
-		}
+			// downloading the file in another goroutine so we can retry the download if it timed out.  Passing the
+			// timeout context so the download will immediately terminate on timeout or cancellation.
+			type chanResponse struct {
+				index int
+				buff  []byte
+				err   error
+			}
 
-		var res = make(chan chanResponse)
+			var res = make(chan chanResponse)
 
-		go func() {
-			var err error
-			data, err := m.dataSource.getObject(timeoutCtx, m.key)
-			res <- chanResponse{index: m.index, buff: data, err: err}
-		}()
+			go func() {
+				var err error
+				data, err := m.dataSource.getObject(timeoutCtx, m.key)
+				res <- chanResponse{index: m.index, buff: data, err: err}
+			}()
 
-		select {
-		case r := <-res:
-			cancel()
-			if r.err != nil {
-				if retry >= MAX_RETRIES {
-					log.Println("error fetching file, max retries reached, exiting", r.err)
-					return r.buff, r.err
+			r := <-res
+			switch r.err {
+			// Happy path:
+			case nil:
+				if retry > 0 {
+					log.Printf("fetch attempt %d/%d successful for file: %s\n", retry+1, MAX_RETRIES, m.key)
 				}
 
-				log.Printf("error fetching file: %s, retrying (attempt no: %d/%d. err: %s\n", m.key, retry+1, MAX_RETRIES, r.err.Error())
-				continue loop
+				return r.buff, nil
+			default:
+				return bs, r.err
 			}
+		}()
 
-			// Happy path:
-			if r.err == nil && retry > 0 {
-				log.Printf("fetch attempt %d/%d successful for file: %s\n", retry+1, MAX_RETRIES, m.key)
-			}
+		if err == nil {
+			return b, nil
+		}
 
-			return r.buff, nil
+		// if the context was cancelled (eg: user cancelling the request) then no point in retrying so return the error
+		select {
 		case <-ctx.Done():
-			cancel()
 			return b, ctx.Err()
-		case <-timeoutCtx.Done():
-			cancel()
-			if retry >= MAX_RETRIES {
-				log.Println("timeout fetching file, max retries reached, exiting", timeoutCtx.Err().Error())
-				return b, timeoutCtx.Err()
-			}
-
-			log.Printf("timeout fetching file %s, attempt number %d/%d\n", m.key, retry+1, MAX_RETRIES)
+		default:
+			log.Printf("failed to download file: %s, attempt %d/%d, err:%s\n", m.key, retry+1, MAX_RETRIES, err)
 		}
 	}
 
-	return b, fmt.Errorf("error fetching file: %s\n", m.key)
+	return b, fmt.Errorf("failed to download file: %s, all attempts failed\n", m.key)
 }
 
 func (m match) parse(ctx context.Context, inBuff *bytes.Buffer) (out bytes.Buffer, err error) {
