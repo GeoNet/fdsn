@@ -256,7 +256,6 @@ func (e *event) save() error {
 	txn, err := db.Begin()
 	if err != nil {
 		return err
-		return err
 	}
 
 	_, err = txn.Exec(`DELETE FROM fdsn.event WHERE PublicID = $1 AND ModificationTime <= $2`, e.PublicID, e.ModificationTime)
