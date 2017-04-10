@@ -72,8 +72,8 @@ func init() {
 
 // fdsnDataselectV1Handler handles all dataselect queries.  It searches for matching keys in S3 and
 // fetches them in parallel, writing matching records to w in the same order they were requested.
-// This parses all input files before writing the StatusCode and before writing data to w.  In the case
-// of an error a non-200 status code is returned as a weft.Result and no output written to w.
+// This parses all input files before writing the StatusCode and before writing data to ResponseWriter.
+// In the case of an error a non-200 status code is returned as a weft.Result and no output written to w.
 func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWriter) *weft.Result {
 	params, res := dataSelectParams(r)
 	if res != nil {
@@ -177,8 +177,8 @@ func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWrit
 		inputs <- m
 	}
 
-	// Storing to a tempfile (deleted on exit) so we can see if the entire processes worked without an error, otherwise
-	// it's difficult to show that an error occurred.
+	// Storing to a tempfile (deleted on exit) so we can see if the entire processes worked without an error.  If no
+	// error seen then we write to ResponseWriter which automatically writes a 200 status.
 	tempFile, err := ioutil.TempFile("", "fdsn_tempfile")
 	if err != nil {
 		return weft.InternalServerError(err)
