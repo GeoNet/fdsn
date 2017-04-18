@@ -1,6 +1,6 @@
 FROM alpine:3.4
 
-RUN apk add --no-cache libxslt
+RUN apk add --no-cache libxslt ca-certificates tzdata
 
 ADD ./ /
 
