@@ -30,6 +30,24 @@ CREATE TABLE fdsn.event (
   Sc3ml                 TEXT                        NOT NULL
 );
 
+CREATE TABLE fdsn.stream (
+  streamPK SERIAL PRIMARY KEY,
+  network  TEXT NOT NULL,
+  station  TEXT NOT NULL,
+  channel  TEXT NOT NULL,
+  location TEXT NOT NULL,
+  UNIQUE (network, station, channel, location)
+);
+
+-- Table for index to the miniSEED files in the S3 bucket.
+CREATE TABLE fdsn.holdings (
+  streamPK INTEGER REFERENCES fdsn.stream (streamPK) ON DELETE CASCADE NOT NULL,
+  start_time    TIMESTAMP(6) WITH TIME ZONE NOT NULL,
+  numsamples INTEGER NOT NULL,
+  key      TEXT                     NOT NULL,
+  UNIQUE (streamPK, key)
+);
+
 CREATE FUNCTION fdsn.event_geom()
   RETURNS TRIGGER AS
 $$

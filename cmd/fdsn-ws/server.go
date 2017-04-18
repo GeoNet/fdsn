@@ -21,20 +21,22 @@ func init() {
 	if Prefix != "" {
 		log.SetPrefix(Prefix + " ")
 	}
-
-	if S3_BUCKET = os.Getenv("S3_BUCKET"); S3_BUCKET == "" {
-		log.Fatal("ERROR: S3_BUCKET environment variable is not set")
-	}
 }
 
 func main() {
+	if S3_BUCKET = os.Getenv("S3_BUCKET"); S3_BUCKET == "" {
+		log.Fatal("ERROR: S3_BUCKET environment variable is not set")
+	}
 
 	p, err := cfg.PostgresEnv()
 	if err != nil {
 		log.Fatalf("error reading DB config from the environment vars: %s", err)
 	}
 
-	db, err = sql.Open("postgres", p.Connection())
+	// set a statement timeout to cancel any very long running DB queries.
+	// Value is int milliseconds.
+	// https://www.postgresql.org/docs/9.5/static/runtime-config-client.html
+	db, err = sql.Open("postgres", p.Connection()+" statement_timeout=600000")
 	if err != nil {
 		log.Fatalf("error with DB config: %s", err)
 	}

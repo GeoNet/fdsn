@@ -63,6 +63,10 @@ func TestNotificationParse(t *testing.T) {
 
 	r := e.Records[0]
 
+	if r.EventName != "ObjectCreated:Put" {
+		t.Errorf("expected event name ObjectCreated:Put got %s", r.EventName)
+	}
+
 	if r.S3.Bucket.Name != "mybucket" {
 		t.Errorf("expected mybucket got %s", r.S3.Bucket.Name)
 	}
