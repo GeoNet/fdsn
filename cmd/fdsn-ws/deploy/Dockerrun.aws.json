@@ -8,11 +8,5 @@
       "ContainerPort": "8080"
     }
   ],
-  "Logging": "/var/log/",
-  "Volumes": [
-    {
-      "HostDirectory": "/media/ephemeral0",
-      "ContainerDirectory": "/media/ephemeral0"
-    }
-  ]
+  "Logging": "/var/log/"
 }

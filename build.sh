@@ -45,10 +45,21 @@ echo "nobody:x:65534:65534:Nobody:/:" > ${DOCKER_TMP}/etc/passwd
 
 for i in "$@"
 do
-	docker run -e "GOBIN=/usr/src/go/src/github.com/GeoNet/${CWD}/${DOCKER_TMP}" -e "GOPATH=/usr/src/go" -e "CGO_ENABLED=0" -e "GOOS=linux" -e "BUILD=$BUILD" --rm \
+
+    # only enable Cgo for executables that require it
+    enable_cgo=0
+    if [ ${i} = "fdsn-ws" ]; then
+        enable_cgo=1
+    fi
+
+    # install dependencies to compile libmseed and libslink, and compile/install with the -static flag to statically link with C libs (if applicable)
+	docker run -e "GOBIN=/usr/src/go/src/github.com/GeoNet/${CWD}/${DOCKER_TMP}" -e "CGO_ENABLED=${enable_cgo}" -e "GOPATH=/usr/src/go" -e "GOOS=linux" -e "BUILD=$BUILD" --rm \
 		-v "$PWD":/usr/src/go/src/github.com/GeoNet/${CWD} \
 		-w /usr/src/go/src/github.com/GeoNet/${CWD} ${BUILD_CONTAINER} \
-		go install -a -ldflags "-X main.Prefix=${i}/${VERSION}" -installsuffix cgo ./cmd/${i}
+		/bin/ash -c "apk add --update ca-certificates tzdata gcc make musl-dev && \
+				     make -B -C /usr/src/go/src/github.com/GeoNet/${CWD}/vendor/github.com/GeoNet/collect/cvendor/libmseed && \
+				     make -B -C /usr/src/go/src/github.com/GeoNet/${CWD}/vendor/github.com/GeoNet/collect/cvendor/libslink && \
+		             go install -a -ldflags \"-X main.Prefix=${i}/${VERSION} -extldflags -static\" -installsuffix cgo ./cmd/${i}"
 
 		rm -rf $DOCKER_TMP/assets
 		mkdir $DOCKER_TMP/assets

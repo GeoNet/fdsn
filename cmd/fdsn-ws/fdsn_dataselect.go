@@ -8,14 +8,11 @@ import (
 	"fmt"
 	"github.com/GeoNet/collect/mseed"
 	"github.com/GeoNet/weft"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -123,47 +120,21 @@ func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWrit
 		inputs <- m
 	}
 
-	// Storing to a tempfile (deleted on exit) so we can see if the entire processes worked without an error.  If no
-	// error seen then we write to ResponseWriter which automatically writes a 200 status.
-	tempFile, err := ioutil.TempFile(SCRATCH_DIR, "fdsn_tempfile")
-	if err != nil {
-		return weft.InternalServerError(err)
-	}
-	defer tempFile.Close()
-	defer os.Remove(tempFile.Name())
+	// everything worked so set headers before writing body.
+	// Obspy and curl check against Content-Length header but we don't know this yet
+	h.Set("Surrogate-Control", "max-age=10")
+	h.Set("Content-Type", "application/vnd.fdsn.mseed")
 
 	for _, r := range matches {
 		select {
 		case err := <-errChan:
 			return weft.InternalServerError(err)
 		case buff := <-r.buff:
-			if _, err := buff.WriteTo(tempFile); err != nil {
+			if _, err := buff.WriteTo(w); err != nil {
 				quitWorker <- true
 				return weft.InternalServerError(err)
 			}
 		}
-	}
-
-	if _, err := tempFile.Seek(0, 0); err != nil {
-		log.Println("error seeking to start of tempfile", err)
-		return weft.InternalServerError(err)
-	}
-
-	tempFileInfo, err := tempFile.Stat()
-	if err != nil {
-		log.Println("error getting size of tempfile", err)
-		return weft.InternalServerError(err)
-	}
-
-	// everything worked so set headers before writing body.
-	// Obspy and curl check against Content-Length header as a check that the download completed
-	h.Set("Surrogate-Control", "max-age=10")
-	h.Set("Content-Type", "application/vnd.fdsn.mseed")
-	h.Set("Content-Length", strconv.FormatInt(tempFileInfo.Size(), 10))
-
-	if _, err := io.Copy(w, tempFile); err != nil {
-		log.Printf("error copying from tempfile to ResponseWriter: err: %s", err.Error())
-		return weft.InternalServerError(err)
 	}
 
 	return &weft.StatusOK

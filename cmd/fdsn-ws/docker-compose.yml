@@ -1,0 +1,21 @@
+version: '2'
+services:
+  fdsn-ws:
+    image: 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com/fdsn-ws:latest
+    links:
+      - db
+    env_file:
+      - ./env_test.list
+    volumes:
+      - ./docker-temp-dir:/tmp
+    environment:
+      # override DB_HOST since docker-compose gives it the hostname 'db'
+      - DB_HOST=db
+    entrypoint:
+      - /fdsn-ws
+    ports:
+      - "8080:8080"
+  db:
+    image: 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com/haz-db:latest
+    ports:
+      - "5432:5432"
