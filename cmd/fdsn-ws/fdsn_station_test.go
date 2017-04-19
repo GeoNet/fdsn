@@ -17,7 +17,6 @@ func init() {
 	}
 }
 
-
 func TestStationV1Query(t *testing.T) {
 	ts = httptest.NewServer(mux)
 	defer ts.Close()
@@ -169,15 +168,15 @@ func BenchmarkStationQuery(b *testing.B) {
 
 	params, err := parseStationV1Post(postBody)
 
-	if err!=nil {
+	if err != nil {
 		b.Error(err)
 	}
 
 	benchmarks := []struct {
-		name string
+		name   string
 		params []fdsnStationV1Parm
-	} {
-		{ "post", params },
+	}{
+		{"post", params},
 	}
 
 	for _, bm := range benchmarks {
