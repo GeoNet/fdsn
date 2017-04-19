@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"github.com/GeoNet/weft"
 	"net/http"
-	"net/http/httputil"
-	"os"
 )
 
 var mux *http.ServeMux
