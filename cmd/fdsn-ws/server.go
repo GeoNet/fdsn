@@ -11,11 +11,10 @@ import (
 )
 
 var (
-	db          *sql.DB
-	decoder     = schema.NewDecoder() // decoder for URL queries.
-	Prefix      string                // prefix for logging
-	S3_BUCKET   string                // the S3 bucket storing the miniseed files used by dataselect
-	SCRATCH_DIR string                // the directory to use when writing large tempfiles before streaming the response
+	db        *sql.DB
+	decoder   = schema.NewDecoder() // decoder for URL queries.
+	Prefix    string                // prefix for logging
+	S3_BUCKET string                // the S3 bucket storing the miniseed files used by dataselect
 )
 
 func init() {
@@ -26,8 +25,6 @@ func init() {
 	if S3_BUCKET = os.Getenv("S3_BUCKET"); S3_BUCKET == "" {
 		log.Fatal("ERROR: S3_BUCKET environment variable is not set")
 	}
-
-	SCRATCH_DIR = os.Getenv("SCRATCH_DIR")
 }
 
 func main() {

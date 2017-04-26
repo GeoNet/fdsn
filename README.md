@@ -4,6 +4,25 @@ Federation of Digital Seismic Networks (FDSN) Web Services (FDSN-WS).
 
 Refer to notes in `cmd/*/deploy/DEPLOY.md` for specific deployment requirements.
 
+## Building C libraries
+
+Fdsn-ws uses the Go wrappers to the libmseed C library.  The C source is vendored using govendor.  A special govendor 
+command was used to vendor the entire collect repository and C code:
+```
+govendor fetch github.com/GeoNet/collect/^
+```
+
+You will need to build these C libraries in-place before building fdsn-ws.  This will require a C compiler (eg: gcc)
+and make (possibly other packages depending on your system.  Apline requires musl-dev):
+```
+cd vendor/github.com/GeoNet/collect/cvendor/libmseed/
+make
+cd ../libslink/
+make
+```
+
+Build.sh will automatically re-build these C libraries before building any Go executables in Docker.
+
 ## fdsn-ws
 
 Provides FDSN web services.  
@@ -23,6 +42,8 @@ handled with separate XSLT to be consistent with upstream changes):
 * 0.9
 
 The only version of QuakeML created and stored is 1.2
+
+### Dataselect
 
 FDSN dataselect has been implemented, querying and serving data from miniseed files off an Amazon S3 bucket.
 

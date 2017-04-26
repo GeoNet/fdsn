@@ -30,7 +30,7 @@ before_script:
 
 script:
   - go test -v ./internal/...
-  - ./all.sh
+  - 'if [ "TRAVIS_SECURE_ENV_VARS" = "true" ]; then bash ./all.sh; fi'
 
 deploy:
    - provider: script
