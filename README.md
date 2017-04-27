@@ -89,3 +89,11 @@ curl -u :test -X PUT http://localhost:8080/holdings/NZ.AKCZ.01.OCF.D.2016.207
 
 * This should be kept up to date using S3 bucket notifications, see `cmd/fdsn-holdings-consumer/deploy/DEPLOY.md`.
 * Back filling can be done by listing a bucket and then using curl with the list.
+
+There is a dump of ~1/2 a year of holdings data available for dev/test.  Initialize the DB then load the test data:
+
+```
+cp etc/data/fdsn-holding-dump.txt.gz /tmp
+gunzip /tmp/fdsn-holding-dump.txt.gz
+psql -h 127.0.0.1 fdsn fdsn_w -f /tmp/fdsn-holding-dump.txt
+```
