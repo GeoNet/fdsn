@@ -63,8 +63,8 @@ func TestDataHoldingsSearch(t *testing.T) {
 		Holding: holdings.Holding{
 			Network:    "NZ",
 			Station:    "ABAZ",
-			Channel:    "ACE",
 			Location:   "01",
+			Channel:    "ACE",
 			Start:      time.Date(2016, time.January, 2, 0, 0, 0, 0, time.UTC),
 			NumSamples: 500000,
 		},
@@ -78,7 +78,7 @@ func TestDataHoldingsSearch(t *testing.T) {
 	start := time.Date(2016, time.January, 1, 0, 0, 0, 0, time.UTC)
 	end := time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-	keys, err := holdingsSearch("NZ", "A.AZ", "A.", "01", start, end)
+	keys, err := holdingsSearch("NZ", "A.AZ", "01", "A.", start, end)
 	if err != nil {
 		t.Error(err)
 	}

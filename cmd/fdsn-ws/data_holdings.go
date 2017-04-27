@@ -93,7 +93,7 @@ func holdingsHandler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Resu
 // network, station, channel, and location are matched using POSIX regular expressions.
 // https://www.postgresql.org/docs/9.3/static/functions-matching.html
 // start and end should be set for all queries.
-func holdingsSearch(network, station, channel, location string, start, end time.Time) (keys []string, err error) {
+func holdingsSearch(network, station, location, channel string, start, end time.Time) (keys []string, err error) {
 	var rows *sql.Rows
 
 	rows, err = db.Query(`WITH s AS (SELECT DISTINCT ON (network, station, channel, location) streamPK

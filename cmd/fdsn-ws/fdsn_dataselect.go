@@ -317,12 +317,16 @@ func (m match) fetch(ctx context.Context) (b []byte, err error) {
 		}
 	}
 
-	return b, fmt.Errorf("failed to download file: %s, all attempts failed\n", m.key)
+	return b, fmt.Errorf("failed to download file: %s, all attempts failed.  Err: %s\n", m.key, err)
 }
 
 func (m match) parse(inBuff *bytes.Buffer) (out bytes.Buffer, err error) {
 	msr := mseed.NewMSRecord()
 	defer mseed.FreeMSRecord(msr)
+
+	params := m.dataSource.params
+	net, sta, loc, cha, _, _ := m.dataSource.regexp()
+	re := []string{net, sta, loc, cha}
 
 loop:
 	for {
@@ -344,14 +348,12 @@ loop:
 		// the msr.Endtime() appears to be identical to msr.Starttime so just check the start time is within bounds
 		msrStart := Time{msr.Starttime()}
 		msrEnd := Time{msr.Starttime()}
-		params := m.dataSource.params
 		if msrStart.Before(params.StartTime.Time) || msrEnd.After(params.EndTime.Time) {
 			continue
 		}
 
 		// Checking that network, station, location and channel match the input params
 		var match bool
-		re := m.dataSource.regexp()
 		msrFields := []string{msr.Network(), msr.Station(), msr.Location(), msr.Channel()}
 
 		var err error

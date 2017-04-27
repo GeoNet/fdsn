@@ -14,6 +14,8 @@ var ts *httptest.Server
 func setup(t *testing.T) {
 	var err error
 
+	S3_BUCKET = os.Getenv("S3_BUCKET")
+
 	db, err = sql.Open("postgres", "host=localhost connect_timeout=300 user=fdsn_w password=test dbname=fdsn sslmode=disable statement_timeout=600000")
 	if err != nil {
 		t.Fatalf("ERROR: problem with DB config: %s", err)
