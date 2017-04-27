@@ -90,18 +90,17 @@ func holdingsHandler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Resu
 }
 
 // holdingsSearch searches for S3 keys matching the query.
-// network, station, channel, and location can contain the LIKE matching
-// postgres operators _ (any single character) or % (any sequence of zero or more characters).
+// network, station, channel, and location are matched using POSIX regular expressions.
 // https://www.postgresql.org/docs/9.3/static/functions-matching.html
 // start and end should be set for all queries.
 func holdingsSearch(network, station, channel, location string, start, end time.Time) (keys []string, err error) {
 	var rows *sql.Rows
 
 	rows, err = db.Query(`WITH s AS (SELECT DISTINCT ON (network, station, channel, location) streamPK
-	FROM fdsn.stream WHERE network LIKE $1
-	AND station LIKE $2
-	AND channel LIKE $3
-	AND location LIKE $4)
+	FROM fdsn.stream WHERE network ~ $1
+	AND station ~ $2
+	AND channel ~ $3
+	AND location ~ $4)
 	SELECT DISTINCT ON (key) key FROM s JOIN fdsn.holdings USING (streampk) WHERE start_time >= $5 AND start_time <= $6`,
 		network, station, channel, location, start, end)
 	if err != nil {
