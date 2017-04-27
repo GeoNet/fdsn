@@ -74,3 +74,18 @@ POSTs SC3ML to an fdsn-ws for bulk loading events.  The same thing can be achiev
 
 * Refer to the config in the EB env running fdsn-ws for the current key.
 * Use HTTPS for the POST.  Until the EB fdsn-ws app is using a GeoNet domain name you will need to skip verifying the TLS cert.
+
+## fdsn-holdings-consumer
+
+Receives notifications for miniSEED file uploads to S3 and PUTs the S3 object key to the fdsn-ws holdings service.
+
+### Data Holdings
+
+A holdings table is used for data select.  This needs to be populated with PUTs to the fdsn-ws URL .../holdings/...key... e.g.,
+
+```
+curl -u :test -X PUT http://localhost:8080/holdings/NZ.AKCZ.01.OCF.D.2016.207
+```
+
+* This should be kept up to date using S3 bucket notifications, see `cmd/fdsn-holdings-consumer/deploy/DEPLOY.md`.
+* Back filling can be done by listing a bucket and then using curl with the list.
