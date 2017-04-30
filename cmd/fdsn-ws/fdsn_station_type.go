@@ -151,6 +151,17 @@ type ExternalReferenceType struct {
 	Description string `xml:"Description"`
 }
 
+type FDSNStationXML struct {
+	SchemaVersion float64       `xml:"schemaVersion,attr"`
+	Items         []string      `xml:",any"`
+	Source        string        `xml:"Source"`
+	Sender        string        `xml:"Sender"`
+	Module        string        `xml:"Module"`
+	ModuleURI     string        `xml:"ModuleURI"`
+	Created       xsdDateTime   `xml:"Created"`
+	Network       []NetworkType `xml:"Network"`
+}
+
 // Response: FIR filter. Corresponds to SEED blockette 61. FIR filters
 // are also commonly documented using the CoefficientsType element.
 type FIRType struct {
@@ -335,18 +346,6 @@ type ResponseType struct {
 
 // May be one of open, closed, partial
 type RestrictedStatusType string
-
-type FDSNStationXML struct {
-	XmlNs         string        `xml:"xmlns,attr" default:"http://www.fdsn.org/xml/station/1"`
-	SchemaVersion float64       `xml:"schemaVersion,attr"`
-	Items         []string      `xml:",any"`
-	Source        string        `xml:"Source"`
-	Sender        string        `xml:"Sender"`
-	Module        string        `xml:"Module"`
-	ModuleURI     string        `xml:"ModuleURI"`
-	Created       xsdDateTime   `xml:"Created"`
-	Network       []NetworkType `xml:"Network"`
-}
 
 type SampleRateRatioType struct {
 	NumberSamples int `xml:"NumberSamples"`
