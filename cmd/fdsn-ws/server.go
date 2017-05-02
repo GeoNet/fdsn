@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 var (
@@ -24,8 +25,17 @@ func init() {
 }
 
 func main() {
+	var err error
 	if S3_BUCKET = os.Getenv("S3_BUCKET"); S3_BUCKET == "" {
 		log.Fatal("ERROR: S3_BUCKET environment variable is not set")
+	}
+
+	maxWorkersStr := os.Getenv("MAX_WORKERS")
+	if maxWorkersStr == "" {
+		maxWorkersStr = "10"
+	}
+	if MAX_WORKERS, err = strconv.Atoi(maxWorkersStr); err != nil {
+		log.Fatalf("error parsing MAX_WORKERS environment variable: %s", err.Error())
 	}
 
 	p, err := cfg.PostgresEnv()

@@ -27,8 +27,6 @@ const (
 	FETCH_TIMEOUT time.Duration = time.Minute
 	HTTP_TIMEOUT  time.Duration = FETCH_TIMEOUT * time.Duration(MAX_RETRIES)
 	// the max number of worker goroutines downloading files from S3 in parallel.
-	// See https://github.com/aws/aws-sdk-go/issues/190 for detail on why we keep this number small
-	MAX_WORKERS int = 10
 	// the maximum number of queries in a POST request
 	MAX_QUERIES int = 1000
 	// Limit the number of input files (each file is max ~10 MB).  We can handle a large number so could increase or remove this limit.
@@ -38,6 +36,7 @@ const (
 var (
 	fdsnDataselectWadlFile []byte
 	fdsnDataselectIndex    []byte
+	MAX_WORKERS            int
 )
 
 type fdsnDataselectV1 struct {
