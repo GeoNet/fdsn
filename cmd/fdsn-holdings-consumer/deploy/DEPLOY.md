@@ -7,6 +7,7 @@ For deployment to AWS:
 * Use an AWS S3 bucket notification to notify about the upload of miniSEED.  This should be create or remove.
 * Send the S3 notifications to an SNS topic.  This will need permissions for the S3 bucket to send to it.
 * Use SNS->SQS fanout.  The SQS subscription should be for raw messages and SNS needs permissions to send to the SQS queue.
+* The role will need permissions to read from the bucket.
 
 ## Service on ECS
 
