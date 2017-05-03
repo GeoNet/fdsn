@@ -22,10 +22,6 @@ var routes = wt.Requests{
 	{ID: wt.L(), URL: "/sc3ml", Method: "DELETE", Status: http.StatusMethodNotAllowed},
 	{ID: wt.L(), URL: "/sc3ml?eventid=2015p768477", Content: "application/xml"},
 
-	{ID: wt.L(), URL: "/holdings/NZ.ABAZ.01.ACE.D.2016.097", Method: "POST", Status: http.StatusMethodNotAllowed},
-	{ID: wt.L(), URL: "/holdings/NZ.ABAZ.01.ACE.D.2016.097", Method: "PUT", Status: http.StatusUnauthorized},
-	{ID: wt.L(), URL: "/holdings/NZ.ABAZ.01.ACE.D.2016.097", Method: "DELETE", Status: http.StatusUnauthorized},
-
 	// fdsn-ws-event
 	{ID: wt.L(), URL: "/fdsnws/event/1", Content: "text/html"},
 	{ID: wt.L(), URL: "/fdsnws/event/1/query?eventid=2015p768477", Content: "application/xml"},
@@ -56,6 +52,7 @@ var routes = wt.Requests{
 // Test all routes give the expected response.  Also check with
 // cache busters and extra query paramters.
 func TestRoutes(t *testing.T) {
+	setup(t)
 	setup(t)
 	defer teardown()
 
