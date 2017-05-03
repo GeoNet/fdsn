@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/gob"
 	"encoding/xml"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/kit/s3"
@@ -106,12 +107,12 @@ func init() {
 		log.Printf("error reading assets/fdsn-ws-station.html: %s", err.Error())
 	}
 
-	// The loading+unmarshaling complete fdsn-station xml file could take quite a long time.
+	// The downloading fdsn-station gob file could take quite a long time.
 	// So we're loading it (locally or download from S3) in a goroutine.
 	// Before unmarshling is done the service returns 500 error with "not ready" message.
 	go func() {
-		s3Bucket := os.Getenv("FDSN_STATION_XML_BUCKET")
-		s3MetaKey := os.Getenv("FDSN_STATION_XML_META_KEY")
+		s3Bucket := os.Getenv("FDSN_STATION_GOB_BUCKET")
+		s3MetaKey := os.Getenv("FDSN_STATION_GOB_META_KEY")
 
 		var by bytes.Buffer
 		var r *bytes.Reader
@@ -120,15 +121,16 @@ func init() {
 
 		// If we've found local cache the use the cache.
 		if _, err = os.Stat("etc/" + s3MetaKey); err == nil {
-			log.Println("Loading fdsn station xml file from local: ", "etc/"+s3MetaKey)
+			log.Println("Loading fdsn station gob file from local: ", "etc/"+s3MetaKey)
 			if b, err = ioutil.ReadFile("etc/" + s3MetaKey); err != nil {
 				log.Println("Warning:", err.Error())
 			}
+			r = bytes.NewReader(b)
 			// Note: if anything goes wrong here, we download from S3 as the fallback.
 		}
 
 		if err != nil {
-			log.Println("Loading fdsn station xml file from S3: ", s3Bucket, s3MetaKey)
+			log.Println("Loading fdsn station gob file from S3: ", s3Bucket, s3MetaKey)
 
 			s3Client, err := s3.New(100)
 			if err != nil {
@@ -147,13 +149,11 @@ func init() {
 			}
 
 			r = bytes.NewReader(by.Bytes())
-			if b, err = ioutil.ReadAll(r); err != nil {
-				log.Println(err.Error())
-			}
 		}
 
-		if err = xml.Unmarshal(b, &fdsnStations); err != nil {
-			log.Println("error unmarshaling fdsn station xml", err.Error())
+		dec := gob.NewDecoder(r)
+		if err = dec.Decode(&fdsnStations); err != nil {
+			log.Println("error unmarshaling fdsn station gob", err.Error())
 		} else {
 			log.Println("Done loading stations:", len(fdsnStations.Network[0].Station))
 			stationsLoaded = true
@@ -574,4 +574,13 @@ func matchAnyRegex(input string, regexs []string) bool {
 		// error here will be treated as non-matching
 	}
 	return false
+}
+
+// MarshalBinary and UnmarshalBinary are required by gob encode/decode.
+func (v xsdDateTime) MarshalBinary() ([]byte, error) {
+	return v.MarshalText()
+}
+
+func (v *xsdDateTime) UnmarshalBinary(data []byte) error {
+	return v.UnmarshalText(data)
 }
