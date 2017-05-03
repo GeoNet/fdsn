@@ -27,21 +27,6 @@ Build.sh will automatically re-build these C libraries before building any Go ex
 
 Provides FDSN web services.  
 
-Events can be loaded for the QuakeML web services by posting (with appropriate credentials, see below) SC3ML to `/sc3ml`,
-this is transformed into a QuakeML 1.2 fragment and stored in the DB (see sc3ml.go).  These fragments are then combined and served for event
-requests.
-
-SC3ML is usually delivered with an S3 bucket notification which is consumed by `fdsn-s3-consumer`.
-SC3ML can be bulk loaded with `fdsn-ws-event-loader` or any http client.
-
-The following versions of SC3ML can be handled (there is no difference between the quake content for these versions but they are 
-handled with separate XSLT to be consistent with upstream changes):
-
-* 0.7
-* 0.8
-* 0.9
-
-The only version of QuakeML created and stored is 1.2
 
 ### Dataselect
 
@@ -66,7 +51,17 @@ NZ ALRZ 10 B?  2017-01-09T00:00:00 2017-01-10T00:00:00
 
 ## fdsn-quake-consumer
 
-Receives notifications for SeisComPML (SC3ML) event data uploads to S3 and posts the SC3ML to the fdsn-ws event service.
+Receives notifications for SeisComPML (SC3ML) event data uploads to S3 and stores the SC3ML in the DB.
+
+The following versions of SC3ML can be handled (there is no difference between the quake content for these versions but they are 
+handled with separate XSLT to be consistent with upstream changes):
+
+* 0.7
+* 0.8
+* 0.9
+
+The only version of QuakeML created and stored is 1.2
+
   
 ## fdsn-ws-event-loader
 
