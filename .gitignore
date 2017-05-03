@@ -6,5 +6,6 @@ cmd/fdsn-ws/fdsn-ws
 cmd/fdsn-ws-event-loader/fdsn-ws-event-loader
 cmd/fdsn-holdings-consumer/fdsn-holdings-consumer
 cmd/fdsn-ws-holdings-loader/fdsn-ws-holdings-loader
+cmd/xml2gob/xml2gob
 *.o
 *.a
