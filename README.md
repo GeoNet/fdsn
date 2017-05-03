@@ -64,7 +64,7 @@ NZ ALRZ 10 AC* 2017-01-02T00:00:00 2017-01-10T00:00:00
 NZ ALRZ 10 B?  2017-01-09T00:00:00 2017-01-10T00:00:00
 ```
 
-## fdsn-s3-consumer
+## fdsn-quake-consumer
 
 Receives notifications for SeisComPML (SC3ML) event data uploads to S3 and posts the SC3ML to the fdsn-ws event service.
   

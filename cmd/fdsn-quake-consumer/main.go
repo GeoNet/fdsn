@@ -1,45 +1,33 @@
 // fdsn-s3-consumer receives notifications for the creation of SeisComPML objects
 // in AWS S3.  Notifications are received from SQS.
-// SeisComPML objects are fetched from S3 and posted to the FDSN webservices.
+// SeisComPML objects are fetched from S3 and stored in the DB.
 package main
 
 import (
 	"bytes"
-	"crypto/tls"
+	"database/sql"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/GeoNet/fdsn/internal/kit/msg"
 	"github.com/GeoNet/fdsn/internal/kit/s3"
 	"github.com/GeoNet/fdsn/internal/kit/sqs"
+	"github.com/pkg/errors"
 	"log"
-	"net/http"
 	"os"
 	"time"
 )
 
 var (
-	key       = os.Getenv("FDSN_KEY")
-	path      = os.Getenv("FDSN_SC3ML_URL")
 	queueURL  = os.Getenv("SQS_QUEUE_URL")
-	client    *http.Client
 	s3Client  s3.S3
 	sqsClient sqs.SQS
+	db        *sql.DB
 )
 
-type event struct {
+type notification struct {
 	s3.Event
 }
 
 func main() {
-	// TODO - remove skip veryifying the TLS cert - currently using a geonet domain cert without a geonet DNS entry.
-	client = &http.Client{
-		Timeout: time.Duration(60 * time.Second),
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
-
 	var err error
 
 	s3Client, err = s3.New(100)
@@ -55,7 +43,7 @@ func main() {
 	log.Println("listening for messages")
 
 	var r sqs.Raw
-	var e event
+	var n notification
 
 	for {
 		r, err = sqsClient.Receive(queueURL, 600)
@@ -65,7 +53,7 @@ func main() {
 			continue
 		}
 
-		err = msg.DoProcess(&e, []byte(r.Body))
+		err = msg.DoProcess(&n, []byte(r.Body))
 		if err != nil {
 			log.Printf("problem processing message, skipping deletion for redelivery: %s", err)
 			continue
@@ -79,54 +67,36 @@ func main() {
 }
 
 // Process implements msg.Processor for event.
-func (e *event) Process(msg []byte) error {
-	err := json.Unmarshal(msg, e)
+func (n *notification) Process(msg []byte) error {
+	err := json.Unmarshal(msg, n)
 	if err != nil {
 		return err
 	}
 
-	if e.Records == nil || len(e.Records) == 0 {
-		return errors.New("received message with no content.")
+	if n.Records == nil || len(n.Records) == 0 {
+		return nil
 	}
 
 	var b bytes.Buffer
 
-	for _, v := range e.Records {
+	for _, v := range n.Records {
 		b.Reset()
 
 		err = s3Client.Get(v.S3.Bucket.Name, v.S3.Object.Key, v.S3.Object.VersionId, &b)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "error getting SC3ML %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
 		}
 
-		err = fdsn(&b)
-		if err != nil {
-			return err
+		var e event
+
+		if err := unmarshal(b.Bytes(), &e); err != nil {
+			return errors.Wrapf(err, "error unmarshalling SC3ML %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
+		}
+
+		if err := e.save(); err != nil {
+			return errors.Wrapf(err, "error saving SC3ML %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
 		}
 	}
 
 	return nil
-}
-
-// fdsn posts the SC3ML in b to the FDSN webservice.
-func fdsn(b *bytes.Buffer) error {
-	req, err := http.NewRequest("POST", path, b)
-	if err != nil {
-		return err
-	}
-	defer req.Body.Close()
-
-	req.SetBasicAuth("", key)
-
-	res, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode == http.StatusOK {
-		return nil
-	}
-
-	return fmt.Errorf("non 200 response (%d)", res.StatusCode)
 }
