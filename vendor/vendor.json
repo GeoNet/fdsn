@@ -3,11 +3,36 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "x66dBA9On6IvryKWc/nUaIAw3k8=",
+			"origin": "github.com/GeoNet/haz/vendor/github.com/GeoNet/Golang-Ellipsoid/ellipsoid",
+			"path": "github.com/GeoNet/Golang-Ellipsoid/ellipsoid",
+			"revision": "c86387b7d6cd380cb26cd4e3a9cb1d3c6cdbccf9",
+			"revisionTime": "2016-12-18T06:52:36Z"
+		},
+		{
 			"checksumSHA1": "FK9YmovqaKyJ+EPY/VGPTpRinis=",
 			"path": "github.com/GeoNet/collect",
 			"revision": "c6de37063633b7519d37bd7f1209f1818429506d",
 			"revisionTime": "2017-03-28T00:46:59Z",
 			"tree": true
+		},
+		{
+			"checksumSHA1": "VFgFU+lG4iAqCPnqak2mZdzIYBo=",
+			"path": "github.com/GeoNet/delta",
+			"revision": "8314a19149c621789d15a6948c310b01249d1191",
+			"revisionTime": "2017-01-06T00:42:38Z"
+		},
+		{
+			"checksumSHA1": "QOSMCi5XSKFryhB507FXLXBHjXk=",
+			"path": "github.com/GeoNet/haz/database",
+			"revision": "c86387b7d6cd380cb26cd4e3a9cb1d3c6cdbccf9",
+			"revisionTime": "2016-12-18T06:52:36Z"
+		},
+		{
+			"checksumSHA1": "OiWRmUyeQXs/AVF1kXpKXyEYDqA=",
+			"path": "github.com/GeoNet/haz/msg",
+			"revision": "c86387b7d6cd380cb26cd4e3a9cb1d3c6cdbccf9",
+			"revisionTime": "2016-12-18T06:52:36Z"
 		},
 		{
 			"checksumSHA1": "3JsW/vlMhZWOm9tAS+ZoOYUy8aQ=",
@@ -209,6 +234,12 @@
 			"revisionTime": "2017-04-05T23:52:32Z"
 		},
 		{
+			"checksumSHA1": "kBeNcaKk56FguvPSUCEaH6AxpRc=",
+			"path": "github.com/golang/protobuf/proto",
+			"revision": "18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8",
+			"revisionTime": "2017-04-27T21:32:20Z"
+		},
+		{
 			"checksumSHA1": "06XwQBTwD96swkWju6aW20iGJNM=",
 			"path": "github.com/gorilla/schema",
 			"revision": "f3c80893412cff6b5596a82f3cb8c31c5a971aa9",
@@ -232,6 +263,12 @@
 			"path": "github.com/lib/pq/oid",
 			"revision": "165a3529e799da61ab10faed1fabff3662d6193f",
 			"revisionTime": "2016-03-02T08:17:19Z"
+		},
+		{
+			"checksumSHA1": "ynJSWoF6v+3zMnh9R0QmmG6iGV8=",
+			"path": "github.com/pkg/errors",
+			"revision": "248dadf4e9068a0b3e79f02ed0a610d935de5302",
+			"revisionTime": "2016-10-29T09:36:37Z"
 		}
 	],
 	"rootPath": "github.com/GeoNet/fdsn"

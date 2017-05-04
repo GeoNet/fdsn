@@ -1,50 +1,81 @@
 // fdsn-holdings-consumer receives notifications for the creation of miniSEED objects
 // in AWS S3.  Notifications are received from SQS.
-// The key (string) for miniSEED objects are posted to the FDSN webservices for indexing in the data holdings.
+// The the miniSEED file referred to by the notification is fetched and indexed.  The
+// results are saved to the holdings DB.
+//
+// Multiple instances (workers) of this code can be run against the same queue for
+// Large data reindexing tasks.  Reindexing files that already exist in the bucket
+// would require sending messages in the notification format to the SQS queue.
+// See github.com/GeoNet/fdsn/internal/kit/s3 for the Event type.
 package main
 
 import (
-	"crypto/tls"
+	"database/sql"
 	"encoding/json"
-	"errors"
-	"fmt"
+	"github.com/GeoNet/fdsn/internal/kit/cfg"
 	"github.com/GeoNet/fdsn/internal/kit/msg"
-	"github.com/GeoNet/fdsn/internal/kit/s3"
+	nf "github.com/GeoNet/fdsn/internal/kit/s3"
 	"github.com/GeoNet/fdsn/internal/kit/sqs"
+	"github.com/aws/aws-sdk-go/aws/client"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/pkg/errors"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
 )
 
 var (
-	key       = os.Getenv("FDSN_KEY")
-	path      = os.Getenv("FDSN_HOLDINGS_URL")
+	db        *sql.DB
 	queueURL  = os.Getenv("SQS_QUEUE_URL")
-	client    *http.Client
 	sqsClient sqs.SQS
+	s3Session *session.Session
+	s3Client  *s3.S3
 )
 
 type event struct {
-	s3.Event
+	nf.Event
 }
 
 func main() {
-	// TODO - remove skip veryifying the TLS cert - currently using a geonet domain cert without a geonet DNS entry.
-	client = &http.Client{
-		Timeout: time.Duration(60 * time.Second),
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
+	p, err := cfg.PostgresEnv()
+	if err != nil {
+		log.Fatalf("error reading DB config from the environment vars: %s", err)
 	}
 
-	var err error
+	db, err = sql.Open("postgres", p.Connection())
+	if err != nil {
+		log.Fatalf("error with DB config: %s", err)
+	}
+	defer db.Close()
+
+	db.SetMaxIdleConns(p.MaxIdle)
+	db.SetMaxOpenConns(p.MaxOpen)
+
+ping:
+	for {
+		err = db.Ping()
+		if err != nil {
+			log.Println("problem pinging DB sleeping and retrying")
+			time.Sleep(time.Second * 30)
+			continue ping
+		}
+		break ping
+	}
 
 	sqsClient, err = sqs.New(100)
 	if err != nil {
 		log.Fatalf("creating SQS client: %s", err)
 	}
+
+	s3Session, err = session.NewSession()
+	if err != nil {
+		log.Fatalf("creating S3 session: %s", err)
+	}
+
+	s3Session.Config.Retryer = client.DefaultRetryer{NumMaxRetries: 3}
+	s3Client = s3.New(s3Session)
 
 	log.Println("listening for messages")
 
@@ -80,44 +111,32 @@ func (e *event) Process(msg []byte) error {
 	}
 
 	if e.Records == nil || len(e.Records) == 0 {
-		return errors.New("received message with no content.")
+		return nil
 	}
 
 	for _, v := range e.Records {
 		switch {
 		case strings.HasPrefix(v.EventName, "ObjectCreated"):
-			err = fdsn("PUT", v.S3.Object.Key)
+			h, err := holdingS3(v.S3.Bucket.Name, v.S3.Object.Key)
+			if err != nil {
+				return errors.Wrapf(err, "error creating holdings for %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
+			}
+
+			err = h.save()
+			if err != nil {
+				return errors.Wrapf(err, "error saving holding for % %", v.S3.Bucket.Name, v.S3.Object.Key)
+			}
+
 		case strings.HasPrefix(v.EventName, "ObjectRemoved"):
-			err = fdsn("DELETE", v.S3.Object.Key)
+			h := holding{key: v.S3.Object.Key}
+			err = h.delete()
+			if err != nil {
+				return errors.Wrapf(err, "error deleting holdings for %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
+			}
 		default:
-			err = errors.New("unknown EventName: " + v.EventName)
-		}
-		if err != nil {
-			return err
+			return errors.New("unknown EventName: " + v.EventName)
 		}
 	}
 
 	return nil
-}
-
-// fdsn puts the objectKey to the FDSN holdings webservice.
-func fdsn(method, objectKey string) error {
-	req, err := http.NewRequest(method, path+"/"+objectKey, nil)
-	if err != nil {
-		return err
-	}
-
-	req.SetBasicAuth("", key)
-
-	res, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode == http.StatusOK {
-		return nil
-	}
-
-	return fmt.Errorf("non 200 response (%d)", res.StatusCode)
 }

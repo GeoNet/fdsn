@@ -1,0 +1,29 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1486029995000",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ChangeMessageVisibility",
+        "sqs:DeleteMessage",
+        "sqs:ReceiveMessage"
+      ],
+      "Resource": [
+        "SQS_QUEUE_ARN"
+      ]
+    },
+    {
+      "Sid": "Stmt1486027161000",
+      "Effect": "Allow",
+      "Action": [
+        "s3:Get*",
+        "s3:List*"
+      ],
+      "Resource": [
+        "BUCKET_ARN",
+        "BUCKET_ARN/*"
+      ]
+    }
+  ]
+}

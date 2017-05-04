@@ -36,7 +36,6 @@ func init() {
 	mux.HandleFunc("/fdsnws/dataselect/1/application.wadl", weft.MakeHandlerAPI(fdsnDataselectWadl))
 
 	mux.HandleFunc("/sc3ml", weft.MakeHandlerAPI(s3ml))
-	mux.HandleFunc("/holdings/", weft.MakeHandlerAPI(holdingsHandler))
 
 	mux.HandleFunc("/", weft.MakeHandlerAPI(noMatch))
 
