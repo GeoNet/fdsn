@@ -15,6 +15,5 @@ For deployment to AWS:
 * Replace the variables in all caps in `fdsn-holdings-consumer.policy.json` with the deployment values. 
 * Create a policy named `fdsn-holdings-consumer` using the file `fdsn-holdings-consumer.policy.json`.
 * Create an ECS Task role named role `fdsn-holdings-consumer` that used the `fdsn-holdings-consumer` policy.
-* Register an ECS task named `fdsn-holdings-consumer` using the `fdsn-holdings-consumer` role.  For a guide see `fdsn-holdings-consumer.task.json`
-Note at the least the values `SET_VALUE` need replacing with deployment values.
+* Register an ECS task named `fdsn-holdings-consumer` using the `fdsn-holdings-consumer` role.  
 * Deploy the task as a service to an ECS cluster.
