@@ -22,6 +22,7 @@ const (
 	STATION_LEVEL_NETWORK = 0
 	STATION_LEVEL_STATION = 1
 	STATION_LEVEL_CHANNEL = 2
+	STATION_LEVEL_RESPONSE = 3
 )
 
 // supported query parameters for the station service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
@@ -528,6 +529,11 @@ func (c *ChannelType) doFilter(params []fdsnStationV1Parm) bool {
 		if !p.validLatLng(c.Latitude.Value, c.Longitude.Value) {
 			continue
 		}
+
+		if p.LevelValue <= STATION_LEVEL_CHANNEL {
+			// The user is not asking for response, remove responses before return
+			c.Response = ResponseType{}
+		}
 		return true
 	}
 
@@ -542,6 +548,8 @@ func levelValue(level string) (int, error) {
 		return STATION_LEVEL_NETWORK, nil
 	case "channel":
 		return STATION_LEVEL_CHANNEL, nil
+	case "response":
+		return STATION_LEVEL_RESPONSE, nil
 	default:
 		return -1, fmt.Errorf("Invalid level string.")
 	}
