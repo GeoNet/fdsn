@@ -160,6 +160,7 @@ type FDSNStationXML struct {
 	ModuleURI     string        `xml:"ModuleURI,omitempty"`
 	Created       xsdDateTime   `xml:"Created,omitempty"`
 	Network       []NetworkType `xml:"Network,omitempty"`
+	Xmlns         string        `xml:"xmlns,attr,omitempty"`
 }
 
 // Response: FIR filter. Corresponds to SEED blockette 61. FIR filters
