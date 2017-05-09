@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>FDSNWS - Dataselect</title>
+</head>
+<body>
+<h1>FDSNWS Dataselect Web Service</h1>
+<p>The dataselect Web service provides access to earthquake data in <a href="https://ds.iris.edu/ds/nodes/dmc/data/formats/miniseed/">miniseed</a> format.
+    Events may be filtered e.g. by network, station, location, channel, and starttime/endtime. The
+    request type is <em>HTTP-GET</em> for simple queries and <em>HTTP-POST</em> for multiple queries. Please refer to <a
+            href="http://www.fdsn.org/webservices">http://www.fdsn.org/webservice</a> for
+    a complete service description.</p>
+
+<h2>Available URLs</h2>
+<ul>
+    <li><a href="/fdsnws/dataselect/1/query">query</a></li>
+    <li><a href="/fdsnws/dataselect/1/version">version</a></li>
+    <li><a href="/fdsnws/dataselect/1/application.wadl">application.wadl</a></li>
+</ul>
+
+<h2>Feature Notes</h2>
+<ul>
+    <li>The result set is limited to 20,000 files.  Queries that would return more than 20,000 files receive an HTTP
+        413 response and will need to be broken in to smaller queries.</li>
+</ul>
+</body>
+</html>
