@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	STATION_LEVEL_NETWORK = 0
-	STATION_LEVEL_STATION = 1
-	STATION_LEVEL_CHANNEL = 2
+	STATION_LEVEL_NETWORK  = 0
+	STATION_LEVEL_STATION  = 1
+	STATION_LEVEL_CHANNEL  = 2
 	STATION_LEVEL_RESPONSE = 3
 )
 
@@ -94,6 +94,8 @@ var fdsnStationWadlFile []byte
 var fdsnStationIndex []byte
 var fdsnStations FDSNStationXML
 var stationsLoaded bool
+var zeroDateTime time.Time
+var emptyDateTime time.Time
 
 func init() {
 	var err error
@@ -106,6 +108,9 @@ func init() {
 	if err != nil {
 		log.Printf("error reading assets/fdsn-ws-station.html: %s", err.Error())
 	}
+
+	zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+	emptyDateTime = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	// The loading+unmarshaling complete fdsn-station xml file could take quite a long time.
 	// So we're loading it (locally or download from S3) in a goroutine.
@@ -582,4 +587,29 @@ func matchAnyRegex(input string, regexs []string) bool {
 		// error here will be treated as non-matching
 	}
 	return false
+}
+
+// The MarshalXML funcs below use to removing output for empty date ("9999-01-01T00:00:00")
+// and zero date ("0001-01-01T00:00:00")
+
+// For XML element
+func (d xsdDateTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	if time.Time(d).Equal(zeroDateTime) || time.Time(d).Equal(emptyDateTime) {
+		return nil
+	}
+	return e.EncodeElement(time.Time(d), start)
+}
+
+// For attr in an XML element
+func (d xsdDateTime) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
+	if time.Time(d).Equal(zeroDateTime) || time.Time(d).Equal(emptyDateTime) {
+		return xml.Attr{}, nil
+	}
+
+	t, err := d.MarshalText()
+	if err != nil {
+		return xml.Attr{}, err
+	}
+
+	return xml.Attr{Name: name, Value: string(t)}, nil
 }
