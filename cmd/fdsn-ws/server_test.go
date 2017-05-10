@@ -15,7 +15,6 @@ func setup(t *testing.T) {
 	var err error
 
 	S3_BUCKET = os.Getenv("S3_BUCKET")
-	MAX_WORKERS = 10
 
 	// need a db write user for adding test data.
 	// should use a db r/o user in prod.
@@ -29,6 +28,25 @@ func setup(t *testing.T) {
 
 	if err = db.Ping(); err != nil {
 		t.Fatal("ERROR: problem pinging DB")
+	}
+
+	_, err = db.Exec(`DELETE FROM fdsn.event WHERE publicid = '2015p768477'`)
+	if err != nil {
+		t.Log(err)
+	}
+
+	_, err = db.Exec(`INSERT INTO fdsn.event (publicid, modificationtime, origintime,
+	 latitude, longitude, depth, magnitude, magnitudetype, deleted, eventtype,
+	 depthtype, evaluationmethod, earthmodel, evaluationmode, evaluationstatus,
+	 usedphasecount, usedstationcount, originerror, azimuthalgap, minimumdistance,
+	 magnitudeuncertainty, magnitudestationcount, quakeml12event, sc3ml)
+	 VALUES ('2015p768477', timestamptz '2015-10-12 08:05:01.717692+00', timestamptz '2015-10-12 08:05:01.717692+00',
+	 -40.57806609, 176.3257242, 23.28125, 2.3, 'magnitudetype', false, 'eventtype',
+	 'depthtype', 'evaluationmethod', 'earthmodel', 'evaluationmode', 'evaluationstatus',
+	 0, 0, 0, 0, 0,
+	 0, 0, 'quakeml12event', 'sc3ml')`)
+	if err != nil {
+		t.Log(err)
 	}
 
 	ts = httptest.NewServer(mux)

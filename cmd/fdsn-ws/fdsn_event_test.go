@@ -114,11 +114,6 @@ func TestEventQuery(t *testing.T) {
 	setup(t)
 	defer teardown()
 
-	// Test event in the DB.
-	//publicid   |   latitude   |  longitude  |  depth   | magnitude |          origintime
-	//-------------+--------------+-------------+----------+-----------+-------------------------------
-	//2015p768477 | -40.57806609 | 176.3257242 | 23.28125 |       2.3 | 2015-10-12 08:05:01.717692+00
-
 	vals := []struct {
 		k string
 		v string

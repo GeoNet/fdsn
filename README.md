@@ -33,6 +33,14 @@ NZ ALRZ 10 EHN 2017-01-09T00:00:00 2017-01-09T02:00:00
 NZ ALRZ 10 AC* 2017-01-02T00:00:00 2017-01-10T00:00:00
 NZ ALRZ 10 B?  2017-01-09T00:00:00 2017-01-10T00:00:00
 ```
+### fdsn-ws-nrt
+
+Federation of Digital Seismic Networks (FDSN) Web Services (FDSN-WS) http://www.fdsn.org/webservices/ For 
+near real time data from a Postgres database.
+
+### slink-db
+
+Listens to a SEEDLink server and saves miniSEED records to a Postgres database.
 
 ### fdsn-quake-consumer
 

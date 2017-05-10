@@ -98,3 +98,15 @@ AS
   WHERE Deleted != TRUE
   ORDER BY OriginTime DESC;
 
+--  for miniSEED records from SEEDLink
+
+CREATE TABLE fdsn.record (
+  streamPK   INTEGER REFERENCES fdsn.stream (streamPK) ON DELETE CASCADE NOT NULL,
+  start_time TIMESTAMP(6) WITH TIME ZONE                                  NOT NULL,
+  latency    NUMERIC                                                      NOT NULL,
+  raw        BYTEA                                                        NOT NULL,
+  PRIMARY KEY (streamPK, start_time)
+);
+
+CREATE INDEX ON fdsn.record (start_time);
+
