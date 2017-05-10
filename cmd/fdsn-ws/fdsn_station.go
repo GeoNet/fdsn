@@ -14,15 +14,18 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
 const (
-	STATION_LEVEL_NETWORK  = 0
-	STATION_LEVEL_STATION  = 1
-	STATION_LEVEL_CHANNEL  = 2
-	STATION_LEVEL_RESPONSE = 3
+	STATION_LEVEL_NETWORK   = 0
+	STATION_LEVEL_STATION   = 1
+	STATION_LEVEL_CHANNEL   = 2
+	STATION_LEVEL_RESPONSE  = 3
+	DEFAULT_RELOAD_INTERVAL = 300
 )
 
 // supported query parameters for the station service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
@@ -31,14 +34,14 @@ type fdsnStationV1Parm struct {
 	Start        Time
 	EndTime      Time `schema:"endtime"` // Limit to metadata epochs ending on or before the specified end time.
 	End          Time
-	Network      string `schema:"network"` // Select one or more network codes. Can be SEED network codes or data center defined codes. Multiple codes are comma-separated.
-	Net          string
-	Station      string `schema:"station"` // Select one or more SEED station codes. Multiple codes are comma-separated.
-	Sta          string
-	Location     string `schema:"location"` // Select one or more SEED location identifiers. Multiple identifiers are comma- separated. As a special case “--“ (two dashes) will be translated to a string of two space characters to match blank location IDs.
-	Loc          string
-	Channel      string `schema:"channel"` // Select one or more SEED channel codes. Multiple codes are comma-separated.
-	Cha          string
+	Network      *string `schema:"network"` // Select one or more network codes. Can be SEED network codes or data center defined codes. Multiple codes are comma-separated.
+	Net          *string
+	Station      *string `schema:"station"` // Select one or more SEED station codes. Multiple codes are comma-separated.
+	Sta          *string
+	Location     *string `schema:"location"` // Select one or more SEED location identifiers. Multiple identifiers are comma- separated. As a special case “--“ (two dashes) will be translated to a string of two space characters to match blank location IDs.
+	Loc          *string
+	Channel      *string `schema:"channel"` // Select one or more SEED channel codes. Multiple codes are comma-separated.
+	Cha          *string
 	MinLatitude  float64 `schema:"minlatitude"` // Limit to stations with a latitude larger than or equal to the specified minimum.
 	MinLat       float64
 	MaxLatitude  float64 `schema:"maxlatitude"` // Limit to stations with a latitude smaller than or equal to the specified maximum.
@@ -90,12 +93,18 @@ func (v fdsnStationV1Parm) validLatLng(latitude, longitude float64) bool {
 	return true
 }
 
+type fdsnStationObj struct {
+	fdsn     *FDSNStationXML
+	modified time.Time
+	sync.RWMutex
+}
+
 var fdsnStationWadlFile []byte
 var fdsnStationIndex []byte
-var fdsnStations FDSNStationXML
-var stationsLoaded bool
+var fdsnStations fdsnStationObj
 var zeroDateTime time.Time
 var emptyDateTime time.Time
+var errNotModified = fmt.Errorf("Not modified.")
 
 func init() {
 	var err error
@@ -112,60 +121,38 @@ func init() {
 	zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 	emptyDateTime = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	// The loading+unmarshaling complete fdsn-station xml file could take quite a long time.
-	// So we're loading it (locally or download from S3) in a goroutine.
-	// Before unmarshling is done the service returns 500 error with "not ready" message.
+	fdsnStations, err = loadStationXML(time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		// We don't have to consider ERR_NOT_MODIFIED here.
+		log.Fatalf("Error loading station xml: %s\n", err.Error())
+	}
+
+	s := os.Getenv("STATION_RELOAD_INTERVAL")
+	reloadInterval, err := strconv.Atoi(s)
+	if err != nil {
+		log.Printf("Warning: invalid STATION_RELOAD_INTERVAL env variable, use default value %d instead.\n", DEFAULT_RELOAD_INTERVAL)
+		reloadInterval = DEFAULT_RELOAD_INTERVAL
+	}
+
+	ticker := time.NewTicker(time.Duration(reloadInterval) * time.Second)
 	go func() {
-		s3Bucket := os.Getenv("FDSN_STATION_XML_BUCKET")
-		s3MetaKey := os.Getenv("FDSN_STATION_XML_META_KEY")
-
-		var by bytes.Buffer
-		var r *bytes.Reader
-		var b []byte
-		var err error
-
-		// If we've found local cache the use the cache.
-		if _, err = os.Stat("etc/" + s3MetaKey); err == nil {
-			log.Println("Loading fdsn station xml file from local: ", "etc/"+s3MetaKey)
-			if b, err = ioutil.ReadFile("etc/" + s3MetaKey); err != nil {
-				log.Println("Warning:", err.Error())
-			}
-			// Note: if anything goes wrong here, we download from S3 as the fallback.
-		}
-
-		if err != nil {
-			log.Println("Loading fdsn station xml file from S3: ", s3Bucket, s3MetaKey)
-
-			s3Client, err := s3.New(100)
+		for range ticker.C {
+			newStations, err := loadStationXML(fdsnStations.modified)
 			if err != nil {
-				log.Fatalf("creating S3 client: %s", err)
+				if err == errNotModified {
+					log.Println("No update for data source.")
+				} else {
+					log.Println("Error updating data source:", err)
+				}
+			} else {
+				fdsnStations.Lock()
+				fdsnStations.fdsn = newStations.fdsn
+				fdsnStations.modified = newStations.modified
+				fdsnStations.Unlock()
+				log.Println("Data source updated.")
 			}
-
-			err = s3Client.Get(s3Bucket, s3MetaKey, "", &by)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			// save it to the same file name
-			if err = ioutil.WriteFile("etc/"+s3MetaKey, by.Bytes(), 0644); err != nil {
-				log.Println(err.Error())
-			}
-
-			r = bytes.NewReader(by.Bytes())
-			if b, err = ioutil.ReadAll(r); err != nil {
-				log.Println(err.Error())
-			}
-		}
-
-		if err = xml.Unmarshal(b, &fdsnStations); err != nil {
-			log.Println("error unmarshaling fdsn station xml", err.Error())
-		} else {
-			log.Println("Done loading stations:", len(fdsnStations.Network[0].Station))
-			stationsLoaded = true
 		}
 	}()
-
 }
 
 func parseStationV1Post(body string) ([]fdsnStationV1Parm, error) {
@@ -255,16 +242,16 @@ func parseStationV1(v url.Values) (fdsnStationV1Parm, error) {
 	if e.MaxLon != math.MaxFloat64 {
 		e.MaxLongitude = e.MaxLon
 	}
-	if e.Net != "" {
+	if e.Net != nil {
 		e.Network = e.Net
 	}
-	if e.Sta != "" {
+	if e.Sta != nil {
 		e.Station = e.Sta
 	}
-	if e.Cha != "" {
+	if e.Cha != nil {
 		e.Channel = e.Cha
 	}
-	if e.Loc != "" {
+	if e.Loc != nil {
 		e.Location = e.Loc
 	}
 
@@ -273,21 +260,10 @@ func parseStationV1(v url.Values) (fdsnStationV1Parm, error) {
 		return e, err
 	}
 
-	if e.Network != "" {
-		e.NetworkReg = genRegex(e.Network)
-	}
-
-	if e.Station != "" {
-		e.StationReg = genRegex(e.Station)
-	}
-
-	if e.Channel != "" {
-		e.ChannelReg = genRegex(e.Channel)
-	}
-
-	if e.Location != "" {
-		e.LocationReg = genRegex(e.Location)
-	}
+	e.NetworkReg = genRegex(e.Network)
+	e.StationReg = genRegex(e.Station)
+	e.ChannelReg = genRegex(e.Channel)
+	e.LocationReg = genRegex(e.Location)
 
 	// geometry bounds checking
 	if e.MinLatitude != math.MaxFloat64 && e.MinLatitude < -90.0 {
@@ -359,10 +335,6 @@ func fdsnStationV1Index(r *http.Request, h http.Header, b *bytes.Buffer) *weft.R
 }
 
 func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	if !stationsLoaded {
-		return weft.ServiceUnavailableError(fmt.Errorf("Station data not ready."))
-	}
-
 	var err error
 	var v url.Values
 	var params []fdsnStationV1Parm
@@ -388,21 +360,26 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 		return &weft.MethodNotAllowed
 	}
 
-	c := fdsnStations
-	c.doFilter(params)
+	fdsnStations.RLock()
+	c := *fdsnStations.fdsn // NOTE: FDSNStationXML is a pointer in struct
+	fdsnStations.RUnlock()
+
+	hasContent := c.doFilter(params)
+
+	if !hasContent {
+		return &weft.Result{Ok: true, Code: http.StatusNoContent, Msg: ""}
+	}
 
 	by, err := xml.Marshal(c)
 	if err != nil {
 		return weft.BadRequest(err.Error())
 	}
 
-	if len(by) == 0 {
-		return &weft.Result{Ok: false, Code: http.StatusNoContent, Msg: "The query resut is empty."}
-	}
-
 	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
 	b.Write(by)
 	h.Set("Content-Type", "application/xml")
+
+	log.Println("Serving", r.URL.String(), len(by), "bytes")
 
 	return &weft.StatusOK
 }
@@ -441,10 +418,9 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Parm) bool {
 		if p.NetworkReg != nil && !matchAnyRegex(n.Code, p.NetworkReg) {
 			continue
 		}
-
 		if p.LevelValue < STATION_LEVEL_STATION {
 			n.Station = nil
-			continue
+			return true
 		}
 		matchedParams = append(matchedParams, p)
 	}
@@ -469,8 +445,7 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Parm) bool {
 	n.SelectedNumberStations = len(ss)
 	n.Station = ss
 
-	// Parent will keep this node if it's not empty
-	return len(ss) > 0
+	return true
 }
 
 func (s *StationType) doFilter(params []fdsnStationV1Parm) bool {
@@ -517,7 +492,7 @@ func (s *StationType) doFilter(params []fdsnStationV1Parm) bool {
 	s.SelectedNumberChannels = len(cs)
 	s.Channel = cs
 
-	return len(cs) > 0
+	return true
 }
 
 func (c *ChannelType) doFilter(params []fdsnStationV1Parm) bool {
@@ -545,6 +520,81 @@ func (c *ChannelType) doFilter(params []fdsnStationV1Parm) bool {
 	return false
 }
 
+func loadStationXML(since time.Time) (stationObj fdsnStationObj, err error) {
+	bucket := os.Getenv("STATION_XML_BUCKET")
+	meta := os.Getenv("STATION_XML_META_KEY")
+
+	var by bytes.Buffer
+	var r *bytes.Reader
+	var b []byte
+	var modified time.Time
+
+	// If we've found local cache the use the cache.
+	if stat, err := os.Stat("etc/" + meta); err == nil {
+		if !stat.ModTime().After(since) {
+			return stationObj, errNotModified
+		}
+		log.Println("Loading fdsn station xml file from local: ", "etc/"+meta)
+		if b, err = ioutil.ReadFile("etc/" + meta); err != nil {
+			log.Println("Warning:", err.Error())
+		} else {
+			modified = stat.ModTime()
+		}
+		// Note: if anything goes wrong here, we download from S3 as the fallback.
+	}
+
+	if err != nil {
+		log.Println("Loading fdsn station xml file from S3: ", bucket, meta)
+
+		var s3Client s3.S3
+		var t *time.Time
+		s3Client, err = s3.New(100)
+		if err != nil {
+			return
+		}
+
+		t, err = s3Client.LastModified(bucket, meta, "")
+		if err != nil {
+			return
+		}
+
+		if !t.After(since) {
+			return stationObj, errNotModified
+		}
+
+		err = s3Client.Get(bucket, meta, "", &by)
+		if err != nil {
+			return
+		}
+
+		// save it to the same file name
+		if err = ioutil.WriteFile("etc/"+meta, by.Bytes(), 0644); err != nil {
+			return
+		}
+
+		r = bytes.NewReader(by.Bytes())
+		if b, err = ioutil.ReadAll(r); err != nil {
+			return
+		}
+
+		modified = *t
+	}
+
+	var f FDSNStationXML
+	if err = xml.Unmarshal(b, &f); err != nil {
+		return
+	}
+
+	// Precondition: There's at least 1 network in the source XML.
+	// Else program will crash here.
+	log.Printf("Done loading %d or more stations.\n", len(f.Network[0].Station))
+
+	stationObj.modified = modified
+	stationObj.fdsn = &f
+
+	return
+}
+
 func levelValue(level string) (int, error) {
 	switch level {
 	case "station", "":
@@ -560,8 +610,12 @@ func levelValue(level string) (int, error) {
 	}
 }
 
-func genRegex(input string) []string {
-	tokens := strings.Split(input, ",")
+func genRegex(input *string) []string {
+	if input == nil {
+		return nil // Default value is nil. Setting nil to regex can make further check to skip.
+	}
+
+	tokens := strings.Split(*input, ",")
 	result := make([]string, len(tokens))
 
 	for i, s := range tokens {
@@ -580,6 +634,9 @@ func genRegex(input string) []string {
 }
 
 func matchAnyRegex(input string, regexs []string) bool {
+	if regexs == nil {
+		return true
+	}
 	for _, r := range regexs {
 		if m, _ := regexp.MatchString(r, input); m == true {
 			return true
