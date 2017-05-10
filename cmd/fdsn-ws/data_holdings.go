@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"github.com/GeoNet/fdsn/internal/fdsn"
 	"time"
 )
 
@@ -10,7 +11,7 @@ import (
 // https://www.postgresql.org/docs/9.3/static/functions-matching.html
 // start and end should be set for all queries.  24 hours will be subtracted from the Start time to include all records
 // in each day long file.
-func holdingsSearch(network, station, location, channel string, start, end time.Time) (keys []string, err error) {
+func holdingsSearch(d fdsn.DataSearch) (keys []string, err error) {
 	var rows *sql.Rows
 
 	rows, err = db.Query(`WITH s AS (SELECT DISTINCT ON (network, station, channel, location) streamPK
@@ -19,7 +20,7 @@ func holdingsSearch(network, station, location, channel string, start, end time.
 	AND channel ~ $3
 	AND location ~ $4)
 	SELECT DISTINCT ON (key) key FROM s JOIN fdsn.holdings USING (streampk) WHERE start_time >= $5 AND start_time <= $6`,
-		network, station, channel, location, start.Add(time.Hour*-24), end)
+		d.Network, d.Station, d.Channel, d.Location, d.Start.Add(time.Hour*-24), d.End)
 	if err != nil {
 		return
 	}

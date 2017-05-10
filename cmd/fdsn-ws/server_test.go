@@ -15,7 +15,6 @@ func setup(t *testing.T) {
 	var err error
 
 	S3_BUCKET = os.Getenv("S3_BUCKET")
-	MAX_WORKERS = 10
 
 	// need a db write user for adding test data.
 	// should use a db r/o user in prod.

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/GeoNet/fdsn/internal/fdsn"
 	"github.com/GeoNet/fdsn/internal/holdings"
 	"github.com/lib/pq"
 	"testing"
@@ -89,7 +90,16 @@ func TestDataHoldingsSearch(t *testing.T) {
 	start := time.Date(2016, time.January, 1, 0, 0, 0, 0, time.UTC)
 	end := time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)
 
-	keys, err := holdingsSearch("NZ", "A.AZ", "01", "A.", start, end)
+	d := fdsn.DataSearch{
+		Network:  "NZ",
+		Station:  "A.AZ",
+		Location: "01",
+		Channel:  "A.",
+		Start:    start,
+		End:      end,
+	}
+
+	keys, err := holdingsSearch(d)
 	if err != nil {
 		t.Error(err)
 	}
