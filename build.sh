@@ -48,7 +48,7 @@ do
 
     # only enable Cgo for executables that require it
     enable_cgo=0
-    if [ ${i} = "fdsn-ws" ]; then
+    if [ ${i} = "fdsn-ws" ] || [ ${i} = "fdsn-holdings-consumer" ] || [ ${i} = "slink-db" ]; then
         enable_cgo=1
     fi
 
