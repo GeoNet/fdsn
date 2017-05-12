@@ -14,6 +14,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"github.com/GeoNet/fdsn/internal/kit/cfg"
 )
 
 var (
@@ -28,7 +29,30 @@ type notification struct {
 }
 
 func main() {
-	var err error
+	p, err := cfg.PostgresEnv()
+	if err != nil {
+		log.Fatalf("error reading DB config from the environment vars: %s", err)
+	}
+
+	db, err = sql.Open("postgres", p.Connection())
+	if err != nil {
+		log.Fatalf("error with DB config: %s", err)
+	}
+	defer db.Close()
+
+	db.SetMaxIdleConns(p.MaxIdle)
+	db.SetMaxOpenConns(p.MaxOpen)
+
+ping:
+	for {
+		err = db.Ping()
+		if err != nil {
+			log.Println("problem pinging DB sleeping and retrying")
+			time.Sleep(time.Second * 30)
+			continue ping
+		}
+		break ping
+	}
 
 	s3Client, err = s3.New(100)
 	if err != nil {
