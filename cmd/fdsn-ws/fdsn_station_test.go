@@ -2,7 +2,6 @@ package main
 
 import (
 	wt "github.com/GeoNet/weft/wefttest"
-	"log"
 	"net/http/httptest"
 	"net/url"
 	"testing"
@@ -12,10 +11,6 @@ import (
 // STATION_XML_META_KEY=fdsn-station-test.xml
 
 func init() {
-	var err error
-	if fdsnStations, err = loadStationXML(zeroDateTime); err != nil {
-		log.Println(err)
-	}
 }
 
 func TestStationV1Query(t *testing.T) {
@@ -24,7 +19,6 @@ func TestStationV1Query(t *testing.T) {
 
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/version"}.Do(ts.URL)
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/application.wadl"}.Do(ts.URL)
-
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query"}.Do(ts.URL)
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00"}.Do(ts.URL)
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query?minlat=-41&maxlon=177"}.Do(ts.URL)
@@ -43,10 +37,6 @@ func TestStationFilter(t *testing.T) {
 	v.Set("maxlatitude", "-35.0")
 	v.Set("minlongitude", "173.0")
 	v.Set("maxlongitude", "177.0")
-
-	if fdsnStations, err = loadStationXML(zeroDateTime); err != nil {
-		t.Error(err)
-	}
 
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)

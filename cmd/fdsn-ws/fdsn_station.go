@@ -97,6 +97,20 @@ func init() {
 
 	s3Bucket = os.Getenv("STATION_XML_BUCKET")
 	s3Meta = os.Getenv("STATION_XML_META_KEY")
+
+	// Prepare the data source for station.
+	// If there's no local file available then we'll have to download first.
+	if _, err := os.Stat("etc/" + s3Meta); err != nil {
+		if err = downloadStationXML(zeroDateTime); err != nil {
+			log.Fatalf("error download xml from S3:", err)
+		}
+	}
+
+	fdsnStations, err = loadStationXML(zeroDateTime)
+	if err != nil {
+		log.Fatalf("error loading xml from local file", err)
+	}
+
 }
 
 func parseStationV1Post(body string) ([]fdsnStationV1Search, error) {
@@ -310,9 +324,6 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
 	b.Write(by)
 	h.Set("Content-Type", "application/xml")
-
-	log.Println("Serving", r.URL.String(), len(by), "bytes")
-
 	return &weft.StatusOK
 }
 
