@@ -75,7 +75,6 @@ var (
 	fdsnStationWadlFile []byte
 	fdsnStationIndex []byte
 	fdsnStations fdsnStationObj
-	zeroDateTime time.Time
 	emptyDateTime time.Time
 	errNotModified = fmt.Errorf("Not modified.")
 	s3Bucket string
@@ -94,43 +93,10 @@ func init() {
 		log.Printf("error reading assets/fdsn-ws-station.html: %s", err.Error())
 	}
 
-	zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 	emptyDateTime = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	s3Bucket = os.Getenv("STATION_XML_BUCKET")
 	s3Meta = os.Getenv("STATION_XML_META_KEY")
-
-	fdsnStations, err = loadStationXML(time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC))
-	if err != nil {
-		// We don't have to consider ERR_NOT_MODIFIED here.
-		log.Fatalf("Error loading station xml: %s\n", err.Error())
-	}
-
-	// Periodically update data source
-	s := os.Getenv("STATION_RELOAD_INTERVAL")
-	reloadInterval, err := strconv.Atoi(s)
-	if err != nil {
-		log.Printf("Warning: invalid STATION_RELOAD_INTERVAL env variable, use default value %d instead.\n", DEFAULT_RELOAD_INTERVAL)
-		reloadInterval = DEFAULT_RELOAD_INTERVAL
-	}
-	ticker := time.NewTicker(time.Duration(reloadInterval) * time.Second)
-	go func() {
-		for range ticker.C {
-			newStations, err := loadStationXML(fdsnStations.modified)
-			if err != nil {
-				// errNotModified will be silent
-				if err != errNotModified {
-					log.Println("Error updating data source:", err)
-				}
-			} else {
-				fdsnStations.Lock()
-				fdsnStations.fdsn = newStations.fdsn
-				fdsnStations.modified = newStations.modified
-				fdsnStations.Unlock()
-				log.Println("Data source updated.")
-			}
-		}
-	}()
 }
 
 func parseStationV1Post(body string) ([]fdsnStationV1Search, error) {
@@ -532,61 +498,64 @@ func (v fdsnStationV1Search) validLatLng(latitude, longitude float64) bool {
 	return true
 }
 
-func loadStationXML(since time.Time) (stationObj fdsnStationObj, err error) {
+// Download station XML from S3
+func downloadStationXML(since time.Time) error {
 	var by bytes.Buffer
-	var r *bytes.Reader
-	var b []byte
-	var modified time.Time
+	var err error
 
-	// If we've found local cache the use the cache.
-	if stat, err := os.Stat("etc/" + s3Meta); err == nil {
-		if !stat.ModTime().After(since) {
-			return stationObj, errNotModified
-		}
-		log.Println("Loading fdsn station xml file from local: ", "etc/"+s3Meta)
-		if b, err = ioutil.ReadFile("etc/" + s3Meta); err != nil {
-			log.Println("Warning:", err.Error())
-		} else {
-			modified = stat.ModTime()
-		}
-		// Note: if anything goes wrong here, we download from S3 as the fallback.
+	var s3Client s3.S3
+	s3Client, err = s3.New(100)
+	if err != nil {
+		return err
 	}
 
+	s3Modified, err := s3Client.LastModified(s3Bucket, s3Meta, "")
 	if err != nil {
-		log.Println("Loading fdsn station xml file from S3: ", s3Bucket, s3Meta)
+		return err
+	}
 
-		var s3Client s3.S3
-		var t *time.Time
-		s3Client, err = s3.New(100)
-		if err != nil {
-			return
-		}
+	if !s3Modified.After(since) {
+		return errNotModified
+	}
 
-		t, err = s3Client.LastModified(s3Bucket, s3Meta, "")
-		if err != nil {
-			return
-		}
+	log.Println("Downloading fdsn station xml file from S3: ", s3Bucket+"/"+s3Meta)
 
-		if !t.After(since) {
-			return stationObj, errNotModified
-		}
+	err = s3Client.Get(s3Bucket, s3Meta, "", &by)
+	if err != nil {
+		return err
+	}
 
-		err = s3Client.Get(s3Bucket, s3Meta, "", &by)
-		if err != nil {
-			return
-		}
+	// save it to the same file name
+	if err = ioutil.WriteFile("etc/"+s3Meta, by.Bytes(), 0644); err != nil {
+		return err
+	}
 
-		// save it to the same file name
-		if err = ioutil.WriteFile("etc/"+s3Meta, by.Bytes(), 0644); err != nil {
-			return
-		}
+	// Adjust the saved file's to sync with the file in S3
+	if err = os.Chtimes("etc/"+s3Meta, *s3Modified, *s3Modified); err !=nil {
+		return err
+	}
 
-		r = bytes.NewReader(by.Bytes())
-		if b, err = ioutil.ReadAll(r); err != nil {
-			return
-		}
+	log.Println("Download complete.")
+	return nil
+}
 
-		modified = *t
+
+func loadStationXML(since time.Time) (stationObj fdsnStationObj, err error) {
+	var b []byte
+	var stat os.FileInfo
+
+	if stat, err = os.Stat("etc/" + s3Meta); err != nil {
+		return
+	}
+
+	if !stat.ModTime().After(since) {
+		err = errNotModified
+		return
+	}
+
+	log.Println("Loading fdsn station xml file ", "etc/"+s3Meta)
+	if b, err = ioutil.ReadFile("etc/" + s3Meta); err != nil {
+		return
 	}
 
 	var f FDSNStationXML
@@ -598,10 +567,46 @@ func loadStationXML(since time.Time) (stationObj fdsnStationObj, err error) {
 	// Else program will crash here.
 	log.Printf("Done loading %d or more stations.\n", len(f.Network[0].Station))
 
-	stationObj.modified = modified
+	stationObj.modified = stat.ModTime()
 	stationObj.fdsn = &f
 
 	return
+}
+
+// Periodically update data source
+func setupStationXMLUpdater() {
+	s := os.Getenv("STATION_RELOAD_INTERVAL")
+	reloadInterval, err := strconv.Atoi(s)
+	if err != nil {
+		log.Printf("Warning: invalid STATION_RELOAD_INTERVAL env variable, use default value %d instead.\n", DEFAULT_RELOAD_INTERVAL)
+		reloadInterval = DEFAULT_RELOAD_INTERVAL
+	}
+	ticker := time.NewTicker(time.Duration(reloadInterval) * time.Second)
+	go func() {
+		for range ticker.C {
+			err = downloadStationXML(fdsnStations.modified)
+			switch err {
+			case errNotModified:
+				// Do nothing
+			case nil:
+				newStations, err := loadStationXML(fdsnStations.modified)
+				if err != nil {
+					// errNotModified will be silent
+					if err != errNotModified {
+						log.Println("Error updating data source:", err)
+					}
+				} else {
+					fdsnStations.Lock()
+					fdsnStations.fdsn = newStations.fdsn
+					fdsnStations.modified = newStations.modified
+					fdsnStations.Unlock()
+					log.Println("Data source updated.")
+				}
+			default:
+				log.Println("ERROR: Download XML from S3:", err)
+			}
+		}
+	}()
 }
 
 func levelValue(level string) (int, error) {

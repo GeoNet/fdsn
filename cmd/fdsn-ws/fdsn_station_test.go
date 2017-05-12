@@ -5,12 +5,17 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"log"
 )
 
 // NOTE: To run the test, please export :
-// FDSN_STATION_XML_META_KEY=fdsn-station-test.xml
+// STATION_XML_META_KEY=fdsn-station-test.xml
 
 func init() {
+	var err error
+	if fdsnStations, err = loadStationXML(zeroDateTime); err !=nil {
+		log.Println(err)
+	}
 }
 
 func TestStationV1Query(t *testing.T) {
@@ -38,6 +43,10 @@ func TestStationFilter(t *testing.T) {
 	v.Set("maxlatitude", "-35.0")
 	v.Set("minlongitude", "173.0")
 	v.Set("maxlongitude", "177.0")
+
+	if fdsnStations, err = loadStationXML(zeroDateTime); err !=nil {
+		t.Error(err)
+	}
 
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
@@ -156,7 +165,7 @@ func TestStationFilter(t *testing.T) {
 // 3. Run `go test -bench=StationQuery -benchmem -run=^$`.
 //    Note: You must specify -run=^$ to skip test functions since you're not using test fdsn-station xml.
 // Currently the benchmark result for my MacBookPro 2017 is:
-// BenchmarkStationQuery/post-4               20000             65430 ns/op           54824 B/op        462 allocs/op
+// BenchmarkStationQuery/post-4               20000             74472 ns/op           78376 B/op        706 allocs/op
 func BenchmarkStationQuery(b *testing.B) {
 	postBody := `level=   channel
 		NZ ARA* * EHE*      2001-01-01T00:00:00 *

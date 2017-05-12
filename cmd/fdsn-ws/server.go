@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
@@ -15,12 +16,14 @@ var (
 	decoder   = schema.NewDecoder() // decoder for URL queries.
 	Prefix    string                // prefix for logging
 	S3_BUCKET string                // the S3 bucket storing the miniseed files used by dataselect
+	zeroDateTime time.Time
 )
 
 func init() {
 	if Prefix != "" {
 		log.SetPrefix(Prefix + " ")
 	}
+	zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
 func main() {
@@ -49,6 +52,22 @@ func main() {
 	if err = db.Ping(); err != nil {
 		log.Println("ERROR: problem pinging DB - is it up and contactable? 500s will be served")
 	}
+
+	// Prepare the data source for station.
+	// If there's no local file available then we'll have to download first.
+	if _, err := os.Stat("etc/" + s3Meta); err != nil {
+		log.Println("Going")
+		if err = downloadStationXML(zeroDateTime); err!=nil {
+			log.Fatalf("error download xml from S3:", err)
+		}
+	}
+
+	fdsnStations, err = loadStationXML(zeroDateTime)
+	if err!=nil {
+		log.Fatalf("error loading xml from local file", err)
+	}
+
+	setupStationXMLUpdater()
 
 	log.Println("starting server")
 	log.Fatal(http.ListenAndServe(":8080", mux))
