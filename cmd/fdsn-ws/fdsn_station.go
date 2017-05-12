@@ -73,12 +73,12 @@ type fdsnStationObj struct {
 
 var (
 	fdsnStationWadlFile []byte
-	fdsnStationIndex []byte
-	fdsnStations fdsnStationObj
-	emptyDateTime time.Time
-	errNotModified = fmt.Errorf("Not modified.")
-	s3Bucket string
-	s3Meta string
+	fdsnStationIndex    []byte
+	fdsnStations        fdsnStationObj
+	emptyDateTime       time.Time
+	errNotModified      = fmt.Errorf("Not modified.")
+	s3Bucket            string
+	s3Meta              string
 )
 
 func init() {
@@ -531,14 +531,13 @@ func downloadStationXML(since time.Time) error {
 	}
 
 	// Adjust the saved file's to sync with the file in S3
-	if err = os.Chtimes("etc/"+s3Meta, *s3Modified, *s3Modified); err !=nil {
+	if err = os.Chtimes("etc/"+s3Meta, *s3Modified, *s3Modified); err != nil {
 		return err
 	}
 
 	log.Println("Download complete.")
 	return nil
 }
-
 
 func loadStationXML(since time.Time) (stationObj fdsnStationObj, err error) {
 	var b []byte

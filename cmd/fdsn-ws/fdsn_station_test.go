@@ -2,10 +2,10 @@ package main
 
 import (
 	wt "github.com/GeoNet/weft/wefttest"
+	"log"
 	"net/http/httptest"
 	"net/url"
 	"testing"
-	"log"
 )
 
 // NOTE: To run the test, please export :
@@ -13,7 +13,7 @@ import (
 
 func init() {
 	var err error
-	if fdsnStations, err = loadStationXML(zeroDateTime); err !=nil {
+	if fdsnStations, err = loadStationXML(zeroDateTime); err != nil {
 		log.Println(err)
 	}
 }
@@ -44,7 +44,7 @@ func TestStationFilter(t *testing.T) {
 	v.Set("minlongitude", "173.0")
 	v.Set("maxlongitude", "177.0")
 
-	if fdsnStations, err = loadStationXML(zeroDateTime); err !=nil {
+	if fdsnStations, err = loadStationXML(zeroDateTime); err != nil {
 		t.Error(err)
 	}
 

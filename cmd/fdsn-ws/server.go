@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	db        *sql.DB
-	decoder   = schema.NewDecoder() // decoder for URL queries.
-	Prefix    string                // prefix for logging
-	S3_BUCKET string                // the S3 bucket storing the miniseed files used by dataselect
+	db           *sql.DB
+	decoder      = schema.NewDecoder() // decoder for URL queries.
+	Prefix       string                // prefix for logging
+	S3_BUCKET    string                // the S3 bucket storing the miniseed files used by dataselect
 	zeroDateTime time.Time
 )
 
@@ -57,13 +57,13 @@ func main() {
 	// If there's no local file available then we'll have to download first.
 	if _, err := os.Stat("etc/" + s3Meta); err != nil {
 		log.Println("Going")
-		if err = downloadStationXML(zeroDateTime); err!=nil {
+		if err = downloadStationXML(zeroDateTime); err != nil {
 			log.Fatalf("error download xml from S3:", err)
 		}
 	}
 
 	fdsnStations, err = loadStationXML(zeroDateTime)
-	if err!=nil {
+	if err != nil {
 		log.Fatalf("error loading xml from local file", err)
 	}
 
