@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"os"
+	"time"
 )
 
 type S3 struct {
@@ -59,4 +60,23 @@ func (s *S3) Get(bucket, key, version string, b *bytes.Buffer) error {
 	_, err = b.ReadFrom(result.Body)
 
 	return err
+}
+
+func (s *S3) LastModified(bucket, key, version string) (*time.Time, error) {
+	params := s3.GetObjectInput{
+		Key:    aws.String(key),
+		Bucket: aws.String(bucket),
+	}
+
+	if version != "" {
+		params.VersionId = aws.String(version)
+	}
+
+	result, err := s.client.GetObject(&params)
+	if err != nil {
+		return nil, err
+	}
+	defer result.Body.Close()
+
+	return result.LastModified, nil
 }
