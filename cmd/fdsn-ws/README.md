@@ -13,8 +13,6 @@ STATION_XML_META_KEY= (eg. file name)
 ```
 (NOTE: An environment with credential to access S3 is required.)
 
-The fdsn-station service will download and cache it in "etc/" for later use (when the service restarts).
-
 Downloading and unmarshaling the fdsn-station xml could take long : Unmarshaling a 174MB xml takes about 10 seconds in my MacBookPro(2017), and downloading it takes much longer. 
 So the initial time will be longer than usual - could be more than 10 seconds.
 The service periodically (defaults to 300 seconds, set by STATION_RELOAD_INTERVAL) checks if the data source xml in the S3 bucket has been updated.

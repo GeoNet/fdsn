@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/kit/s3"
 	"github.com/GeoNet/weft"
+	"io"
 	"io/ioutil"
 	"log"
 	"math"
@@ -100,17 +101,33 @@ func init() {
 
 	// Prepare the data source for station.
 	// If there's no local file available then we'll have to download first.
-	if _, err := os.Stat("etc/" + s3Meta); err != nil {
-		if err = downloadStationXML(zeroDateTime); err != nil {
-			log.Fatalf("error download xml from S3:", err)
+	by := bytes.NewBuffer(nil)
+	modified := zeroDateTime
+	var s os.FileInfo
+	if s, err = os.Stat("etc/" + s3Meta); err == nil {
+		log.Println("Loading fdsn station xml file ", "etc/"+s3Meta)
+		var f *os.File
+		if f, err = os.Open("etc/" + s3Meta); err == nil {
+			io.Copy(by, f)
+			f.Close()
+			modified = s.ModTime()
 		}
 	}
 
-	fdsnStations, err = loadStationXML(zeroDateTime)
+	// Local file not exist, or got error while reading it.
+	// Read from S3 instead.
 	if err != nil {
-		log.Fatalf("error loading xml from local file", err)
+		by, modified, err = downloadStationXML(zeroDateTime)
+		if err != nil {
+			// errNotModified wouldn't happen here
+			log.Fatalf("Download from S3 error: %s\n", err.Error())
+		}
 	}
 
+	fdsnStations, err = loadStationXML(by, modified)
+	if err != nil {
+		log.Fatalf("Error loading xml: %s\n", err)
+	}
 }
 
 func parseStationV1Post(body string) ([]fdsnStationV1Search, error) {
@@ -510,66 +527,38 @@ func (v fdsnStationV1Search) validLatLng(latitude, longitude float64) bool {
 }
 
 // Download station XML from S3
-func downloadStationXML(since time.Time) error {
-	var by bytes.Buffer
-	var err error
-
+func downloadStationXML(since time.Time) (by *bytes.Buffer, modified time.Time, err error) {
 	var s3Client s3.S3
 	s3Client, err = s3.New(100)
 	if err != nil {
-		return err
+		return
 	}
 
-	s3Modified, err := s3Client.LastModified(s3Bucket, s3Meta, "")
+	tp, err := s3Client.LastModified(s3Bucket, s3Meta, "")
 	if err != nil {
-		return err
+		return
 	}
 
-	if !s3Modified.After(since) {
-		return errNotModified
+	if !tp.After(since) {
+		return nil, zeroDateTime, errNotModified
 	}
 
 	log.Println("Downloading fdsn station xml file from S3: ", s3Bucket+"/"+s3Meta)
 
-	err = s3Client.Get(s3Bucket, s3Meta, "", &by)
+	by = bytes.NewBuffer(nil)
+	err = s3Client.Get(s3Bucket, s3Meta, "", by)
 	if err != nil {
-		return err
+		return
 	}
 
-	// save it to the same file name
-	if err = ioutil.WriteFile("etc/"+s3Meta, by.Bytes(), 0644); err != nil {
-		return err
-	}
-
-	// Adjust the saved file's to sync with the file in S3
-	if err = os.Chtimes("etc/"+s3Meta, *s3Modified, *s3Modified); err != nil {
-		return err
-	}
-
+	modified = *tp
 	log.Println("Download complete.")
-	return nil
+	return
 }
 
-func loadStationXML(since time.Time) (stationObj fdsnStationObj, err error) {
-	var b []byte
-	var stat os.FileInfo
-
-	if stat, err = os.Stat("etc/" + s3Meta); err != nil {
-		return
-	}
-
-	if !stat.ModTime().After(since) {
-		err = errNotModified
-		return
-	}
-
-	log.Println("Loading fdsn station xml file ", "etc/"+s3Meta)
-	if b, err = ioutil.ReadFile("etc/" + s3Meta); err != nil {
-		return
-	}
-
+func loadStationXML(by *bytes.Buffer, modified time.Time) (stationObj fdsnStationObj, err error) {
 	var f FDSNStationXML
-	if err = xml.Unmarshal(b, &f); err != nil {
+	if err = xml.Unmarshal(by.Bytes(), &f); err != nil {
 		return
 	}
 
@@ -577,7 +566,7 @@ func loadStationXML(since time.Time) (stationObj fdsnStationObj, err error) {
 	// Else program will crash here.
 	log.Printf("Done loading %d or more stations.\n", len(f.Network[0].Station))
 
-	stationObj.modified = stat.ModTime()
+	stationObj.modified = modified
 	stationObj.fdsn = &f
 
 	return
@@ -594,12 +583,12 @@ func setupStationXMLUpdater() {
 	ticker := time.NewTicker(time.Duration(reloadInterval) * time.Second)
 	go func() {
 		for range ticker.C {
-			err = downloadStationXML(fdsnStations.modified)
+			by, s3Modified, err := downloadStationXML(fdsnStations.modified)
 			switch err {
 			case errNotModified:
 				// Do nothing
 			case nil:
-				newStations, err := loadStationXML(fdsnStations.modified)
+				newStations, err := loadStationXML(by, s3Modified)
 				if err != nil {
 					// errNotModified will be silent
 					if err != errNotModified {
