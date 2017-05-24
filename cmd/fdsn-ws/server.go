@@ -8,19 +8,22 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
-	db        *sql.DB
-	decoder   = schema.NewDecoder() // decoder for URL queries.
-	Prefix    string                // prefix for logging
-	S3_BUCKET string                // the S3 bucket storing the miniseed files used by dataselect
+	db           *sql.DB
+	decoder      = schema.NewDecoder() // decoder for URL queries.
+	Prefix       string                // prefix for logging
+	S3_BUCKET    string                // the S3 bucket storing the miniseed files used by dataselect
+	zeroDateTime time.Time
 )
 
 func init() {
 	if Prefix != "" {
 		log.SetPrefix(Prefix + " ")
 	}
+	zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
 func main() {
@@ -49,6 +52,8 @@ func main() {
 	if err = db.Ping(); err != nil {
 		log.Println("ERROR: problem pinging DB - is it up and contactable? 500s will be served")
 	}
+
+	setupStationXMLUpdater()
 
 	log.Println("starting server")
 	log.Fatal(http.ListenAndServe(":8080", mux))
