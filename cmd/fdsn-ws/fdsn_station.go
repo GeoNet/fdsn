@@ -55,6 +55,7 @@ type fdsnStationV1Parm struct {
 	MinLongitude float64 `schema:"minlongitude"` // Limit to stations with a longitude larger than or equal to the specified minimum.
 	MaxLongitude float64 `schema:"maxlongitude"` // Limit to stations with a longitude smaller than or equal to the specified maximum.
 	Level        string  `schema:"level"`        // Specify the level of detail for the results.
+	Format       string  `schema:"format"`       // Format of result. Either "xml" or "text".
 }
 
 type fdsnStationV1Search struct {
@@ -186,6 +187,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		MinLongitude: math.MaxFloat64,
 		MaxLongitude: math.MaxFloat64,
 		Level:        "station",
+		Format:       "xml",
 	}
 
 	for abbrev, expanded := range stationAbbreviations {
@@ -209,6 +211,15 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	err := decoder.Decode(&p, v)
 	if err != nil {
 		return fdsnStationV1Search{}, err
+	}
+
+	// Only xml and text is allowed.
+	if p.Format != "xml" && p.Format != "text" {
+		return fdsnStationV1Search{}, fmt.Errorf("Invalid format.")
+	}
+
+	if p.Level == "response" && p.Format == "text" {
+		return fdsnStationV1Search{}, fmt.Errorf("Text formats are only supported when level is net|sta|cha.")
 	}
 
 	s := fdsnStationV1Search{
@@ -294,7 +305,6 @@ func fdsnStationV1Index(r *http.Request, h http.Header, b *bytes.Buffer) *weft.R
 }
 
 func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	var err error
 	var v url.Values
 	var params []fdsnStationV1Search
 
@@ -333,14 +343,20 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 	// (Note: all params have the same level so I'm taking the first param's level.)
 	c.trimLevel(params[0].LevelValue)
 
-	by, err := xml.Marshal(c)
-	if err != nil {
-		return weft.ServiceUnavailableError(err)
+	if params[0].Format == "xml" {
+		by, err := xml.Marshal(c)
+		if err != nil {
+			return weft.ServiceUnavailableError(err)
+		}
+		b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
+		b.Write(by)
+		h.Set("Content-Type", "application/xml")
+	} else {
+		bb := c.marshalText(params[0].LevelValue)
+		b.Write(bb.Bytes())
+		h.Set("Content-Type", "text/plain")
 	}
 
-	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
-	b.Write(by)
-	h.Set("Content-Type", "application/xml")
 	return &weft.StatusOK
 }
 
@@ -366,6 +382,56 @@ func (r *FDSNStationXML) trimLevel(level int) {
 			}
 		}
 	}
+}
+
+func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
+	by := bytes.NewBuffer(nil)
+
+	switch levelVal {
+	case STATION_LEVEL_NETWORK:
+		by.WriteString("#Network | Description | StartTime | EndTime | TotalStations\n")
+	case STATION_LEVEL_STATION:
+		by.WriteString("#Network | Station | Latitude | Longitude | Elevation | SiteName | StartTime | EndTime\n")
+	case STATION_LEVEL_CHANNEL:
+		by.WriteString("#Network | Station | Location | Channel | Latitude | Longitude | Elevation | Depth | Azimuth | Dip | SensorDescription | Scale | ScaleFreq | ScaleUnits | SampleRate | StartTime | EndTime\n")
+		// RESPONSE is not supported
+	}
+
+	for n := 0; n < len(r.Network); n++ {
+		net := &r.Network[n]
+		if levelVal == STATION_LEVEL_NETWORK {
+			by.WriteString(fmt.Sprintf("%s|%s|%s|%s|%d\n",
+				net.Code, net.Description,
+				net.StartDate.MarshalFormatText(), net.EndDate.MarshalFormatText(),
+				net.TotalNumberStations))
+		} else {
+			for s := 0; s < len(net.Station); s++ {
+				sta := &net.Station[s]
+				if levelVal == STATION_LEVEL_STATION {
+					by.WriteString(fmt.Sprintf("%s|%s|%f|%f|%f|%s|%s|%s\n",
+						net.Code, sta.Code,
+						sta.Latitude.Value, sta.Longitude.Value, sta.Elevation.Value,
+						sta.Site.Name, sta.StartDate.MarshalFormatText(), sta.EndDate.MarshalFormatText()))
+				} else {
+					for c := 0; c < len(sta.Channel); c++ {
+						cha := &sta.Channel[c]
+						by.WriteString(fmt.Sprintf("%s|%s|%s|%s|%f|%f|%f|%f|%f|%f|%s|%f|%f|%s|%f|%s|%s\n",
+							net.Code, sta.Code, cha.LocationCode, cha.Code,
+							cha.Latitude.Value, cha.Longitude.Value, cha.Elevation.Value,
+							cha.Depth.Value, cha.Azimuth.Value, cha.Dip.Value,
+							cha.Sensor.Description,
+							cha.Response.InstrumentSensitivity.Value,
+							cha.Response.InstrumentSensitivity.Frequency,
+							cha.Response.InstrumentSensitivity.InputUnits.Name,
+							cha.SampleRate.Value,
+							cha.StartDate.MarshalFormatText(), cha.EndDate.MarshalFormatText()))
+
+					}
+				}
+			}
+		}
+	}
+	return by
 }
 
 func (r *FDSNStationXML) doFilter(params []fdsnStationV1Search) bool {
@@ -679,4 +745,14 @@ func (d xsdDateTime) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
 	}
 
 	return xml.Attr{Name: name, Value: string(t)}, nil
+}
+
+// For format=text
+func (d xsdDateTime) MarshalFormatText() string {
+	if time.Time(d).Equal(zeroDateTime) || time.Time(d).Equal(emptyDateTime) {
+		return ""
+	}
+
+	b, _ := d.MarshalText()
+	return string(b)
 }

@@ -23,6 +23,8 @@ func TestStationV1Query(t *testing.T) {
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00"}.Do(ts.URL)
 	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query?minlat=-41&maxlon=177"}.Do(ts.URL)
 
+	wt.Request{Accept: "text/plain", URL: "/fdsnws/station/1/query?format=y", Status: 400}.Do(ts.URL)
+	wt.Request{Accept: "text/plain", URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00&format=text"}.Do(ts.URL)
 }
 
 func TestStationFilter(t *testing.T) {
