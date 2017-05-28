@@ -135,6 +135,16 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 		}
 	}
 
+	// Valid parameter values.
+	// Note: Since we're only checking the first occurrence of a parameter,
+	//   so we're not handling "parameter submitted multiple times" - it might pass or fail.
+	// (According to spec 1.1 Page 10 top section)
+	for key, val := range v {
+		if len(val[0]) == 0 {
+			return DataSelect{}, fmt.Errorf("Invalid %s value", key)
+		}
+	}
+
 	err := decoder.Decode(&e, v)
 	if err != nil {
 		return DataSelect{}, err

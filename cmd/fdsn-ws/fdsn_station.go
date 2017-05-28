@@ -201,10 +201,9 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	// Note: Since we're only checking the first occurrence of a parameter,
 	//   so we're not handling "parameter submitted multiple times" - it might pass or fail.
 	// (According to spec 1.1 Page 10 top section)
-	for _, pv := range []string{"network", "station", "channel", "location"} {
-		va, ok := v[pv]
-		if ok && len(va[0]) == 0 {
-			return fdsnStationV1Search{}, fmt.Errorf("Invalid %s value", pv)
+	for key, val := range v {
+		if len(val[0]) == 0 {
+			return fdsnStationV1Search{}, fmt.Errorf("Invalid %s value", key)
 		}
 	}
 
