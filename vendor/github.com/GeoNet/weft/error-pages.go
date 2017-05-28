@@ -94,7 +94,7 @@ const (
 	<div id="container" class="corners-all">
 	<h1>Error 400</h1>
 
-	<p><b>400 Page Not Found</b>: '400' is standard notation indicating a bad request, please correct your query and try again.</p>
+	<p><b>400 Bad Request</b>: '400' is standard notation indicating a bad request, please correct your query and try again.</p>
 
 	<p>If you need more information about this error please contact us directly.</p>
 
