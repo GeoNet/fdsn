@@ -95,9 +95,7 @@ func MakeHandlerPage(f RequestHandler) http.HandlerFunc {
 }
 
 /*
-MakeHandlerAPI executes f.  A non nil bytes.Buffer is only
-passed to f for GET requests. For GET request the response in
-b is written to the client with gzipping.
+MakeHandlerAPI executes f.
 
 When res.Code is not http.StatusOK the contents of res.Msg are written to w.
 
@@ -108,20 +106,13 @@ func MakeHandlerAPI(f RequestHandler) http.HandlerFunc {
 		t := mtrapp.Start()
 		var res *Result
 
-		switch r.Method {
-		case "GET":
-			b := bufferPool.Get().(*bytes.Buffer)
-			defer bufferPool.Put(b)
-			b.Reset()
+		b := bufferPool.Get().(*bytes.Buffer)
+		defer bufferPool.Put(b)
+		b.Reset()
 
-			res = f(r, w.Header(), b)
-			t.Stop()
-			WriteBytes(w, r, res, b, false)
-		default:
-			res = f(r, w.Header(), nil)
-			t.Stop()
-			Write(w, r, res)
-		}
+		res = f(r, w.Header(), b)
+		t.Stop()
+		WriteBytes(w, r, res, b, false)
 
 		t.Track(name(f) + "." + r.Method)
 		res.Count()
@@ -135,20 +126,16 @@ func MakeHandlerAPI(f RequestHandler) http.HandlerFunc {
 }
 
 /*
-MakeStreamHandlerAPI executes f.  The http.ResponseWriter variable is made directly
-available to the handler, allowing f to stream large amounts of data to the client.
+MakeSimpleHandler executes f.  The caller should write directly to w for success (200) only.
+When res.Code is not http.StatusOK the contents of res.Msg are written to w.
 
-When res.Code is not http.StatusOK the contents of res.Msg are written to w.  The handler
-function should only write to w if there is no error.  Writing to w automatically sets
-a status code of 200 so you must be sure of success before writing to it.
-
+Responses are counted.  f is not wrapped with a timer as this includes the write to the client.
 */
-func MakeStreamHandlerAPI(f RequestStreamHandler) http.HandlerFunc {
+func MakeSimpleHandler(f SimpleRequestHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		t := mtrapp.Start()
 		var res *Result
 
-		res = f(r, w.Header(), w)
+		res = f(r, w)
 
 		// if we have StatusOK it means we've already written this to the header, so only handle other cases
 		if res.Code != http.StatusOK {
@@ -156,16 +143,8 @@ func MakeStreamHandlerAPI(f RequestStreamHandler) http.HandlerFunc {
 			Write(w, r, res)
 		}
 
-		t.Stop()
-
-		t.Track(name(f) + "." + r.Method)
 		res.Count()
-
 		res.log(r)
-
-		if t.Taken() > 250 {
-			log.Printf("slow: took %d ms serving %s", t.Taken(), r.RequestURI)
-		}
 	}
 }
 

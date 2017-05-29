@@ -69,7 +69,7 @@ func init() {
 // fetches them, writing matching records to w in the same order they were requested.
 // Results are streamed to the client so a 200 can still be followed by errors which will not
 // be reported to the client.  The potentially large response sizes make this the simplest solution.
-func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWriter) *weft.Result {
+func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Result {
 	var params []fdsn.DataSelect
 
 	switch r.Method {
