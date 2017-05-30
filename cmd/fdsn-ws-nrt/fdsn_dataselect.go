@@ -32,7 +32,7 @@ func init() {
 // fetches them in parallel, writing matching records to w in the same order they were requested.
 // This parses all input files before writing the StatusCode and before writing data to ResponseWriter.
 // In the case of an error a non-200 status code is returned as a weft.Result and no output written to w.
-func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWriter) *weft.Result {
+func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Result {
 	var params []fdsn.DataSelect
 
 	switch r.Method {
@@ -75,7 +75,7 @@ func fdsnDataselectV1Handler(r *http.Request, h http.Header, w http.ResponseWrit
 		}
 	}
 
-	h.Set("Content-Type", "application/vnd.fdsn.mseed")
+	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
 
 	return &weft.StatusOK
 }
