@@ -27,7 +27,7 @@ function runTests {
 		export $(cat ${1}/env.list | grep = | xargs)
 	fi
 
-	go test -v ./${1}
+	go test -tags integration -v ./${1}
 	return $?
 
 }
