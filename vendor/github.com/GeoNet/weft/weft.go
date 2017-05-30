@@ -34,7 +34,7 @@ type Result struct {
 
 type RequestHandler func(r *http.Request, h http.Header, b *bytes.Buffer) *Result
 
-type RequestStreamHandler func(r *http.Request, h http.Header, w http.ResponseWriter) *Result
+type SimpleRequestHandler func(r *http.Request, w http.ResponseWriter) *Result
 
 func InternalServerError(err error) *Result {
 	return &Result{Ok: false, Code: http.StatusInternalServerError, Msg: err.Error()}

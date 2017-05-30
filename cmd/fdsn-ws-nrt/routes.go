@@ -30,7 +30,7 @@ func init() {
 
 	// This service implements the dataselect spec from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf.
 	mux.HandleFunc("/fdsnws/dataselect/1", weft.MakeHandlerAPI(fdsnDataselectV1Index))
-	mux.HandleFunc("/fdsnws/dataselect/1/query", weft.MakeStreamHandlerAPI(fdsnDataselectV1Handler))
+	mux.HandleFunc("/fdsnws/dataselect/1/query", weft.MakeSimpleHandler(fdsnDataselectV1Handler))
 	mux.HandleFunc("/fdsnws/dataselect/1/version", weft.MakeHandlerAPI(fdsnDataselectVersion))
 	mux.HandleFunc("/fdsnws/dataselect/1/application.wadl", weft.MakeHandlerAPI(fdsnDataselectWadl))
 
