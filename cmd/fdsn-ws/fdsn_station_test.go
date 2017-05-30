@@ -1,8 +1,6 @@
 package main
 
 import (
-	wt "github.com/GeoNet/weft/wefttest"
-	"net/http/httptest"
 	"net/url"
 	"testing"
 )
@@ -11,20 +9,6 @@ import (
 // STATION_XML_META_KEY=fdsn-station-test.xml
 
 func init() {
-}
-
-func TestStationV1Query(t *testing.T) {
-	ts = httptest.NewServer(mux)
-	defer ts.Close()
-
-	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/version"}.Do(ts.URL)
-	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/application.wadl"}.Do(ts.URL)
-	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query"}.Do(ts.URL)
-	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00"}.Do(ts.URL)
-	wt.Request{Accept: "application/xml", URL: "/fdsnws/station/1/query?minlat=-41&maxlon=177"}.Do(ts.URL)
-
-	wt.Request{Accept: "text/plain", URL: "/fdsnws/station/1/query?format=y", Status: 400}.Do(ts.URL)
-	wt.Request{Accept: "text/plain", URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00&format=text"}.Do(ts.URL)
 }
 
 func TestStationFilter(t *testing.T) {

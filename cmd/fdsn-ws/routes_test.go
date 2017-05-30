@@ -34,6 +34,15 @@ var routes = wt.Requests{
 		Status:  http.StatusNoContent},
 	//{ID: wt.L(), URL: "/fdsnws/dataselect/1/query", Content: "text/plain", Status: http.StatusRequestEntityTooLarge},
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/application.wadl", Content: "application/xml"},
+
+	// fdsn-ws-station
+	{ID: wt.L(), URL: "/fdsnws/station/1/version", Content: "text/plain"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/application.wadl", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?minlat=-41&maxlon=177", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00&format=text", Content: "text/plain"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?format=y", Content: "text/plain", Status: http.StatusBadRequest},
 }
 
 // Test all routes give the expected response.  Also check with
