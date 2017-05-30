@@ -29,8 +29,8 @@ before_script:
 - ./etc/scripts/initdb.sh
 
 script:
-  - make -C vendor/github.com/GeoNet/collect/cvendor/libmseed
-  - make -C vendor/github.com/GeoNet/collect/cvendor/libslink
+  - make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
+  - make -C vendor/github.com/GeoNet/kit/cvendor/libslink
   - go test -v ./internal/...
   - ./all.sh
   - 'if [ "TRAVIS_SECURE_ENV_VARS" = "true" ]; then bash ./all-integration.sh; fi'

@@ -64,17 +64,19 @@ Receives notifications for miniSEED file uploads to S3, indexes the files, and s
 
 ### Building C libraries
 
-Fdsn-ws uses the Go wrappers to the libmseed C library.  The C source is vendored using govendor.  A special govendor 
-command was used to vendor the entire collect repository and C code:
+Go wrappers to the libmseed and libslink need the C libraries.  The C source is vendored using govendor.  A special govendor 
+command was used to vendor the C code from the kit repo:
+
 ```
-govendor fetch github.com/GeoNet/collect/^
+govendor fetch github.com/GeoNet/kit/cvendor/libmseed^
+govendor fetch github.com/GeoNet/kit/cvendor/libslink^
 ```
 
 You will need to build these C libraries in-place before building fdsn-ws.  This will require a C compiler (eg: gcc)
 and make (possibly other packages depending on your system.  Alpine requires musl-dev):
 
 ```
-cd vendor/github.com/GeoNet/collect/cvendor/libmseed/
+cd vendor/github.com/GeoNet/kit/cvendor/libmseed/
 make
 cd ../libslink/
 make
