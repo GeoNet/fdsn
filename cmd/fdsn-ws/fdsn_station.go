@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/kit/s3"
 	"github.com/GeoNet/weft"
@@ -44,18 +45,19 @@ var stationAbbreviations = map[string]string{
 
 // supported query parameters for the station service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
 type fdsnStationV1Parm struct {
-	StartTime    Time    `schema:"starttime"`    // Limit to metadata epochs starting on or after the specified start time.
-	EndTime      Time    `schema:"endtime"`      // Limit to metadata epochs ending on or before the specified end time.
-	Network      string  `schema:"network"`      // Select one or more network codes. Can be SEED network codes or data center defined codes. Multiple codes are comma-separated.
-	Station      string  `schema:"station"`      // Select one or more SEED station codes. Multiple codes are comma-separated.
-	Location     string  `schema:"location"`     // Select one or more SEED location identifiers. Multiple identifiers are comma- separated. As a special case “--“ (two dashes) will be translated to a string of two space characters to match blank location IDs.
-	Channel      string  `schema:"channel"`      // Select one or more SEED channel codes. Multiple codes are comma-separated.
-	MinLatitude  float64 `schema:"minlatitude"`  // Limit to stations with a latitude larger than or equal to the specified minimum.
-	MaxLatitude  float64 `schema:"maxlatitude"`  // Limit to stations with a latitude smaller than or equal to the specified maximum.
-	MinLongitude float64 `schema:"minlongitude"` // Limit to stations with a longitude larger than or equal to the specified minimum.
-	MaxLongitude float64 `schema:"maxlongitude"` // Limit to stations with a longitude smaller than or equal to the specified maximum.
-	Level        string  `schema:"level"`        // Specify the level of detail for the results.
-	Format       string  `schema:"format"`       // Format of result. Either "xml" or "text".
+	StartTime           Time    `schema:"starttime"`    // Limit to metadata epochs starting on or after the specified start time.
+	EndTime             Time    `schema:"endtime"`      // Limit to metadata epochs ending on or before the specified end time.
+	Network             string  `schema:"network"`      // Select one or more network codes. Can be SEED network codes or data center defined codes. Multiple codes are comma-separated.
+	Station             string  `schema:"station"`      // Select one or more SEED station codes. Multiple codes are comma-separated.
+	Location            string  `schema:"location"`     // Select one or more SEED location identifiers. Multiple identifiers are comma- separated. As a special case “--“ (two dashes) will be translated to a string of two space characters to match blank location IDs.
+	Channel             string  `schema:"channel"`      // Select one or more SEED channel codes. Multiple codes are comma-separated.
+	MinLatitude         float64 `schema:"minlatitude"`  // Limit to stations with a latitude larger than or equal to the specified minimum.
+	MaxLatitude         float64 `schema:"maxlatitude"`  // Limit to stations with a latitude smaller than or equal to the specified maximum.
+	MinLongitude        float64 `schema:"minlongitude"` // Limit to stations with a longitude larger than or equal to the specified minimum.
+	MaxLongitude        float64 `schema:"maxlongitude"` // Limit to stations with a longitude smaller than or equal to the specified maximum.
+	Level               string  `schema:"level"`        // Specify the level of detail for the results.
+	Format              string  `schema:"format"`       // Format of result. Either "xml" or "text".
+	IncludeAvailability bool    `schema:includeavailability`
 }
 
 type fdsnStationV1Search struct {
@@ -219,6 +221,10 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 
 	if p.Level == "response" && p.Format == "text" {
 		return fdsnStationV1Search{}, fmt.Errorf("Text formats are only supported when level is net|sta|cha.")
+	}
+
+	if p.IncludeAvailability {
+		return fdsnStationV1Search{}, errors.New("include availability is not supported.")
 	}
 
 	s := fdsnStationV1Search{
