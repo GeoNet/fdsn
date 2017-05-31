@@ -75,7 +75,7 @@ func TestEventV1Query(t *testing.T) {
 func TestEventV1OrderBy(t *testing.T) {
 	var v url.Values = make(map[string][]string)
 
-	for _, s := range []string{"", "time", "time-asc", "magnitude", "magnitude-asc"} {
+	for _, s := range []string{"time", "time-asc", "magnitude", "magnitude-asc"} {
 		v.Set("orderby", s)
 		_, err := parseEventV1(v)
 		if err != nil {

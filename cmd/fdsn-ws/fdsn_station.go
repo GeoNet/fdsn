@@ -41,6 +41,8 @@ var stationAbbreviations = map[string]string{
 	"maxlat": "maxlatitude",
 	"minlon": "minlongitude",
 	"maxlon": "maxlongitude",
+	"lat":    "latitude",
+	"lon":    "longitude",
 }
 
 // supported query parameters for the station service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
@@ -57,7 +59,9 @@ type fdsnStationV1Parm struct {
 	MaxLongitude        float64 `schema:"maxlongitude"` // Limit to stations with a longitude smaller than or equal to the specified maximum.
 	Level               string  `schema:"level"`        // Specify the level of detail for the results.
 	Format              string  `schema:"format"`       // Format of result. Either "xml" or "text".
-	IncludeAvailability bool    `schema:includeavailability`
+	IncludeAvailability bool    `schema:"includeavailability"`
+	IncludeRestricted   bool    `schema:"includerestricted"`
+	MatchTimeSeries     bool    `schema:"matchtimeseries"`
 }
 
 type fdsnStationV1Search struct {
@@ -84,9 +88,21 @@ var (
 	s3Bucket            string
 	s3Meta              string
 )
+var stationNotSupported = map[string]bool{
+	"startafter":  true,
+	"startbefore": true,
+	"endafter":    true,
+	"endbefore":   true,
+	"latitude":    true,
+	"longitude":   true,
+	"minradius":   true,
+	"maxraduis":   true,
+	"nodata":      true,
+}
 
 func init() {
 	var err error
+
 	fdsnStationWadlFile, err = ioutil.ReadFile("assets/fdsn-ws-station.wadl")
 	if err != nil {
 		log.Printf("error reading assets/fdsn-ws-station.wadl: %s", err.Error())
@@ -184,12 +200,13 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	// All query parameters are optional and float zero values overlap
 	// with possible request ranges so the default is set to the max float val.
 	p := fdsnStationV1Parm{
-		MinLatitude:  math.MaxFloat64,
-		MaxLatitude:  math.MaxFloat64,
-		MinLongitude: math.MaxFloat64,
-		MaxLongitude: math.MaxFloat64,
-		Level:        "station",
-		Format:       "xml",
+		MinLatitude:       math.MaxFloat64,
+		MaxLatitude:       math.MaxFloat64,
+		MinLongitude:      math.MaxFloat64,
+		MaxLongitude:      math.MaxFloat64,
+		Level:             "station",
+		Format:            "xml",
+		IncludeRestricted: true,
 	}
 
 	for abbrev, expanded := range stationAbbreviations {
@@ -203,7 +220,11 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	// Note: Since we're only checking the first occurrence of a parameter,
 	//   so we're not handling "parameter submitted multiple times" - it might pass or fail.
 	// (According to spec 1.1 Page 10 top section)
+
 	for key, val := range v {
+		if _, ok := stationNotSupported[key]; ok {
+			return fdsnStationV1Search{}, fmt.Errorf("\"%s\" is not supported", key)
+		}
 		if len(val[0]) == 0 {
 			return fdsnStationV1Search{}, fmt.Errorf("Invalid %s value", key)
 		}
@@ -225,6 +246,14 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 
 	if p.IncludeAvailability {
 		return fdsnStationV1Search{}, errors.New("include availability is not supported.")
+	}
+
+	if !p.IncludeRestricted {
+		return fdsnStationV1Search{}, errors.New("exclude restricted is not supported.")
+	}
+
+	if p.MatchTimeSeries {
+		return fdsnStationV1Search{}, errors.New("match time series is not supported.")
 	}
 
 	s := fdsnStationV1Search{

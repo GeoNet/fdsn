@@ -24,13 +24,21 @@ var abbreviations = map[string]string{
 	"end":   "endtime",
 }
 
+var dataSelectNotSupported = map[string]bool {
+	"quality":        true,
+	"minuimumlength": true,
+	"nodata":         true,
+}
+
 type DataSelect struct {
-	StartTime Time     `schema:"starttime"` // limit to data on or after the specified start time.
-	EndTime   Time     `schema:"endtime"`   // limit to data on or before the specified end time.
-	Network   []string `schema:"network"`   // network name of data to query
-	Station   []string `schema:"station"`   // station name of data to query
-	Location  []string `schema:"location"`  // location name of data to query
-	Channel   []string `schema:"channel"`   // channel number of data to query
+	StartTime   Time     `schema:"starttime"` // limit to data on or after the specified start time.
+	EndTime     Time     `schema:"endtime"`   // limit to data on or before the specified end time.
+	Network     []string `schema:"network"`   // network name of data to query
+	Station     []string `schema:"station"`   // station name of data to query
+	Location    []string `schema:"location"`  // location name of data to query
+	Channel     []string `schema:"channel"`   // channel number of data to query
+	Format      string   `schema:"format"`
+	LongestOnly bool     `schema:"longestonly"`
 }
 
 type Time struct {
@@ -125,7 +133,9 @@ func ParseDataSelectPost(r io.Reader, d *[]DataSelect) error {
 // ParesDataSelectGet parses the FDSN dataselect parameters in v from a
 // dataselect GET request.
 func ParseDataSelectGet(v url.Values) (DataSelect, error) {
-	e := DataSelect{}
+	e := DataSelect{
+		Format: "miniseed",
+	}
 
 	// convert all abbreviated params to their expanded form
 	for abbrev, expanded := range abbreviations {
@@ -139,7 +149,11 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 	// Note: Since we're only checking the first occurrence of a parameter,
 	//   so we're not handling "parameter submitted multiple times" - it might pass or fail.
 	// (According to spec 1.1 Page 10 top section)
+
 	for key, val := range v {
+		if _, ok := dataSelectNotSupported[key]; ok {
+			return DataSelect{}, fmt.Errorf("\"%s\" is not supported", key)
+		}
 		if len(val[0]) == 0 {
 			return DataSelect{}, fmt.Errorf("Invalid %s value", key)
 		}
@@ -148,6 +162,14 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 	err := decoder.Decode(&e, v)
 	if err != nil {
 		return DataSelect{}, err
+	}
+
+	if e.Format != "miniseed" {
+		return DataSelect{}, fmt.Errorf("Only \"miniseed\" format is supported.")
+	}
+
+	if e.LongestOnly {
+		return DataSelect{}, fmt.Errorf("Query for longest only is not supported.")
 	}
 
 	// Defaults: as per spec we need to include any valid files in the search so use wildcards and broad time range

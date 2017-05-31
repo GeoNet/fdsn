@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/GeoNet/weft"
 	"io/ioutil"
@@ -16,18 +17,22 @@ import (
 
 // supported query parameters for the event service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
 type fdsnEventV1 struct {
-	PublicID     string  `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
-	MinLatitude  float64 `schema:"minlatitude"`  // limit to events with a latitude larger than or equal to the specified minimum.
-	MaxLatitude  float64 `schema:"maxlatitude"`  // limit to events with a latitude smaller than or equal to the specified maximum.
-	MinLongitude float64 `schema:"minlongitude"` // limit to events with a longitude larger than or equal to the specified minimum.
-	MaxLongitude float64 `schema:"maxlongitude"` // limit to events with a longitude smaller than or equal to the specified maximum.
-	MinDepth     float64 `schema:"mindepth"`     // limit to events with depth more than the specified minimum.
-	MaxDepth     float64 `schema:"maxdepth"`     // limit to events with depth less than the specified maximum.
-	MinMagnitude float64 `schema:"minmagnitude"` // limit to events with a magnitude larger than the specified minimum.
-	MaxMagnitude float64 `schema:"maxmagnitude"` // limit to events with a magnitude smaller than the specified maximum.
-	OrderBy      string  `schema:"orderby"`      // order the result by time or magnitude with the following possibilities: time, time-asc, magnitude, magnitude-asc
-	StartTime    Time    `schema:"starttime"`    // limit to events on or after the specified start time.
-	EndTime      Time    `schema:"endtime"`      // limit to events on or before the specified end time.
+	PublicID             string  `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
+	MinLatitude          float64 `schema:"minlatitude"`  // limit to events with a latitude larger than or equal to the specified minimum.
+	MaxLatitude          float64 `schema:"maxlatitude"`  // limit to events with a latitude smaller than or equal to the specified maximum.
+	MinLongitude         float64 `schema:"minlongitude"` // limit to events with a longitude larger than or equal to the specified minimum.
+	MaxLongitude         float64 `schema:"maxlongitude"` // limit to events with a longitude smaller than or equal to the specified maximum.
+	MinDepth             float64 `schema:"mindepth"`     // limit to events with depth more than the specified minimum.
+	MaxDepth             float64 `schema:"maxdepth"`     // limit to events with depth less than the specified maximum.
+	MinMagnitude         float64 `schema:"minmagnitude"` // limit to events with a magnitude larger than the specified minimum.
+	MaxMagnitude         float64 `schema:"maxmagnitude"` // limit to events with a magnitude smaller than the specified maximum.
+	OrderBy              string  `schema:"orderby"`      // order the result by time or magnitude with the following possibilities: time, time-asc, magnitude, magnitude-asc
+	StartTime            Time    `schema:"starttime"`    // limit to events on or after the specified start time.
+	EndTime              Time    `schema:"endtime"`      // limit to events on or before the specified end time.
+	IncludeAllOrigins    bool    `schema:"includeallorigins"`
+	IncludeAllMagnitudes bool    `schema:"includeallmagnitudes"`
+	IncludeArrivals      bool    `schema:"includearrivals"`
+	Format               string  `schema:"format"`
 }
 
 type Time struct {
@@ -36,6 +41,19 @@ type Time struct {
 
 var fdsnEventWadlFile []byte
 var fdsnEventIndex []byte
+var eventNotSupported = map[string]bool{
+	"latitude":      true,
+	"longitude":     true,
+	"minradius":     true,
+	"maxraduis":     true,
+	"magnitudetype": true,
+	"limit":         true,
+	"offset":        true,
+	"catalog":       true,
+	"contributor":   true,
+	"updateafter":   true,
+	"nodata":        true,
+}
 
 func init() {
 	var err error
@@ -91,9 +109,30 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		MaxMagnitude: math.MaxFloat64,
 	}
 
+	for key, val := range v {
+		if _, ok := eventNotSupported[key]; ok {
+			return e, fmt.Errorf("\"%s\" is not supported", key)
+		}
+		if len(val[0]) == 0 {
+			return e, fmt.Errorf("Invalid %s value", key)
+		}
+	}
+
 	err := decoder.Decode(&e, v)
 	if err != nil {
 		return e, err
+	}
+
+	if e.IncludeAllMagnitudes {
+		return e, errors.New("include all magnitudes is not supported.")
+	}
+
+	if e.IncludeAllOrigins {
+		return e, errors.New("include all origins is not supported.")
+	}
+
+	if e.IncludeArrivals {
+		return e, errors.New("include arrivals is not supported.")
 	}
 
 	// geometry bounds checking
