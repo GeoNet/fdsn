@@ -2,8 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"github.com/GeoNet/collect/mseed"
 	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/mseed"
 	"github.com/golang/groupcache"
 	"io"
 	"os"

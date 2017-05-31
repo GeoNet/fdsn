@@ -2,7 +2,7 @@
 package holdings
 
 import (
-	"github.com/GeoNet/collect/mseed"
+	"github.com/GeoNet/kit/mseed"
 	"io"
 	"strings"
 	"time"

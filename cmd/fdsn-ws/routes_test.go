@@ -24,10 +24,6 @@ var routes = wt.Requests{
 	// fdsn-ws-dataselect
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1", Content: "text/html"},
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/version", Content: "text/plain"},
-	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?starttime=2016-01-09T00:00:00&endtime=2016-01-09T23:00:00&network=NZ&station=CHST&location=01&channel=LOG", Content: "application/vnd.fdsn.mseed"},
-	// abbreviated params
-	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?start=2016-01-09T00:00:00&end=2016-01-09T23:00:00&net=NZ&sta=CHST&loc=01&cha=LOG", Content: "application/vnd.fdsn.mseed"},
-	//{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?start=2016-01-09T00:00:00&end=2016-01-09T23:00:00&net=NZ&sta=CHST,ALRZ&loc=01&cha=LOG", Content: "application/vnd.fdsn.mseed"},
 	// an invalid network or no files matching query should give 404 (could also give 204 as per spec)
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?starttime=2016-01-09T00:00:00&endtime=2016-01-09T23:00:00&network=INVALID_NETWORK&station=CHST&location=01&channel=LOG",
 		Content: "text/plain; charset=utf-8",
@@ -38,6 +34,20 @@ var routes = wt.Requests{
 		Status:  http.StatusNoContent},
 	//{ID: wt.L(), URL: "/fdsnws/dataselect/1/query", Content: "text/plain", Status: http.StatusRequestEntityTooLarge},
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/application.wadl", Content: "application/xml"},
+
+	// fdsn-ws-station
+	{ID: wt.L(), URL: "/fdsnws/station/1/version", Content: "text/plain"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/application.wadl", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?minlat=-41&maxlon=177", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00&format=text", Content: "text/plain"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?format=y", Content: "text/plain", Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml", Content: "application/xml"},
+	// supporting the includeavailability parameter is optional.  Some clients send the value `false` which is the default.
+	// allow for this by ignoring includeavailability=false
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml&includeavailability=false", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml&includeavailability=true", Content: "text/plain", Status: http.StatusBadRequest},
 }
 
 // Test all routes give the expected response.  Also check with

@@ -3,8 +3,8 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/GeoNet/collect/mseed"
 	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/mseed"
 	"github.com/GeoNet/weft"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"

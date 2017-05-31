@@ -10,13 +10,6 @@
 			"revisionTime": "2016-12-18T06:52:36Z"
 		},
 		{
-			"checksumSHA1": "FK9YmovqaKyJ+EPY/VGPTpRinis=",
-			"path": "github.com/GeoNet/collect",
-			"revision": "c6de37063633b7519d37bd7f1209f1818429506d",
-			"revisionTime": "2017-03-28T00:46:59Z",
-			"tree": true
-		},
-		{
 			"checksumSHA1": "VFgFU+lG4iAqCPnqak2mZdzIYBo=",
 			"path": "github.com/GeoNet/delta",
 			"revision": "8314a19149c621789d15a6948c310b01249d1191",
@@ -35,10 +28,36 @@
 			"revisionTime": "2016-12-18T06:52:36Z"
 		},
 		{
+			"checksumSHA1": "W53yVzxaesOkxQIM0QhIT6SUdBc=",
+			"path": "github.com/GeoNet/kit/cvendor/libmseed",
+			"revision": "2c00bd8989f810e3c3746c01cda4bcfc1bb1f559",
+			"revisionTime": "2017-05-29T05:10:37Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "QFCqVtG2kWcWgQ1zUwn8zlvOKMs=",
+			"path": "github.com/GeoNet/kit/cvendor/libslink",
+			"revision": "2c00bd8989f810e3c3746c01cda4bcfc1bb1f559",
+			"revisionTime": "2017-05-29T05:10:37Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "EiYTGjWEG36hVCdQ8uFNJpxzepw=",
+			"path": "github.com/GeoNet/kit/mseed",
+			"revision": "2c00bd8989f810e3c3746c01cda4bcfc1bb1f559",
+			"revisionTime": "2017-05-29T05:10:37Z"
+		},
+		{
 			"checksumSHA1": "3JsW/vlMhZWOm9tAS+ZoOYUy8aQ=",
 			"path": "github.com/GeoNet/kit/sc3ml",
 			"revision": "2f9da4f307c2035e47546391da8701a642fc9598",
 			"revisionTime": "2017-02-06T08:02:36Z"
+		},
+		{
+			"checksumSHA1": "2+qgbnzd5tfpcwZols7hyOQjzu8=",
+			"path": "github.com/GeoNet/kit/slink",
+			"revision": "2c00bd8989f810e3c3746c01cda4bcfc1bb1f559",
+			"revisionTime": "2017-05-29T05:10:37Z"
 		},
 		{
 			"checksumSHA1": "FcAtIa3dCgJBin+SrFiTOEU/bsA=",

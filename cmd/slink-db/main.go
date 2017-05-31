@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"database/sql"
-	"github.com/GeoNet/collect/mseed"
-	"github.com/GeoNet/collect/slink"
 	"github.com/GeoNet/fdsn/internal/kit/cfg"
+	"github.com/GeoNet/kit/mseed"
+	"github.com/GeoNet/kit/slink"
 	"github.com/GeoNet/mtr/mtrapp"
 	"os"
 	"strings"

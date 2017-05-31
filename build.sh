@@ -57,8 +57,8 @@ do
 		-v "$PWD":/usr/src/go/src/github.com/GeoNet/${CWD} \
 		-w /usr/src/go/src/github.com/GeoNet/${CWD} ${BUILD_CONTAINER} \
 		/bin/ash -c "apk add --update ca-certificates tzdata gcc make musl-dev && \
-				     make -B -C /usr/src/go/src/github.com/GeoNet/${CWD}/vendor/github.com/GeoNet/collect/cvendor/libmseed && \
-				     make -B -C /usr/src/go/src/github.com/GeoNet/${CWD}/vendor/github.com/GeoNet/collect/cvendor/libslink && \
+				     make -B -C /usr/src/go/src/github.com/GeoNet/${CWD}/vendor/github.com/GeoNet/kit/cvendor/libmseed && \
+				     make -B -C /usr/src/go/src/github.com/GeoNet/${CWD}/vendor/github.com/GeoNet/kit/cvendor/libslink && \
 		             go install -a -ldflags \"-X main.Prefix=${i}/${VERSION} -extldflags -static\" -installsuffix cgo ./cmd/${i}"
 
 		rm -rf $DOCKER_TMP/assets
