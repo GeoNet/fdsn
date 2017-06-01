@@ -84,7 +84,7 @@ func (t *Time) UnmarshalText(text []byte) (err error) {
 		return fmt.Errorf("invalid time format: %s", s)
 	}
 
-	if l >= 19 && l <= 26 && l!=20 {	// length 20: "YYYY-MM-DDTHH:MM:SS." invalid
+	if l >= 19 && l <= 26 && l != 20 { // length 20: "YYYY-MM-DDTHH:MM:SS." invalid
 		s = s + ".000000000Z"[(l-19):] // "YYYY-MM-DDTHH:MM:SS" append to nano
 	} else if l == 10 {
 		s = s + "T00:00:00.000000000Z" // YYYY-MM-DD
