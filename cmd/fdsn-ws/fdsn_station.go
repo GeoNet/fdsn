@@ -47,21 +47,21 @@ var stationAbbreviations = map[string]string{
 
 // supported query parameters for the station service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
 type fdsnStationV1Parm struct {
-	StartTime           Time    `schema:"starttime"`    // Limit to metadata epochs starting on or after the specified start time.
-	EndTime             Time    `schema:"endtime"`      // Limit to metadata epochs ending on or before the specified end time.
-	Network             string  `schema:"network"`      // Select one or more network codes. Can be SEED network codes or data center defined codes. Multiple codes are comma-separated.
-	Station             string  `schema:"station"`      // Select one or more SEED station codes. Multiple codes are comma-separated.
-	Location            string  `schema:"location"`     // Select one or more SEED location identifiers. Multiple identifiers are comma- separated. As a special case “--“ (two dashes) will be translated to a string of two space characters to match blank location IDs.
-	Channel             string  `schema:"channel"`      // Select one or more SEED channel codes. Multiple codes are comma-separated.
-	MinLatitude         float64 `schema:"minlatitude"`  // Limit to stations with a latitude larger than or equal to the specified minimum.
-	MaxLatitude         float64 `schema:"maxlatitude"`  // Limit to stations with a latitude smaller than or equal to the specified maximum.
-	MinLongitude        float64 `schema:"minlongitude"` // Limit to stations with a longitude larger than or equal to the specified minimum.
-	MaxLongitude        float64 `schema:"maxlongitude"` // Limit to stations with a longitude smaller than or equal to the specified maximum.
-	Level               string  `schema:"level"`        // Specify the level of detail for the results.
-	Format              string  `schema:"format"`       // Format of result. Either "xml" or "text".
-	IncludeAvailability bool    `schema:"includeavailability"`
-	IncludeRestricted   bool    `schema:"includerestricted"`
-	MatchTimeSeries     bool    `schema:"matchtimeseries"`
+	StartTime           Time     `schema:"starttime"`    // Limit to metadata epochs starting on or after the specified start time.
+	EndTime             Time     `schema:"endtime"`      // Limit to metadata epochs ending on or before the specified end time.
+	Network             []string `schema:"network"`      // Select one or more network codes. Can be SEED network codes or data center defined codes. Multiple codes are comma-separated.
+	Station             []string `schema:"station"`      // Select one or more SEED station codes. Multiple codes are comma-separated.
+	Location            []string `schema:"location"`     // Select one or more SEED location identifiers. Multiple identifiers are comma- separated. As a special case “--“ (two dashes) will be translated to a string of two space characters to match blank location IDs.
+	Channel             []string `schema:"channel"`      // Select one or more SEED channel codes. Multiple codes are comma-separated.
+	MinLatitude         float64  `schema:"minlatitude"`  // Limit to stations with a latitude larger than or equal to the specified minimum.
+	MaxLatitude         float64  `schema:"maxlatitude"`  // Limit to stations with a latitude smaller than or equal to the specified maximum.
+	MinLongitude        float64  `schema:"minlongitude"` // Limit to stations with a longitude larger than or equal to the specified minimum.
+	MaxLongitude        float64  `schema:"maxlongitude"` // Limit to stations with a longitude smaller than or equal to the specified maximum.
+	Level               string   `schema:"level"`        // Specify the level of detail for the results.
+	Format              string   `schema:"format"`       // Format of result. Either "xml" or "text".
+	IncludeAvailability bool     `schema:"includeavailability"`
+	IncludeRestricted   bool     `schema:"includerestricted"`
+	MatchTimeSeries     bool     `schema:"matchtimeseries"`
 }
 
 type fdsnStationV1Search struct {
@@ -723,15 +723,14 @@ func levelValue(level string) (int, error) {
 	}
 }
 
-func genRegex(input string, emptyDash bool) []string {
+func genRegex(input []string, emptyDash bool) []string {
 	if len(input) == 0 {
 		return nil
 	}
 
-	tokens := strings.Split(input, ",")
-	result := make([]string, len(tokens))
+	result := make([]string, len(input))
 
-	for i, s := range tokens {
+	for i, s := range input {
 		// turn "EH*" into "^EH.*$"
 		if emptyDash && s == "--" {
 			// "--" represents empty
