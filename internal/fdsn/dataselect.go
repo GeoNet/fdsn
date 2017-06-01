@@ -24,7 +24,7 @@ var abbreviations = map[string]string{
 	"end":   "endtime",
 }
 
-var dataSelectNotSupported = map[string]bool {
+var dataSelectNotSupported = map[string]bool{
 	"quality":        true,
 	"minuimumlength": true,
 	"nodata":         true,
@@ -68,18 +68,19 @@ Implements the encoding.TextUnmarshaler interface.
 */
 func (t *Time) UnmarshalText(text []byte) (err error) {
 	s := string(text)
-
-	switch len(s) {
-	case 26:
-		s = s + "000Z" // YYYY-MM-DDTHH:MM:SS.ssssss
-	case 19:
-		s = s + ".000000000Z" // YYYY-MM-DDTHH:MM:SS
-	case 10:
-		s = s + "T00:00:00.000000000Z" // YYYY-MM-DD
-	default:
+	l := len(s)
+	if len(s) < 10 {
 		return fmt.Errorf("invalid time format: %s", s)
 	}
 
+
+	if l >= 19 && l <= 26 && l!=20 {	// length 20: "YYYY-MM-DDTHH:MM:SS." invalid
+		s = s + ".000000000Z"[(l-19):] // "YYYY-MM-DDTHH:MM:SS" append to nano
+	} else if l == 10 {
+		s = s + "T00:00:00.000000000Z" // YYYY-MM-DD
+	} else {
+		return fmt.Errorf("invalid time format: %s", s)
+	}
 	t.Time, err = time.Parse(time.RFC3339Nano, s)
 	return
 }
