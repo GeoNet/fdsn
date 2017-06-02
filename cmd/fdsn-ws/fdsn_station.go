@@ -207,6 +207,8 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		Level:             "station",
 		Format:            "xml",
 		IncludeRestricted: true,
+		StartTime:         Time{zeroDateTime},	// 0001-01-01T00:00:00
+		EndTime:           Time{emptyDateTime},	// 9999-01-01T00:00:00
 	}
 
 	for abbrev, expanded := range stationAbbreviations {
@@ -242,6 +244,10 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 
 	if p.Level == "response" && p.Format == "text" {
 		return fdsnStationV1Search{}, fmt.Errorf("Text formats are only supported when level is net|sta|cha.")
+	}
+
+	if p.StartTime.Time.After(p.EndTime.Time) {
+		return fdsnStationV1Search{}, errors.New("Invalid time range.")
 	}
 
 	if p.IncludeAvailability {
@@ -596,11 +602,12 @@ func (v fdsnStationV1Search) validStartEnd(start, end time.Time, level int) bool
 		return true
 	}
 
-	if !v.StartTime.Time.IsZero() && !start.IsZero() && time.Time(start).Before(v.StartTime.Time) {
+	// For start/end, the "no-value" could be "0001-01-01T00:00:00" or "9999-01-01T00:00:00"
+	if !end.IsZero() && v.StartTime.Time.After(end) {
 		return false
 	}
 
-	if !v.EndTime.Time.IsZero() && !end.IsZero() && time.Time(end).After(v.EndTime.Time) {
+	if !start.Equal(emptyDateTime) && v.EndTime.Time.Before(start) {
 		return false
 	}
 	return true
