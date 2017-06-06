@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid"
 	"github.com/GeoNet/fdsn/internal/kit/s3"
 	"github.com/GeoNet/weft"
 	"io"
@@ -62,6 +63,10 @@ type fdsnStationV1Parm struct {
 	IncludeAvailability bool     `schema:"includeavailability"`
 	IncludeRestricted   bool     `schema:"includerestricted"`
 	MatchTimeSeries     bool     `schema:"matchtimeseries"`
+	Latitude            float64  `schema:"latitude`
+	Longitude           float64  `schema:"longitude"`
+	MinRadius           float64  `schema:"minradius"`
+	MaxRadius           float64  `schema:"maxradius"`
 }
 
 type fdsnStationV1Search struct {
@@ -87,21 +92,19 @@ var (
 	errNotModified      = fmt.Errorf("Not modified.")
 	s3Bucket            string
 	s3Meta              string
+	geo                 ellipsoid.Ellipsoid
 )
 var stationNotSupported = map[string]bool{
 	"startafter":  true,
 	"startbefore": true,
 	"endafter":    true,
 	"endbefore":   true,
-	"latitude":    true,
-	"longitude":   true,
-	"minradius":   true,
-	"maxraduis":   true,
 	"nodata":      true,
 }
 
 func init() {
 	var err error
+	geo = ellipsoid.Init("WGS84", ellipsoid.Degrees, ellipsoid.Kilometer, ellipsoid.LongitudeIsSymmetric, ellipsoid.BearingNotSymmetric)
 
 	fdsnStationWadlFile, err = ioutil.ReadFile("assets/fdsn-ws-station.wadl")
 	if err != nil {
@@ -207,8 +210,12 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		Level:             "station",
 		Format:            "xml",
 		IncludeRestricted: true,
-		StartTime:         Time{zeroDateTime},	// 0001-01-01T00:00:00
-		EndTime:           Time{emptyDateTime},	// 9999-01-01T00:00:00
+		StartTime:         Time{zeroDateTime},  // 0001-01-01T00:00:00
+		EndTime:           Time{emptyDateTime}, // 9999-01-01T00:00:00
+		Latitude:          math.MaxFloat64,
+		Longitude:         math.MaxFloat64,
+		MinRadius:         math.MaxFloat64,
+		MaxRadius:         math.MaxFloat64,
 	}
 
 	for abbrev, expanded := range stationAbbreviations {
@@ -294,6 +301,34 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	if p.MaxLongitude != math.MaxFloat64 && p.MaxLongitude > 180.0 {
 		err = fmt.Errorf("maxlongitude > 180.0: %f", p.MaxLongitude)
 		return s, err
+	}
+
+	// Now validate longitude, latitude, and radius
+	if p.Longitude != math.MaxFloat64 || p.Latitude != math.MaxFloat64 {
+		if p.Longitude == math.MaxFloat64 || p.Latitude == math.MaxFloat64 {
+			err = fmt.Errorf("parameter latitude and longitude must both present.")
+			return s, err
+		}
+
+		if p.Longitude > 180.0 || p.Longitude < -180.0 {
+			err = fmt.Errorf("invalid longitude value: %f", p.Longitude)
+			return s, err
+		}
+
+		if p.Latitude > 90.0 || p.Latitude < -90.0 {
+			err = fmt.Errorf("invalid latitude value: %f", p.Latitude)
+			return s, err
+		}
+
+		if p.MaxRadius == math.MaxFloat64 && p.MinRadius == math.MaxFloat64 {
+			err = fmt.Errorf("minradius or maxradius must present for latitude/longitude query.")
+			return s, err
+		}
+
+		if p.MinRadius!=math.MaxFloat64 && p.MinRadius>p.MaxRadius {
+			err = fmt.Errorf("minradius or maxradius range error.")
+			return s, err
+		}
 	}
 
 	return s, err
@@ -550,7 +585,9 @@ func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
 		if !p.validLatLng(s.Latitude.Value, s.Longitude.Value) {
 			continue
 		}
-
+		if !p.validBounding(s.Latitude.Value, s.Longitude.Value) {
+			continue
+		}
 		matchedParams = append(matchedParams, p)
 	}
 
@@ -591,6 +628,9 @@ func (c *ChannelType) doFilter(params []fdsnStationV1Search) bool {
 		if !p.validLatLng(c.Latitude.Value, c.Longitude.Value) {
 			continue
 		}
+		if !p.validBounding(c.Latitude.Value, c.Longitude.Value) {
+			continue
+		}
 		return true
 	}
 
@@ -627,6 +667,24 @@ func (v fdsnStationV1Search) validLatLng(latitude, longitude float64) bool {
 	}
 
 	if v.MaxLongitude != math.MaxFloat64 && longitude > v.MaxLongitude {
+		return false
+	}
+
+	return true
+}
+
+func (v fdsnStationV1Search) validBounding(latitude, longitude float64) bool {
+	if v.Latitude == math.MaxFloat64 {
+		// not using bounding circle
+		return true
+	}
+
+	d, _ := geo.To(v.Latitude, v.Longitude, latitude, longitude)
+
+	if v.MinRadius != math.MaxFloat64 && d < v.MinRadius {
+		return false
+	}
+	if v.MaxRadius != math.MaxFloat64 && d > v.MaxRadius {
 		return false
 	}
 

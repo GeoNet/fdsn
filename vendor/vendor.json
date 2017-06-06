@@ -84,6 +84,12 @@
 			"revisionTime": "2017-03-28T04:04:15Z"
 		},
 		{
+			"checksumSHA1": "ghXMRHH7SQBQr28kX4LYXSY2P1o=",
+			"path": "github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid",
+			"revision": "8fa6ccb8ea661b7d37e95abcb5b30a3405f8ab7c",
+			"revisionTime": "2016-08-19T07:40:24Z"
+		},
+		{
 			"checksumSHA1": "AABXmJ/z1892mbei9/UWUHIf+Wg=",
 			"path": "github.com/aws/aws-sdk-go/aws",
 			"revision": "0bbc97afc1bd36f23958f2f26764ecf0253834bd",

@@ -108,6 +108,39 @@ func TestStationFilter(t *testing.T) {
 		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
 	}
 
+	// latlng radius matching
+	c = *fdsnStations.fdsn
+	v = make(map[string][]string)
+	v.Set("latitude", "-38.6")
+	v.Set("longitude", "176.1")
+	v.Set("minradius", "1")
+	v.Set("maxradius", "20")
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+	c.doFilter([]fdsnStationV1Search{e})
+	if len(c.Network) != 1 {
+		t.Errorf("Incorrect filter result. No valid record.")
+	}
+
+	if len(c.Network[0].Station) != 1 {
+		t.Errorf("Incorrect filter result. Expect 1 got %d", len(c.Network[0].Station))
+	}
+
+	if len(c.Network[0].Station[0].Channel) != 6 {
+		t.Errorf("Incorrect filter result. Expect 6 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+	// test if minradius works
+	v.Set("minradius", "10")
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+	c.doFilter([]fdsnStationV1Search{e})
+	if len(c.Network) != 0 {
+		t.Errorf("Incorrect filter result. Expected no record but got %d.", len(c.Network))
+	}
+
 	// Simulates POST Test.
 	// The spaces between fields should be ignored.
 	postBody := `level=   channel
