@@ -6,9 +6,9 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid"
 	"github.com/GeoNet/fdsn/internal/kit/s3"
 	"github.com/GeoNet/weft"
+	"github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid"
 	"io"
 	"io/ioutil"
 	"log"
@@ -29,6 +29,7 @@ const (
 	STATION_LEVEL_CHANNEL   = 2
 	STATION_LEVEL_RESPONSE  = 3
 	DEFAULT_RELOAD_INTERVAL = 300
+	NZ_KM_DEGREE            = 111.0
 )
 
 var stationAbbreviations = map[string]string{
@@ -104,6 +105,7 @@ var stationNotSupported = map[string]bool{
 
 func init() {
 	var err error
+
 	geo = ellipsoid.Init("WGS84", ellipsoid.Degrees, ellipsoid.Kilometer, ellipsoid.LongitudeIsSymmetric, ellipsoid.BearingNotSymmetric)
 
 	fdsnStationWadlFile, err = ioutil.ReadFile("assets/fdsn-ws-station.wadl")
@@ -214,8 +216,8 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		EndTime:           Time{emptyDateTime}, // 9999-01-01T00:00:00
 		Latitude:          math.MaxFloat64,
 		Longitude:         math.MaxFloat64,
-		MinRadius:         math.MaxFloat64,
-		MaxRadius:         math.MaxFloat64,
+		MinRadius:         0.0,
+		MaxRadius:         180.0,
 	}
 
 	for abbrev, expanded := range stationAbbreviations {
@@ -320,12 +322,17 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 			return s, err
 		}
 
-		if p.MaxRadius == math.MaxFloat64 && p.MinRadius == math.MaxFloat64 {
-			err = fmt.Errorf("minradius or maxradius must present for latitude/longitude query.")
+		if p.MaxRadius < 0 || p.MaxRadius > 180.0 {
+			err = fmt.Errorf("invalid maxradius value.")
 			return s, err
 		}
 
-		if p.MinRadius!=math.MaxFloat64 && p.MinRadius>p.MaxRadius {
+		if p.MinRadius < 0 || p.MinRadius > 180.0 {
+			err = fmt.Errorf("invalid minradius value.")
+			return s, err
+		}
+
+		if p.MinRadius > p.MaxRadius {
 			err = fmt.Errorf("minradius or maxradius range error.")
 			return s, err
 		}
@@ -680,11 +687,12 @@ func (v fdsnStationV1Search) validBounding(latitude, longitude float64) bool {
 	}
 
 	d, _ := geo.To(v.Latitude, v.Longitude, latitude, longitude)
+	d = d / NZ_KM_DEGREE
 
-	if v.MinRadius != math.MaxFloat64 && d < v.MinRadius {
+	if d < v.MinRadius {
 		return false
 	}
-	if v.MaxRadius != math.MaxFloat64 && d > v.MaxRadius {
+	if d > v.MaxRadius {
 		return false
 	}
 
