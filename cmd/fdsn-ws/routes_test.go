@@ -50,6 +50,9 @@ var routes = wt.Requests{
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00&format=text", Content: "text/plain"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?format=y", Content: "text/plain", Status: http.StatusBadRequest},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?lat=-38.6&lon=176.1", Content: "text/plain", Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?lat=-38.6&lon=176.1&maxradius=100", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?lat=-38.6&lon=176.1&maxradius=100&minradius=1", Content: "application/xml"},
 	// supporting the includeavailability parameter is optional.  Some clients send the value `false` which is the default.
 	// allow for this by ignoring includeavailability=false
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml&includeavailability=false", Content: "application/xml"},
