@@ -7,7 +7,7 @@ cmd/fdsn-ws-nrt/fdsn-ws-nrt
 cmd/fdsn-ws-event-loader/fdsn-ws-event-loader
 cmd/fdsn-holdings-consumer/fdsn-holdings-consumer
 cmd/fdsn-ws-holdings-loader/fdsn-ws-holdings-loader
-cmd/slink-db/slink-db
+cmd/fdns-slink-db/fdns-slink-db
 cmd/slink-strong-db/slink-strong-db
 *.o
 *.a

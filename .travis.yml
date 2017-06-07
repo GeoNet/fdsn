@@ -38,6 +38,6 @@ script:
 deploy:
    - provider: script
      skip_cleanup: true
-     script: ./build-push.sh fdsn-quake-consumer fdsn-ws fdsn-holdings-consumer fdsn-ws-nrt slink-db
+     script: ./build-push.sh fdsn-quake-consumer fdsn-ws fdsn-holdings-consumer fdsn-ws-nrt fdsn-slink-db
      on: 
        branch: master 

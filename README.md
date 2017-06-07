@@ -38,7 +38,7 @@ NZ ALRZ 10 B?  2017-01-09T00:00:00 2017-01-10T00:00:00
 Federation of Digital Seismic Networks (FDSN) Web Services (FDSN-WS) http://www.fdsn.org/webservices/ For 
 near real time data from a Postgres database.
 
-### slink-db
+### fdsn-slink-db
 
 Listens to a SEEDLink server and saves miniSEED records to a Postgres database.
 
