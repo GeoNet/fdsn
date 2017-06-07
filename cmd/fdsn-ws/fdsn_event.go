@@ -33,6 +33,10 @@ type fdsnEventV1 struct {
 	IncludeAllMagnitudes bool    `schema:"includeallmagnitudes"`
 	IncludeArrivals      bool    `schema:"includearrivals"`
 	Format               string  `schema:"format"`
+	Latitude             float64 `schema:"latitude`
+	Longitude            float64 `schema:"longitude"`
+	MinRadius            float64 `schema:"minradius"`
+	MaxRadius            float64 `schema:"maxradius"`
 }
 
 type Time struct {
@@ -42,10 +46,6 @@ type Time struct {
 var fdsnEventWadlFile []byte
 var fdsnEventIndex []byte
 var eventNotSupported = map[string]bool{
-	"latitude":      true,
-	"longitude":     true,
-	"minradius":     true,
-	"maxraduis":     true,
 	"magnitudetype": true,
 	"limit":         true,
 	"offset":        true,
@@ -107,6 +107,10 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		MaxDepth:     math.MaxFloat64,
 		MinMagnitude: math.MaxFloat64,
 		MaxMagnitude: math.MaxFloat64,
+		Latitude:     math.MaxFloat64,
+		Longitude:    math.MaxFloat64,
+		MinRadius:    0.0,
+		MaxRadius:    180.0,
 	}
 
 	for key, val := range v {
@@ -154,6 +158,39 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 	if e.MaxLongitude != math.MaxFloat64 && e.MaxLongitude > 180.0 {
 		err = fmt.Errorf("maxlongitude > 180.0: %f", e.MaxLongitude)
 		return e, err
+	}
+
+	// Now validate longitude, latitude, and radius
+	if e.Longitude != math.MaxFloat64 || e.Latitude != math.MaxFloat64 {
+		if e.Longitude == math.MaxFloat64 || e.Latitude == math.MaxFloat64 {
+			err = fmt.Errorf("parameter latitude and longitude must both present.")
+			return e, err
+		}
+
+		if e.Longitude > 180.0 || e.Longitude < -180.0 {
+			err = fmt.Errorf("invalid longitude value: %f", e.Longitude)
+			return e, err
+		}
+
+		if e.Latitude > 90.0 || e.Latitude < -90.0 {
+			err = fmt.Errorf("invalid latitude value: %f", e.Latitude)
+			return e, err
+		}
+
+		if e.MaxRadius < 0 || e.MaxRadius > 180.0 {
+			err = fmt.Errorf("invalid maxradius value.")
+			return e, err
+		}
+
+		if e.MinRadius < 0 || e.MinRadius > 180.0 {
+			err = fmt.Errorf("invalid minradius value.")
+			return e, err
+		}
+
+		if e.MinRadius > e.MaxRadius {
+			err = fmt.Errorf("minradius or maxradius range error.")
+			return e, err
+		}
 	}
 
 	switch e.OrderBy {
@@ -274,6 +311,18 @@ func (e *fdsnEventV1) filter() (q string, args []interface{}) {
 		q = fmt.Sprintf("%s origintime <= $%d AND", q, i)
 		args = append(args, e.EndTime.Time)
 		i++
+	}
+
+	if e.MaxRadius != 180.0 {
+		q = fmt.Sprintf("%s ST_Distance(origin_geom::GEOMETRY, ST_SetSRID(ST_Makepoint($%d, $%d), 4326)) <= $%d AND", q, i, i+1, i+2)
+		args = append(args, e.Longitude, e.Latitude, e.MaxRadius)
+		i += 3
+	}
+
+	if e.MinRadius != 0.0 {
+		q = fmt.Sprintf("%s ST_Distance(origin_geom::GEOMETRY, ST_SetSRID(ST_Makepoint($%d, $%d), 4326)) >= $%d AND", q, i, i+1, i+2)
+		args = append(args, e.Longitude, e.Latitude, e.MinRadius)
+		i += 3
 	}
 
 	q = strings.TrimSuffix(q, " AND")

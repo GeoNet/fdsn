@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"math"
 	"net/url"
 	"reflect"
 	"testing"
@@ -22,6 +24,10 @@ func TestEventV1Query(t *testing.T) {
 	v.Set("starttime", "2015-01-12T12:12:12")
 	v.Set("endtime", "2015-02-12T12:12:12")
 	v.Set("orderby", "time")
+	v.Set("latitude", fmt.Sprintf("%f", math.MaxFloat64))
+	v.Set("longitude", fmt.Sprintf("%f", math.MaxFloat64))
+	v.Set("maxradius", "180")
+	v.Set("minradius", "0")
 
 	e, err := parseEventV1(v)
 	if err != nil {
@@ -39,6 +45,10 @@ func TestEventV1Query(t *testing.T) {
 		MinMagnitude: 2.4,
 		MaxMagnitude: 6.4,
 		OrderBy:      "time",
+		Latitude:     math.MaxFloat64,
+		Longitude:    math.MaxFloat64,
+		MaxRadius:    180.0,
+		MinRadius:    0.0,
 	}
 
 	ex.StartTime.Time, err = time.Parse(time.RFC3339Nano, "2015-01-12T12:12:12.000000000Z")
@@ -204,5 +214,66 @@ func TestEventGeomBounds(t *testing.T) {
 		if err == nil {
 			t.Errorf("expected geom bounds error for %s %s", q.k, q.v)
 		}
+	}
+}
+
+func TestEventBoundingRadius(t *testing.T) {
+	setup(t)
+	defer teardown()
+
+	var v url.Values
+	v = make(map[string][]string)
+
+	// test against record: (-40.57806609, 176.3257242)
+	v.Set("latitude", "-41.57806609") // 1 degree diff in lat
+	v.Set("longitude", "176.3257242")
+
+	// test range : < 2.0
+	v.Set("maxradius", "2.0")
+	e, err := parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err := e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 1 {
+		t.Errorf("expected 1 record got %d.", c)
+	}
+
+	// test range 1.1 ~ 2.0
+	v.Set("minradius", "1.1")
+	e, err = parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err = e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 0 {
+		t.Errorf("expected 0 record got %d.", c)
+	}
+
+	// test range 0.9 ~ 0.99
+	v.Set("maxradius", "0.99")
+	v.Set("minradius", "0.9")
+	e, err = parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err = e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 0 {
+		t.Errorf("expected 0 record got %d.", c)
 	}
 }
