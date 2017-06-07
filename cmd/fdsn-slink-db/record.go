@@ -14,7 +14,8 @@ const (
 type record struct {
 	network, station, channel, location string
 	start                               time.Time
-	latency                             float64
+	latency_tx                          float64 // the transmission latency
+	latency_data                        float64 // the data latency
 	raw                                 []byte
 }
 
@@ -22,7 +23,7 @@ type record struct {
 // slink can deliver duplicate packets and there may be multiple consumers
 // this can cause races on updating the DB which are handled.
 func (a *app) saveRecord(r record) error {
-	n, err := a.saveRecordStmt.Exec(r.network, r.station, r.channel, r.location, r.start, r.raw, r.latency)
+	n, err := a.saveRecordStmt.Exec(r.network, r.station, r.channel, r.location, r.start, r.raw, r.latency_tx, r.latency_data)
 	if err != nil {
 		if u, ok := err.(*pq.Error); ok && u.Code == errorUniqueViolation {
 			// it is not an error if the record already exists.
@@ -54,7 +55,7 @@ func (a *app) saveRecord(r record) error {
 	}
 
 	// try to save the record again.
-	n, err = a.saveRecordStmt.Exec(r.network, r.station, r.channel, r.location, r.start, r.raw, r.latency)
+	n, err = a.saveRecordStmt.Exec(r.network, r.station, r.channel, r.location, r.start, r.raw, r.latency_tx, r.latency_data)
 	if err != nil {
 		if u, ok := err.(*pq.Error); ok && u.Code == errorUniqueViolation {
 			return nil

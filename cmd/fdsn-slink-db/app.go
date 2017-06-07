@@ -43,8 +43,8 @@ func (a *app) initDB() error {
 		break
 	}
 
-	a.saveRecordStmt, err = a.db.Prepare(`INSERT INTO fdsn.record (streamPK, start_time, raw, latency)
-	SELECT streamPK, $5, $6, $7
+	a.saveRecordStmt, err = a.db.Prepare(`INSERT INTO fdsn.record (streamPK, start_time, raw, latency_tx, latency_data)
+	SELECT streamPK, $5, $6, $7, $8
 	FROM fdsn.stream
 	WHERE network = $1
 	AND station = $2
@@ -78,13 +78,14 @@ func (a *app) save(inbound chan []byte) {
 
 			for {
 				err = a.saveRecord(record{
-					network:  strings.Trim(msr.Network(), "\x00"),
-					station:  strings.Trim(msr.Station(), "\x00"),
-					channel:  strings.Trim(msr.Channel(), "\x00"),
-					location: strings.Trim(msr.Location(), "\x00"),
-					start:    msr.Starttime(),
-					latency:  time.Now().UTC().Sub(msr.Endtime()).Seconds(),
-					raw:      b,
+					network:      strings.Trim(msr.Network(), "\x00"),
+					station:      strings.Trim(msr.Station(), "\x00"),
+					channel:      strings.Trim(msr.Channel(), "\x00"),
+					location:     strings.Trim(msr.Location(), "\x00"),
+					start:        msr.Starttime(),
+					latency_tx:   time.Now().UTC().Sub(msr.Endtime()).Seconds(),
+					latency_data: time.Now().UTC().Sub(msr.Starttime()).Seconds(),
+					raw:          b,
 				})
 				if err != nil {
 					log.Printf("error saving record sleeping and trying again: %s", err)
