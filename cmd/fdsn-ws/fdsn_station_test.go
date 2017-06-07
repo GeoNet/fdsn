@@ -113,8 +113,8 @@ func TestStationFilter(t *testing.T) {
 	v = make(map[string][]string)
 	v.Set("latitude", "-38.6")
 	v.Set("longitude", "176.1")
-	v.Set("minradius", "1")
-	v.Set("maxradius", "20")
+	v.Set("maxradius", "0.5")
+
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
 	}
@@ -132,7 +132,7 @@ func TestStationFilter(t *testing.T) {
 	}
 
 	// test if minradius works
-	v.Set("minradius", "10")
+	v.Set("minradius", "0.1")
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
 	}
