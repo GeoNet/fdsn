@@ -5,80 +5,33 @@ slink-ws connects to a SEEDLink server and saves records to a postgres DB.
 */
 
 import (
-	_ "github.com/lib/pq"
-	"log"
-	"time"
-
-	"database/sql"
-	"github.com/GeoNet/fdsn/internal/kit/cfg"
-	"github.com/GeoNet/kit/mseed"
 	"github.com/GeoNet/kit/slink"
 	"github.com/GeoNet/mtr/mtrapp"
+	_ "github.com/lib/pq"
+	"log"
 	"os"
-	"strings"
+	"time"
 )
 
-var db *sql.DB
-var saveRecord *sql.Stmt
-
 func main() {
-	p, err := cfg.PostgresEnv()
+	var a app
+
+	err := a.initDB()
 	if err != nil {
-		log.Fatalf("error reading DB config from the environment vars: %s", err)
+		log.Fatal(err)
 	}
-
-	db, err = sql.Open("postgres", p.Connection())
-	if err != nil {
-		log.Fatalf("error with DB config: %s", err)
-	}
-	defer db.Close()
-
-	db.SetMaxIdleConns(p.MaxIdle)
-	db.SetMaxOpenConns(p.MaxOpen)
-
-ping:
-	for {
-		err = db.Ping()
-		if err != nil {
-			log.Printf("problem pinging DB - is it up and contactable: %s", err.Error())
-			log.Print("sleeping and waiting for DB")
-			time.Sleep(time.Second * 10)
-			continue ping
-		}
-		break ping
-	}
-
-stmt:
-	for {
-		saveRecord, err = db.Prepare(`INSERT INTO fdsn.record (streamPK, start_time, raw, latency)
-	SELECT streamPK, $5, $6, $7
-	FROM fdsn.stream
-	WHERE network = $1
-	AND station = $2
-	AND channel = $3
-	AND location = $4`)
-		if err != nil {
-			log.Printf("preparing statement: %s", err)
-			log.Print("sleeping and trying to prepare statement again")
-			time.Sleep(time.Second * 10)
-			continue stmt
-		}
-		break stmt
-	}
-	defer saveRecord.Close()
+	defer a.close()
 
 	// buffered chan to allow for DB back pressure.
 	// Allows ~ 10-12 minutes of records.
 	process := make(chan []byte, 200000)
 
-	// run as many consumers from process as there are connections in the DB pool.  Tune this
-	// so that the process chan doesn't fill up in normal operations.
-	for i := 0; i <= p.MaxOpen; i++ {
-		go save(process)
+	/// run as many consumers for process as there are connections in the DB pool.
+	for i := 0; i <= a.maxOpen; i++ {
+		go a.save(process)
 	}
 
-	// delete old data from DB
-	go expire()
+	go a.expire()
 
 	// TODO request old data?
 
@@ -123,8 +76,7 @@ recv:
 				case process <- p.GetMSRecord():
 					mtrapp.MsgRx.Inc()
 				default:
-					mtrapp.MsgErr.Inc()
-					log.Fatal("process chan full.")
+					log.Fatal("process chan full, exiting")
 				}
 			}
 			last = time.Now()
@@ -136,57 +88,4 @@ recv:
 	}
 
 	log.Println("ERROR: unexpected exit")
-}
-
-func save(inbound chan []byte) {
-	msr := mseed.NewMSRecord()
-	defer mseed.FreeMSRecord(msr)
-
-	var err error
-	var r record
-
-	for {
-		select {
-		case b := <-inbound:
-			err = msr.Unpack(b, 512, 0, 0)
-			if err != nil {
-				mtrapp.MsgErr.Inc()
-				log.Printf("unpacking miniSEED record: %s", err.Error())
-				continue
-			}
-
-			// have to remove trailing null padding from strings for postgres UTF8.
-			r = record{
-				network:  strings.Trim(msr.Network(), "\x00"),
-				station:  strings.Trim(msr.Station(), "\x00"),
-				channel:  strings.Trim(msr.Channel(), "\x00"),
-				location: strings.Trim(msr.Location(), "\x00"),
-				start:    msr.Starttime(),
-				latency:  time.Now().UTC().Sub(msr.Endtime()).Seconds(),
-				raw:      b,
-			}
-
-			err = r.save()
-			if err != nil {
-				log.Printf("saving record: %s", err.Error())
-				mtrapp.MsgErr.Inc()
-			} else {
-				mtrapp.MsgProc.Inc()
-			}
-		}
-	}
-}
-
-func expire() {
-	ticker := time.NewTicker(time.Minute).C
-	var err error
-	for {
-		select {
-		case <-ticker:
-			_, err = db.Exec(`DELETE FROM fdsn.record WHERE start_time < now() - interval '48 hours'`)
-			if err != nil {
-				log.Printf("deleting old records: %s", err.Error())
-			}
-		}
-	}
 }

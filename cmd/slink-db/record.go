@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/lib/pq"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -18,61 +19,59 @@ type record struct {
 }
 
 // save saves r to the DB adding the stream information to the DB if needed.
-// slink can deliver duplicate packets and there may be multiple consumers.
-func (r *record) save() error {
-	// TODO - back off for DB connection errors.
-	n, err := r.saveRecord()
-	switch {
-	case err != nil:
+// slink can deliver duplicate packets and there may be multiple consumers
+// this can cause races on updating the DB which are handled.
+func (a *app) saveRecord(r record) error {
+	n, err := a.saveRecordStmt.Exec(r.network, r.station, r.channel, r.location, r.start, r.raw, r.latency)
+	if err != nil {
+		if u, ok := err.(*pq.Error); ok && u.Code == errorUniqueViolation {
+			// it is not an error if the record already exists.
+			return nil
+		} else {
+			return err
+		}
+	}
+
+	i, err := n.RowsAffected()
+	if err != nil {
 		return err
-	case n == 1:
+	}
+
+	if i == 1 {
+		// success - affected 1 row.  This should be the most common exit.
 		return nil
 	}
 
-	_, err = r.saveStream()
-	if err != nil {
-		return err
-	}
-
-	_, err = r.saveRecord()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// saveRecord saves the record to the DB.
-// Returns the number of rows affected and any errors.
-// Saving a record that already exists in the DB is
-// not an error and returns rows affected = 1.
-func (r *record) saveRecord() (int64, error) {
-	n, err := saveRecord.Exec(r.network, r.station, r.channel, r.location, r.start, r.raw, r.latency)
-	if err != nil {
-		if u, ok := err.(*pq.Error); ok && u.Code == errorUniqueViolation {
-			return 1, nil
-		} else {
-			return 0, err
-		}
-	}
-
-	return n.RowsAffected()
-}
-
-// saveStream saves the stream information in p to the DB.
-// Returns the number of rows affected and any errors.
-// Saving a stream that already exists in the DB is
-// not an error and returns rows affected = 1.
-func (r *record) saveStream() (int64, error) {
-	n, err := db.Exec(`INSERT INTO fdsn.stream (network, station, channel, location) VALUES($1, $2, $3, $4)`,
+	// if no rows were affected - need to add the stream information
+	_, err = a.db.Exec(`INSERT INTO fdsn.stream (network, station, channel, location) VALUES($1, $2, $3, $4)`,
 		r.network, r.station, r.channel, r.location)
 	if err != nil {
 		if u, ok := err.(*pq.Error); ok && u.Code == errorUniqueViolation {
-			return 1, nil
+			// ignore unique errors, there is a DB race for multiple consumers adding stream information
 		} else {
-			return 0, err
+			return err
 		}
 	}
 
-	return n.RowsAffected()
+	// try to save the record again.
+	n, err = a.saveRecordStmt.Exec(r.network, r.station, r.channel, r.location, r.start, r.raw, r.latency)
+	if err != nil {
+		if u, ok := err.(*pq.Error); ok && u.Code == errorUniqueViolation {
+			return nil
+		} else {
+			return err
+		}
+	}
+
+	i, err = n.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if i == 1 {
+		// success - affected 1 row.
+		return nil
+	}
+
+	return errors.Errorf("affected zero rows saving record %s.%s.%s.%s", r.network, r.station, r.location, r.channel)
 }
