@@ -103,7 +103,8 @@ AS
 CREATE TABLE fdsn.record (
   streamPK   INTEGER REFERENCES fdsn.stream (streamPK) ON DELETE CASCADE NOT NULL,
   start_time TIMESTAMP(6) WITH TIME ZONE                                  NOT NULL,
-  latency    NUMERIC                                                      NOT NULL,
+  latency_data    NUMERIC                                                      NOT NULL,
+  latency_tx    NUMERIC                                                      NOT NULL,
   raw        BYTEA                                                        NOT NULL,
   PRIMARY KEY (streamPK, start_time)
 );

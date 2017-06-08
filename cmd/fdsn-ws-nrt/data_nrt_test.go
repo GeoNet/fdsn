@@ -323,13 +323,13 @@ func testLoadFirst(file string, t testing.TB) {
 		t.Error(err)
 	}
 
-	_, err = db.Exec(`INSERT INTO fdsn.record (streamPK, start_time, raw, latency)
-	SELECT streamPK, $5, $6, $7
+	_, err = db.Exec(`INSERT INTO fdsn.record (streamPK, start_time, raw, latency_tx, latency_data)
+	SELECT streamPK, $5, $6, $7, $8
 	FROM fdsn.stream
 	WHERE network = $1
 	AND station = $2
 	AND channel = $3
-	AND location = $4`, network, station, channel, location, msr.Starttime(), r, 0)
+	AND location = $4`, network, station, channel, location, msr.Starttime(), r, 0, 0)
 	if err != nil {
 		t.Error(err)
 	}
