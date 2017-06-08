@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+// TODO set this from config?
+// Make it larger?  How many GB for a day?
+const recordCacheSize = 4000000000 // RAM for nrt records groupcache.
+
 var (
 	db           *sql.DB
 	decoder      = schema.NewDecoder() // decoder for URL queries.

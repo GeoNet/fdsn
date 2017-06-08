@@ -56,6 +56,8 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 	var keys []string
 	var rec []byte
 
+	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
+
 	for _, v := range params {
 		keys, err = holdingsSearchNrt(v.Regexp())
 		if err != nil {
@@ -74,8 +76,6 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 			}
 		}
 	}
-
-	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
 
 	return &weft.StatusOK
 }
