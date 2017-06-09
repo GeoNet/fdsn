@@ -14,9 +14,9 @@ func init() {
 
 	// station and event services are proxied
 	stationDirector := func(r *http.Request) {
-		r.Host = "service.geonet.org.nz"
+		r.Host = "beta-service.geonet.org.nz"
 		r.URL.Scheme = "http"
-		r.URL.Host = "service.geonet.org.nz"
+		r.URL.Host = "beta-service.geonet.org.nz"
 	}
 
 	eventDirector := func(r *http.Request) {
