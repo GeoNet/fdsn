@@ -53,3 +53,11 @@ All fields named "Value" with float64 type and without field name:
 Value      float64 `xml:",chardata"`
 ```
 must leave unchanged. 
+3. Change all fields with `omitempty` tag to pointer type, *except*:
+* slice type
+* string type
+* Int type for accumulate - TotalNumberChannels, SelectedNumberChannels, TotalNumberStations, and SelectedNumberStations.
+
+The changes above have 2 effects:
+* For fields with struct type, the pointer makes the `omitempty` tag takes effect so no empty xml tags such as `<InputUnits/>` being generated.
+* For fields with numeric type (float, int), the pointer type distinguishes "fields with zero value (uninitialized, should be omitted)" versus "fields with value of 0".
