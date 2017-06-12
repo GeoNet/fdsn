@@ -9,7 +9,8 @@ import (
 	"net/http"
 )
 
-const recordCache = 2000000000 // RAM for nrt records groupcache.
+// TODO - determine a size for this and make it settable based on an env var.
+const recordCache = 4000000000 // RAM for nrt records groupcache.
 
 var (
 	db      *sql.DB

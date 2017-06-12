@@ -28,10 +28,6 @@ func init() {
 	}
 }
 
-// fdsnDataselectV1Handler handles all dataselect queries.  It searches for matching keys in S3 and
-// fetches them in parallel, writing matching records to w in the same order they were requested.
-// This parses all input files before writing the StatusCode and before writing data to ResponseWriter.
-// In the case of an error a non-200 status code is returned as a weft.Result and no output written to w.
 func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Result {
 	var params []fdsn.DataSelect
 
@@ -56,6 +52,11 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 	var keys []string
 	var rec []byte
 
+	// TODO - possibly limit request/response size and use a buffer for the response.  This
+	// would make http response codes to the client more accurate.
+
+	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
+
 	for _, v := range params {
 		keys, err = holdingsSearchNrt(v.Regexp())
 		if err != nil {
@@ -74,8 +75,6 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 			}
 		}
 	}
-
-	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
 
 	return &weft.StatusOK
 }
