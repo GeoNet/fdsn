@@ -1,0 +1,12 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "862640294325.dkr.ecr.ap-southeast-2.amazonaws.com/fdsn-ws-nrt:prod"
+  },
+  "Ports": [
+    {
+      "ContainerPort": "8080"
+    }
+  ],
+  "Logging": "/var/log/"
+}
