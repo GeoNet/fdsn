@@ -6,16 +6,16 @@
 // Multiple instances (workers) of this code can be run against the same queue for
 // Large data reindexing tasks.  Reindexing files that already exist in the bucket
 // would require sending messages in the notification format to the SQS queue.
-// See github.com/GeoNet/fdsn/internal/kit/s3 for the Event type.
+// See github.com/GeoNet/fdsn/internal/platform/s3 for the Event type.
 package main
 
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/GeoNet/fdsn/internal/kit/cfg"
-	"github.com/GeoNet/fdsn/internal/kit/msg"
-	nf "github.com/GeoNet/fdsn/internal/kit/s3"
-	"github.com/GeoNet/fdsn/internal/kit/sqs"
+	"github.com/GeoNet/fdsn/internal/platform/cfg"
+	"github.com/GeoNet/fdsn/internal/platform/msg"
+	nf "github.com/GeoNet/fdsn/internal/platform/s3"
+	"github.com/GeoNet/fdsn/internal/platform/sqs"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"

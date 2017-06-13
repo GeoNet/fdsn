@@ -2,7 +2,7 @@ package s3_test
 
 import (
 	"encoding/json"
-	. "github.com/GeoNet/fdsn/internal/kit/s3"
+	. "github.com/GeoNet/fdsn/internal/platform/s3"
 	"testing"
 )
 

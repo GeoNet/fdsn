@@ -20,7 +20,8 @@ fi
 make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
 make -C vendor/github.com/GeoNet/kit/cvendor/libslink
 
-projects=`find cmd -maxdepth 2 -name '*.go' -print | awk -F "/" '{print $1 "/" $2}' | sort -u | egrep -v vendor`
+projects=`ls cmd`
+
 
 function runTests {
 	if [ -f ${1}/env.list ]; then
@@ -34,6 +35,6 @@ function runTests {
 
 for i in ${projects[@]}; do
 	# run tests in a subshell so they can freely modify their environment variables
-	(runTests ${i})
+	(runTests cmd/${i})
 done
 

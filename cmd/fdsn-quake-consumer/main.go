@@ -7,14 +7,14 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"github.com/GeoNet/fdsn/internal/kit/msg"
-	"github.com/GeoNet/fdsn/internal/kit/s3"
-	"github.com/GeoNet/fdsn/internal/kit/sqs"
+	"github.com/GeoNet/fdsn/internal/platform/cfg"
+	"github.com/GeoNet/fdsn/internal/platform/msg"
+	"github.com/GeoNet/fdsn/internal/platform/s3"
+	"github.com/GeoNet/fdsn/internal/platform/sqs"
 	"github.com/pkg/errors"
 	"log"
 	"os"
 	"time"
-	"github.com/GeoNet/fdsn/internal/kit/cfg"
 )
 
 var (
