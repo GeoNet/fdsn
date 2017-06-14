@@ -6,7 +6,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/GeoNet/fdsn/internal/kit/s3"
+	"github.com/GeoNet/fdsn/internal/platform/s3"
 	"github.com/GeoNet/weft"
 	"github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid"
 	"io"

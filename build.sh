@@ -17,7 +17,7 @@ if [ $# -eq 0 ]; then
 fi
 
 # code will be compiled in this container
-BUILD_CONTAINER=golang:1.8-alpine
+BUILD_CONTAINER=golang:1.8.3-alpine
 
 DOCKER_TMP=docker-build-tmp
 

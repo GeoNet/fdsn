@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"github.com/GeoNet/fdsn/internal/kit/cfg"
+	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	"github.com/GeoNet/kit/mseed"
 	"github.com/GeoNet/mtr/mtrapp"
 	"github.com/pkg/errors"

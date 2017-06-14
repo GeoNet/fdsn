@@ -1,7 +1,7 @@
 package cfg_test
 
 import (
-	"github.com/GeoNet/fdsn/internal/kit/cfg"
+	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	"os"
 	"strings"
 	"testing"
