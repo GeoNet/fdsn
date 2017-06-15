@@ -49,6 +49,22 @@
                         <doc xml:lang="english"
                              title="Limit to events with depths equal to or greater than the specified depth"/>
                     </param>
+                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="latitude" style="query" type="xs:double" default="0.0">
+                        <doc xml:lang="english"
+                            title="Specify the central latitude point for a radial search"/>
+                    </param>
+                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="longitude" style="query" type="xs:double" default="0.0">
+                        <doc xml:lang="english"
+                            title="Specify the central longitude point for a radial search"/>
+                    </param>
+                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="maxradius" style="query" type="xs:double" default="180.0">
+                        <doc xml:lang="english"
+                            title="Specify maximum distance from the geographic point defined by latitude and longitude"/>
+                    </param>
+                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="minradius" style="query" type="xs:double" default="0.0">
+                        <doc xml:lang="english"
+                            title="Specify minimum distance from the geographic point defined by latitude and longitude"/>
+                    </param>
                     <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="orderby" style="query" type="xs:string"
                            default="time">
                         <doc xml:lang="english" title="Specify the ordering of the returned results"/>
@@ -69,9 +85,18 @@
                         <doc xml:lang="english"
                              title="Retrieve an event based on the unique ID numbers assigned by the IRIS DMC"/>
                     </param>
+                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="format" style="query" type="xs:string" default="xml">
+                        <doc xml:lang="english" title="Specify output format. This is an IRIS extension to the FDSN specification"/>
+                        <option value="xml" mediaType="application/xml"/>
+                        <option value="text" mediaType="text/plain"/>
+                    </param>
                 </request>
                 <response>
+                    <representation mediaType="text/plain"/>
                     <representation mediaType="application/xml"/>
+                </response>
+                <response status="204 400 401 403 404 413 414 500 503">
+                    <representation mediaType="text/plain"/>
                 </response>
             </method>
         </resource>
