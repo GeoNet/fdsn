@@ -645,10 +645,6 @@ func (c *ChannelType) doFilter(params []fdsnStationV1Search) bool {
 }
 
 func (v fdsnStationV1Search) validStartEnd(start, end time.Time, level int) bool {
-	if v.LevelValue != level { // we only check for same level
-		return true
-	}
-
 	// For start/end, the "no-value" could be "0001-01-01T00:00:00" or "9999-01-01T00:00:00"
 	if !end.IsZero() && v.StartTime.Time.After(end) {
 		return false
