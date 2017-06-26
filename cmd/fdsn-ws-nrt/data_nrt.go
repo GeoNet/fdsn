@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/mtr/mtrapp"
 	"github.com/golang/groupcache"
 	"strings"
 	"time"
@@ -12,43 +13,14 @@ import (
 
 var errNoData = errors.New("no data")
 
-var record = groupcache.NewGroup("record", recordCache, groupcache.GetterFunc(
-	func(ctx groupcache.Context, key string, dest groupcache.Sink) error {
-
-		// key is like "NZ_AWRB_HNN_23_2017-04-22T22:38:50.115Z"
-		// network_station_channel_location_time.RFC3339Nano
-
-		p := strings.Split(key, "_")
-		if len(p) != 5 {
-			return errors.New("expected 5 parts to key: " + key)
-		}
-
-		t, err := time.Parse(time.RFC3339Nano, p[4])
-		if err != nil {
-			return err
-		}
-
-		var b []byte
-		err = db.QueryRow(`SELECT raw FROM fdsn.record WHERE streampk =
-                                  (SELECT streampk FROM fdsn.stream WHERE network = $1 AND station = $2 AND channel = $3 AND location = $4)
-	                          AND start_time = $5`, p[0], p[1], p[2], p[3], t).Scan(&b)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				return errNoData
-			}
-			return err
-		}
-
-		dest.SetBytes(b)
-		return nil
-	},
-))
-
 // holdingsSearchNrt searches for near real time records matching the query.
 // network, station, channel, and location are matched using POSIX regular expressions.
 // https://www.postgresql.org/docs/9.3/static/functions-matching.html
 // start and end should be set for all queries.
 func holdingsSearchNrt(d fdsn.DataSearch) ([]string, error) {
+	timer := mtrapp.Start()
+	defer timer.Track("holdingsSearchNrt")
+
 	rows, err := db.Query(`WITH s AS (SELECT DISTINCT ON (streamPK) network, station, channel, location, streamPK
 	FROM fdsn.stream WHERE network ~ $1
 	AND station ~ $2
@@ -76,4 +48,71 @@ func holdingsSearchNrt(d fdsn.DataSearch) ([]string, error) {
 	}
 
 	return keys, nil
+}
+
+// primeCache fills the miniSEED record cache from the DB.  It fills for records
+// more recent than start up to maxRecords records.  This can be used to limit
+// cache priming to be less than the amount of RAM assigned to the cache.
+func primeCache(start time.Time, maxRecords int64) error {
+	rows, err := db.Query(`WITH r AS (SELECT streamPk, start_time
+				FROM fdsn.record WHERE start_time > $1)
+				SELECT network, station, channel, location, start_time FROM fdsn.stream JOIN r USING (streamPK)
+				ORDER BY start_time DESC LIMIT $2`, start, maxRecords)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var keys []string
+
+	var n, s, c, l string
+	var t time.Time
+
+	for rows.Next() {
+		err = rows.Scan(&n, &s, &c, &l, &t)
+		if err != nil {
+			return err
+		}
+		keys = append(keys, fmt.Sprintf("%s_%s_%s_%s_%s", n, s, c, l, t.Format(time.RFC3339Nano)))
+	}
+
+	rows.Close()
+
+	var rec []byte
+
+	for _, k := range keys {
+		err = recordCache.Get(nil, k, groupcache.AllocatingByteSliceSink(&rec))
+		if err != nil && err != errNoData {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// recordeGetter implements groupcache.Getter for fetching miniSEED records from the cache.
+// key is like "NZ_AWRB_HNN_23_2017-04-22T22:38:50.115Z"
+// network_station_channel_location_time.RFC3339Nano
+func recordGetter(ctx groupcache.Context, key string, dest groupcache.Sink) error {
+	p := strings.Split(key, "_")
+	if len(p) != 5 {
+		return errors.New("expected 5 parts to key: " + key)
+	}
+
+	t, err := time.Parse(time.RFC3339Nano, p[4])
+	if err != nil {
+		return err
+	}
+
+	var b []byte
+	err = recordStmt.QueryRow(p[0], p[1], p[2], p[3], t).Scan(&b)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errNoData
+		}
+		return err
+	}
+
+	dest.SetBytes(b)
+	return nil
 }

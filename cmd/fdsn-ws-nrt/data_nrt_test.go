@@ -59,7 +59,7 @@ func TestGetRecord(t *testing.T) {
 
 	var r []byte
 
-	err := record.Get(nil, "NZ_ABAZ_EHE_10_2016-03-19T00:00:01.968393Z", groupcache.AllocatingByteSliceSink(&r))
+	err := recordCache.Get(nil, "NZ_ABAZ_EHE_10_2016-03-19T00:00:01.968393Z", groupcache.AllocatingByteSliceSink(&r))
 	if err != nil {
 		t.Error(err)
 	}
@@ -153,7 +153,7 @@ func BenchmarkGetRecordCache(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		err = record.Get(nil, "NZ_ABAZ_EHE_10_2016-03-19T00:00:01.968393Z", groupcache.AllocatingByteSliceSink(&r))
+		err = recordCache.Get(nil, "NZ_ABAZ_EHE_10_2016-03-19T00:00:01.968393Z", groupcache.AllocatingByteSliceSink(&r))
 		if err != nil {
 			b.Error(err)
 		}
@@ -182,8 +182,8 @@ func BenchmarkGetRecordDB(b *testing.B) {
 	var r []byte
 
 	for n := 0; n < b.N; n++ {
-		db.QueryRow(`SELECT raw FROM slink.record WHERE streampk =
-        (SELECT streampk FROM slink.stream WHERE network = $1 AND station = $2 AND channel = $3 AND location = $4)
+		db.QueryRow(`SELECT raw FROM fdsn.record WHERE streampk =
+        (SELECT streampk FROM fdsn.stream WHERE network = $1 AND station = $2 AND channel = $3 AND location = $4)
 	AND start_time = $5`, "NZ", "ABAZ", "EHE", "10", start).Scan(&r)
 		if err != nil {
 			b.Error(err)
@@ -205,6 +205,14 @@ func testSetUp(t testing.TB) {
 
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(10)
+
+	recordStmt, err = db.Prepare(`SELECT raw FROM fdsn.record WHERE streampk =
+                                  (SELECT streampk FROM fdsn.stream WHERE network = $1 AND station = $2 AND channel = $3 AND location = $4)
+	                          AND start_time = $5`)
+
+	if recordCache == nil {
+		recordCache = groupcache.NewGroup("record", 1000000000, groupcache.GetterFunc(recordGetter))
+	}
 }
 
 func testTearDown() {

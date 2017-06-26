@@ -3,19 +3,25 @@ package main
 import (
 	"database/sql"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
+	"github.com/GeoNet/mtr/mtrapp"
+	"github.com/golang/groupcache"
 	"github.com/gorilla/schema"
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 )
 
-// TODO - determine a size for this and make it settable based on an env var.
-const recordCache = 4000000000 // RAM for nrt records groupcache.
+const recordLength = 512 // miniSEED record length in bytes
 
 var (
-	db      *sql.DB
-	decoder = schema.NewDecoder() // decoder for URL queries.
-	Prefix  string                // prefix for logging
+	db          *sql.DB
+	decoder     = schema.NewDecoder() // decoder for URL queries.
+	Prefix      string                // prefix for logging
+	recordStmt  *sql.Stmt
+	recordCache *groupcache.Group
 )
 
 func init() {
@@ -30,6 +36,18 @@ func main() {
 		log.Fatalf("error reading DB config from the environment vars: %s", err)
 	}
 
+	size := os.Getenv("CACHE_SIZE")
+	if size == "" {
+		log.Fatal("CACHE_SIZE env var must be set")
+	}
+
+	cacheSize, err := strconv.ParseInt(size, 10, 64)
+	if err != nil {
+		log.Fatalf("error parsing CACHE_SIZE env var %s", err.Error())
+	}
+
+	cacheSize = cacheSize * 1000000000
+
 	// set a statement timeout to cancel any very long running DB queries.
 	// Value is int milliseconds.
 	// https://www.postgresql.org/docs/9.5/static/runtime-config-client.html
@@ -42,9 +60,47 @@ func main() {
 	db.SetMaxIdleConns(p.MaxIdle)
 	db.SetMaxOpenConns(p.MaxOpen)
 
+	recordStmt, err = db.Prepare(`SELECT raw FROM fdsn.record WHERE streampk =
+                                  (SELECT streampk FROM fdsn.stream WHERE network = $1 AND station = $2 AND channel = $3 AND location = $4)
+	                          AND start_time = $5`)
+	if err != nil {
+		log.Printf("error preparing record statement %s", err.Error())
+	}
+
 	if err = db.Ping(); err != nil {
 		log.Println("ERROR: problem pinging DB - is it up and contactable? 500s will be served")
 	}
+
+	log.Printf("creating record cache size %d bytes", cacheSize)
+
+	recordCache = groupcache.NewGroup("record", cacheSize, groupcache.GetterFunc(recordGetter))
+
+	// at start up back fill the cache with older data.
+	go func() {
+		log.Print("back filling cache")
+		go primeCache(time.Now().UTC().Add(time.Hour*-24), int64(cacheSize/recordLength))
+		log.Print("completed back filling cache")
+	}()
+
+	// keep the cache primed with recent data by periodically updating it.
+	go func() {
+		ticker := time.Tick(time.Second * 30)
+
+		maxRecords := int64(cacheSize / recordLength)
+
+		for {
+			select {
+			case <-ticker:
+				t := mtrapp.Start()
+				err := primeCache(time.Now().UTC().Add(time.Second*-40), maxRecords)
+				if err != nil {
+					log.Printf("priming cache %s", err.Error())
+				}
+				t.Track("primeCache")
+				log.Printf("record cache: %+v", recordCache.CacheStats(groupcache.MainCache))
+			}
+		}
+	}()
 
 	log.Println("starting server")
 	log.Fatal(http.ListenAndServe(":8080", mux))
