@@ -76,11 +76,7 @@ func main() {
 	recordCache = groupcache.NewGroup("record", cacheSize, groupcache.GetterFunc(recordGetter))
 
 	// at start up back fill the cache with older data.
-	go func() {
-		log.Print("back filling cache")
-		go primeCache(time.Now().UTC().Add(time.Hour*-24), int64(cacheSize/recordLength))
-		log.Print("completed back filling cache")
-	}()
+	go primeCache(time.Now().UTC().Add(time.Hour*-24), int64(cacheSize/recordLength))
 
 	// keep the cache primed with recent data by periodically updating it.
 	go func() {
