@@ -63,7 +63,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 			return weft.InternalServerError(err)
 		}
 		for _, k := range keys {
-			err = record.Get(nil, k, groupcache.AllocatingByteSliceSink(&rec))
+			err = recordCache.Get(nil, k, groupcache.AllocatingByteSliceSink(&rec))
 			switch err {
 			case nil:
 				w.Write(rec)
