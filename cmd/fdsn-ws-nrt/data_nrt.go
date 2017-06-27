@@ -90,7 +90,7 @@ func primeCache(start time.Time, maxRecords int64) error {
 	return nil
 }
 
-// recordeGetter implements groupcache.Getter for fetching miniSEED records from the cache.
+// recordGetter implements groupcache.Getter for fetching miniSEED records from the cache.
 // key is like "NZ_AWRB_HNN_23_2017-04-22T22:38:50.115Z"
 // network_station_channel_location_time.RFC3339Nano
 func recordGetter(ctx groupcache.Context, key string, dest groupcache.Sink) error {
