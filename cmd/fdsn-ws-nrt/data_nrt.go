@@ -51,13 +51,12 @@ func holdingsSearchNrt(d fdsn.DataSearch) ([]string, error) {
 }
 
 // primeCache fills the miniSEED record cache from the DB.  It fills for records
-// more recent than start up to maxRecords records.  This can be used to limit
-// cache priming to be less than the amount of RAM assigned to the cache.
-func primeCache(start time.Time, maxRecords int64) error {
+// more recent than start.
+func primeCache(start time.Time) error {
 	rows, err := db.Query(`WITH r AS (SELECT streamPk, start_time
 				FROM fdsn.record WHERE start_time > $1)
 				SELECT network, station, channel, location, start_time FROM fdsn.stream JOIN r USING (streamPK)
-				ORDER BY start_time DESC LIMIT $2`, start, maxRecords)
+				ORDER BY start_time DESC`, start)
 	if err != nil {
 		return err
 	}

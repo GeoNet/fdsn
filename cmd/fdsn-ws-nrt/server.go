@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-const recordLength = 512 // miniSEED record length in bytes
-
 var (
 	db          *sql.DB
 	decoder     = schema.NewDecoder() // decoder for URL queries.
@@ -78,13 +76,11 @@ func main() {
 	go func() {
 		ticker := time.Tick(time.Second * 30)
 
-		maxRecords := int64(cacheSize / recordLength)
-
 		for {
 			select {
 			case <-ticker:
 				t := mtrapp.Start()
-				err := primeCache(time.Now().UTC().Add(time.Second*-40), maxRecords)
+				err := primeCache(time.Now().UTC().Add(time.Second * -40))
 				if err != nil {
 					log.Printf("priming cache %s", err.Error())
 				}
