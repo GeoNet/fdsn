@@ -68,6 +68,7 @@ type fdsnStationV1Parm struct {
 	Longitude           float64  `schema:"longitude"`
 	MinRadius           float64  `schema:"minradius"`
 	MaxRadius           float64  `schema:"maxradius"`
+	NoData              int      `schema:"nodata"`       // Select status code for “no data”, either ‘204’ (default) or ‘404’.
 }
 
 type fdsnStationV1Search struct {
@@ -100,7 +101,6 @@ var stationNotSupported = map[string]bool{
 	"startbefore": true,
 	"endafter":    true,
 	"endbefore":   true,
-	"nodata":      true,
 }
 
 func init() {
@@ -218,6 +218,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		Longitude:         math.MaxFloat64,
 		MinRadius:         0.0,
 		MaxRadius:         180.0,
+		NoData:            204,
 	}
 
 	for abbrev, expanded := range stationAbbreviations {
@@ -269,6 +270,10 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 
 	if p.MatchTimeSeries {
 		return fdsnStationV1Search{}, errors.New("match time series is not supported.")
+	}
+
+	if p.NoData != 204 && p.NoData != 404 {
+		return fdsnStationV1Search{}, errors.New("nodata must be 204 or 404.")
 	}
 
 	s := fdsnStationV1Search{
@@ -418,7 +423,7 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 	hasContent := c.doFilter(params)
 
 	if !hasContent {
-		return &weft.Result{Ok: true, Code: http.StatusNoContent, Msg: ""}
+		return &weft.Result{Ok: true, Code: params[0].NoData, Msg: ""}
 	}
 
 	// Then trim the tree to the level specified in parameter before marshaling.

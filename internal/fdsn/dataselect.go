@@ -3,11 +3,13 @@ package fdsn
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"github.com/gorilla/schema"
 	"io"
 	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -27,7 +29,6 @@ var abbreviations = map[string]string{
 var dataSelectNotSupported = map[string]bool{
 	"quality":        true,
 	"minuimumlength": true,
-	"nodata":         true,
 }
 
 type DataSelect struct {
@@ -39,6 +40,7 @@ type DataSelect struct {
 	Channel     []string `schema:"channel"`   // channel number of data to query
 	Format      string   `schema:"format"`
 	LongestOnly bool     `schema:"longestonly"`
+	NoData      int      `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
 }
 
 type Time struct {
@@ -73,8 +75,7 @@ func (t *Time) UnmarshalText(text []byte) (err error) {
 		return fmt.Errorf("invalid time format: %s", s)
 	}
 
-
-	if l >= 19 && l <= 26 && l!=20 {	// length 20: "YYYY-MM-DDTHH:MM:SS." invalid
+	if l >= 19 && l <= 26 && l != 20 { // length 20: "YYYY-MM-DDTHH:MM:SS." invalid
 		s = s + ".000000000Z"[(l-19):] // "YYYY-MM-DDTHH:MM:SS" append to nano
 	} else if l == 10 {
 		s = s + "T00:00:00.000000000Z" // YYYY-MM-DD
@@ -89,13 +90,29 @@ func (t *Time) UnmarshalText(text []byte) (err error) {
 // dataselect POST request.
 func ParseDataSelectPost(r io.Reader, d *[]DataSelect) error {
 	scanner := bufio.NewScanner(r)
+	noData := 204
 
 	for scanner.Scan() {
 
 		line := scanner.Text()
 		// ignore any blank lines or lines with "=", we don't use any of these parameters and "=" is otherwise invalid
-		if len(line) == 0 || strings.Contains(line, "=") {
+		if len(line) == 0 {
 			continue
+		}
+
+		if tokens := strings.Split(line, "="); len(tokens) == 2 {
+			switch tokens[0] {
+			case "nodata":
+				var err error
+				if noData, err = strconv.Atoi(strings.TrimSpace(tokens[1])); err != nil {
+					return errors.New("error nodata value:" + err.Error())
+				}
+
+				if noData != 204 && noData != 404 {
+					return errors.New("nodata must be 204 or 404.")
+				}
+				continue
+			}
 		}
 
 		fields := strings.Fields(line)
@@ -121,6 +138,8 @@ func ParseDataSelectPost(r io.Reader, d *[]DataSelect) error {
 				Station:   []string{fields[1]},
 				Location:  []string{fields[2]},
 				Channel:   []string{fields[3]},
+				Format:    "miniseed",
+				NoData:    noData,
 			})
 	}
 
@@ -136,6 +155,7 @@ func ParseDataSelectPost(r io.Reader, d *[]DataSelect) error {
 func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 	e := DataSelect{
 		Format: "miniseed",
+		NoData: 204,
 	}
 
 	// convert all abbreviated params to their expanded form
@@ -173,6 +193,10 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 		return DataSelect{}, fmt.Errorf("Query for longest only is not supported.")
 	}
 
+	if e.NoData != 204 && e.NoData != 404 {
+		return DataSelect{}, errors.New("nodata must be 204 or 404.")
+	}
+
 	// Defaults: as per spec we need to include any valid files in the search so use wildcards and broad time range
 	if len(e.Network) == 0 {
 		e.Network = []string{"*"}
@@ -197,7 +221,6 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 	if e.EndTime.IsZero() {
 		e.EndTime.Time = time.Now().UTC()
 	}
-
 	return e, nil
 }
 
