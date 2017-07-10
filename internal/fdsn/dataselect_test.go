@@ -14,6 +14,7 @@ func TestParsePostBody(t *testing.T) {
 	postBody := []byte(`quality=M
 minimumlength=0.0
 longestonly=FALSE
+nodata=204
 NZ ALRZ 10 EHN 2017-01-01T00:00:00 2017-01-10T00:00:00
 NZ ABCD 10 E*? 2017-01-02T00:00:00 2017-01-03T00:00:00
 
@@ -38,6 +39,8 @@ NZ ABCD 10 E*? 2017-01-02T00:00:00 2017-01-03T00:00:00
 			Station:   []string{"ALRZ"},
 			Location:  []string{"10"},
 			Channel:   []string{"EHN"},
+			Format:    "miniseed",
+			NoData:    204,
 		},
 		{
 			StartTime: fdsn.Time{t3},
@@ -46,6 +49,8 @@ NZ ABCD 10 E*? 2017-01-02T00:00:00 2017-01-03T00:00:00
 			Station:   []string{"ABCD"},
 			Location:  []string{"10"},
 			Channel:   []string{"E*?"},
+			Format:    "miniseed",
+			NoData:    204,
 		},
 	}
 
