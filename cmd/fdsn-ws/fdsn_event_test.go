@@ -49,6 +49,7 @@ func TestEventV1Query(t *testing.T) {
 		Longitude:    math.MaxFloat64,
 		MaxRadius:    180.0,
 		MinRadius:    0.0,
+		NoData:       204,
 	}
 
 	ex.StartTime.Time, err = time.Parse(time.RFC3339Nano, "2015-01-12T12:12:12.000000000Z")
@@ -143,6 +144,7 @@ func TestEventQuery(t *testing.T) {
 		{"orderby", "time-asc"},
 		{"orderby", "magnitude"},
 		{"orderby", "magnitude-asc"},
+		{"updatedafter", "2015-10-12T08:04:01"},
 	}
 
 	//var quakeml string

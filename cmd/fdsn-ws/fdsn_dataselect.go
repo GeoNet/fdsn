@@ -118,7 +118,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 	}
 
 	if files == 0 {
-		return &weft.Result{Ok: false, Code: http.StatusNoContent, Msg: "No results for specified query"}
+		return &weft.Result{Ok: false, Code: params[0].NoData, Msg: "No results for specified query"}
 	}
 
 	// Fetch the miniSEED files from S3.  Parse them and write
