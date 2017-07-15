@@ -3,8 +3,8 @@ package main
 import (
 	"database/sql"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
+	"github.com/GeoNet/fdsn/internal/platform/metrics"
 	"github.com/GeoNet/kit/mseed"
-	"github.com/GeoNet/mtr/mtrapp"
 	"github.com/pkg/errors"
 	"log"
 	"strings"
@@ -67,11 +67,11 @@ func (a *app) save(inbound chan []byte) {
 		select {
 		case b := <-inbound:
 
-			t := mtrapp.Start()
+			t := metrics.Start()
 
 			err = msr.Unpack(b, 512, 0, 0)
 			if err != nil {
-				mtrapp.MsgErr.Inc()
+				metrics.MsgErr()
 				log.Printf("unpacking miniSEED record: %s", err.Error())
 				continue
 			}
@@ -88,6 +88,7 @@ func (a *app) save(inbound chan []byte) {
 					raw:          b,
 				})
 				if err != nil {
+					metrics.MsgErr()
 					log.Printf("error saving record sleeping and trying again: %s", err)
 					time.Sleep(time.Second * 10)
 					continue
@@ -95,8 +96,10 @@ func (a *app) save(inbound chan []byte) {
 				break
 			}
 
-			t.Track("save")
-			mtrapp.MsgProc.Inc()
+			if err := t.Track("save"); err != nil {
+				log.Print(err)
+			}
+			metrics.MsgProc()
 		}
 	}
 }
