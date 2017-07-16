@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	_ "github.com/GeoNet/fdsn/internal/ddogmsg"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	"github.com/GeoNet/fdsn/internal/platform/msg"
 	"github.com/GeoNet/fdsn/internal/platform/s3"

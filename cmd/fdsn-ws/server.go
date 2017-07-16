@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	_ "github.com/GeoNet/fdsn/internal/ddoghttp"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	"github.com/gorilla/schema"
 	_ "github.com/lib/pq"

@@ -2,7 +2,7 @@
 package msg
 
 import (
-	"github.com/GeoNet/mtr/mtrapp"
+	"github.com/GeoNet/fdsn/internal/platform/metrics"
 )
 
 // Message defines an interface for message processing.
@@ -12,17 +12,17 @@ type Processor interface {
 
 // DoProcess executes m.Process with metrics.
 func DoProcess(m Processor, b []byte) error {
-	mtrapp.MsgRx.Inc()
-	t := mtrapp.Start()
+	metrics.MsgRx()
+	t := metrics.Start()
 	defer t.Track("process")
 
 	s := m.Process(b)
 
 	switch s {
 	case nil:
-		mtrapp.MsgProc.Inc()
+		metrics.MsgProc()
 	default:
-		mtrapp.MsgErr.Inc()
+		metrics.MsgErr()
 	}
 
 	return s

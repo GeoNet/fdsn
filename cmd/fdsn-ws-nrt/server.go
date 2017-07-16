@@ -2,8 +2,9 @@ package main
 
 import (
 	"database/sql"
+	_ "github.com/GeoNet/fdsn/internal/ddoghttp"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
-	"github.com/GeoNet/mtr/mtrapp"
+	"github.com/GeoNet/fdsn/internal/platform/metrics"
 	"github.com/golang/groupcache"
 	"github.com/gorilla/schema"
 	_ "github.com/lib/pq"
@@ -79,7 +80,7 @@ func main() {
 		for {
 			select {
 			case <-ticker:
-				t := mtrapp.Start()
+				t := metrics.Start()
 				err := primeCache(time.Now().UTC().Add(time.Second * -40))
 				if err != nil {
 					log.Printf("priming cache %s", err.Error())
