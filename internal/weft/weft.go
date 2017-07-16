@@ -9,7 +9,7 @@ package weft
 
 import (
 	"bytes"
-	"github.com/GeoNet/mtr/mtrapp"
+	"github.com/GeoNet/fdsn/internal/platform/metrics"
 	"net/http"
 	"reflect"
 	"runtime"
@@ -116,24 +116,24 @@ func name(f interface{}) string {
 	return n
 }
 
-// count increments mtr counters for Result.
+// count increments metrics counters for Result.
 func (r *Result) Count() {
 	if r != nil && r.Code != 0 {
-		mtrapp.Requests.Inc()
+		metrics.Request()
 
 		switch r.Code {
 		case http.StatusOK:
-			mtrapp.StatusOK.Inc()
+			metrics.StatusOK()
 		case http.StatusBadRequest:
-			mtrapp.StatusBadRequest.Inc()
+			metrics.StatusBadRequest()
 		case http.StatusUnauthorized:
-			mtrapp.StatusUnauthorized.Inc()
+			metrics.StatusUnauthorized()
 		case http.StatusNotFound:
-			mtrapp.StatusNotFound.Inc()
+			metrics.StatusNotFound()
 		case http.StatusInternalServerError:
-			mtrapp.StatusInternalServerError.Inc()
+			metrics.StatusInternalServerError()
 		case http.StatusServiceUnavailable:
-			mtrapp.StatusServiceUnavailable.Inc()
+			metrics.StatusServiceUnavailable()
 		}
 	}
 }
