@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/platform/s3"
-	"github.com/GeoNet/weft"
+	"github.com/GeoNet/fdsn/internal/weft"
 	"github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid"
 	"io"
 	"io/ioutil"

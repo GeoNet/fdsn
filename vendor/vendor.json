@@ -72,18 +72,6 @@
 			"revisionTime": "2016-12-20T21:32:52Z"
 		},
 		{
-			"checksumSHA1": "yNKJtwBLX6WvIayVlalUh09bbRI=",
-			"path": "github.com/GeoNet/weft",
-			"revision": "df925df2e3bf88e79d6e261da598ab78d438d02d",
-			"revisionTime": "2017-05-29T21:54:48Z"
-		},
-		{
-			"checksumSHA1": "CwCYfTEDZW1roi1++adKmYF3m8Y=",
-			"path": "github.com/GeoNet/weft/wefttest",
-			"revision": "b01faa03581cecb744a04e656690902f54e2b215",
-			"revisionTime": "2017-03-28T04:04:15Z"
-		},
-		{
 			"checksumSHA1": "ghXMRHH7SQBQr28kX4LYXSY2P1o=",
 			"path": "github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid",
 			"revision": "8fa6ccb8ea661b7d37e95abcb5b30a3405f8ab7c",

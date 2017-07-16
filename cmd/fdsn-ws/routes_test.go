@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/holdings"
-	wt "github.com/GeoNet/weft/wefttest"
+	wt "github.com/GeoNet/fdsn/internal/weft/wefttest"
 	"net/http"
 	"testing"
 	"time"

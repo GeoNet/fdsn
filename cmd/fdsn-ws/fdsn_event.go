@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/GeoNet/weft"
+	"github.com/GeoNet/fdsn/internal/weft"
 	"io/ioutil"
 	"log"
 	"math"
