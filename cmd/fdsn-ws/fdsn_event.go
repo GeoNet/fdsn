@@ -11,7 +11,9 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
+	"text/template"
 	"time"
 )
 
@@ -37,6 +39,8 @@ type fdsnEventV1 struct {
 	Longitude            float64 `schema:"longitude"`
 	MinRadius            float64 `schema:"minradius"`
 	MaxRadius            float64 `schema:"maxradius"`
+	NoData               int     `schema:"nodata"`       // Select status code for “no data”, either ‘204’ (default) or ‘404’.
+	UpdatedAfter         Time    `schema:"updatedafter"` // Limit to events updated after the specified time.
 }
 
 type Time struct {
@@ -51,16 +55,21 @@ var eventNotSupported = map[string]bool{
 	"offset":        true,
 	"catalog":       true,
 	"contributor":   true,
-	"updateafter":   true,
-	"nodata":        true,
 }
 
 func init() {
 	var err error
-	fdsnEventWadlFile, err = ioutil.ReadFile("assets/fdsn-ws-event.wadl")
+	var b bytes.Buffer
+
+	t, err := template.New("t").ParseFiles("assets/tmpl/fdsn-ws-event.wadl")
 	if err != nil {
-		log.Printf("error reading assets/fdsn-ws-event.wadl: %s", err.Error())
+		log.Printf("error parsing assets/tmpl/fdsn-ws-event.wadl: %s", err.Error())
 	}
+	err = t.ExecuteTemplate(&b, "body", os.Getenv("HOST_CNAME"))
+	if err != nil {
+		log.Printf("error executing assets/tmpl/fdsn-ws-event.wadl: %s", err.Error())
+	}
+	fdsnEventWadlFile = b.Bytes()
 
 	fdsnEventIndex, err = ioutil.ReadFile("assets/fdsn-ws-event.html")
 	if err != nil {
@@ -111,6 +120,7 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		Longitude:    math.MaxFloat64,
 		MinRadius:    0.0,
 		MaxRadius:    180.0,
+		NoData:       204,
 	}
 
 	for key, val := range v {
@@ -137,6 +147,10 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 
 	if e.IncludeArrivals {
 		return e, errors.New("include arrivals is not supported.")
+	}
+
+	if e.NoData != 204 && e.NoData != 404 {
+		return e, errors.New("nodata must be 204 or 404.")
 	}
 
 	// geometry bounds checking
@@ -313,6 +327,12 @@ func (e *fdsnEventV1) filter() (q string, args []interface{}) {
 		i++
 	}
 
+	if !e.UpdatedAfter.Time.IsZero() {
+		q = fmt.Sprintf("%s modificationtime >= $%d AND", q, i)
+		args = append(args, e.UpdatedAfter.Time)
+		i++
+	}
+
 	if e.MaxRadius != 180.0 {
 		q = fmt.Sprintf("%s ST_Distance(origin_geom::GEOMETRY, ST_SetSRID(ST_Makepoint($%d, $%d), 4326)) <= $%d AND", q, i, i+1, i+2)
 		args = append(args, e.Longitude, e.Latitude, e.MaxRadius)
@@ -347,6 +367,10 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.R
 	c, err := e.count()
 	if err != nil {
 		return weft.ServiceUnavailableError(err)
+	}
+
+	if c == 0 {
+		return &weft.Result{Ok: true, Code: e.NoData, Msg: ""}
 	}
 
 	if c > 10000 {
