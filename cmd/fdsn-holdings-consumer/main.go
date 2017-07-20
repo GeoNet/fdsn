@@ -12,6 +12,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	_ "github.com/GeoNet/fdsn/internal/ddogmsg"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	"github.com/GeoNet/fdsn/internal/platform/msg"
 	nf "github.com/GeoNet/fdsn/internal/platform/s3"

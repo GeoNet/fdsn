@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/weft"
+	"github.com/GeoNet/fdsn/internal/weft"
 	"github.com/golang/groupcache"
 	"io/ioutil"
 	"log"

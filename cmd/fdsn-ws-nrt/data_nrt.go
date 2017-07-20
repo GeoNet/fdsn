@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/mtr/mtrapp"
+	"github.com/GeoNet/fdsn/internal/platform/metrics"
 	"github.com/golang/groupcache"
 	"strings"
 	"time"
@@ -18,7 +18,7 @@ var errNoData = errors.New("no data")
 // https://www.postgresql.org/docs/9.3/static/functions-matching.html
 // start and end should be set for all queries.
 func holdingsSearchNrt(d fdsn.DataSearch) ([]string, error) {
-	timer := mtrapp.Start()
+	timer := metrics.Start()
 	defer timer.Track("holdingsSearchNrt")
 
 	rows, err := db.Query(`WITH s AS (SELECT DISTINCT ON (streamPK) network, station, channel, location, streamPK

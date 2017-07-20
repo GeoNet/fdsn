@@ -5,8 +5,9 @@ slink-ws connects to a SEEDLink server and saves records to a postgres DB.
 */
 
 import (
+	_ "github.com/GeoNet/fdsn/internal/ddogmsg"
+	"github.com/GeoNet/fdsn/internal/platform/metrics"
 	"github.com/GeoNet/kit/slink"
-	"github.com/GeoNet/mtr/mtrapp"
 	_ "github.com/lib/pq"
 	"log"
 	"os"
@@ -74,7 +75,7 @@ recv:
 			if p != nil && p.PacketType() == slink.SLDATA {
 				select {
 				case process <- p.GetMSRecord():
-					mtrapp.MsgRx.Inc()
+					metrics.MsgRx()
 				default:
 					log.Fatal("process chan full, exiting")
 				}
