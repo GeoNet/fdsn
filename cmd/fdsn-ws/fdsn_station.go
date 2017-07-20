@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"text/template"
 	"time"
 )
 
@@ -104,14 +105,20 @@ var stationNotSupported = map[string]bool{
 }
 
 func init() {
-	var err error
-
 	geo = ellipsoid.Init("WGS84", ellipsoid.Degrees, ellipsoid.Kilometer, ellipsoid.LongitudeIsSymmetric, ellipsoid.BearingNotSymmetric)
 
-	fdsnStationWadlFile, err = ioutil.ReadFile("assets/fdsn-ws-station.wadl")
+	var err error
+	var b bytes.Buffer
+
+	t, err := template.New("t").ParseFiles("assets/tmpl/fdsn-ws-station.wadl")
 	if err != nil {
-		log.Printf("error reading assets/fdsn-ws-station.wadl: %s", err.Error())
+		log.Printf("error parsing assets/tmpl/fdsn-ws-station.wadl: %s", err.Error())
 	}
+	err = t.ExecuteTemplate(&b, "body", os.Getenv("HOST_CNAME"))
+	if err != nil {
+		log.Printf("error executing assets/tmpl/fdsn-ws-station.wadl: %s", err.Error())
+	}
+	fdsnStationWadlFile = b.Bytes()
 
 	fdsnStationIndex, err = ioutil.ReadFile("assets/fdsn-ws-station.html")
 	if err != nil {
