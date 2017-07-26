@@ -30,6 +30,11 @@
 			<param name="station" style="query" type="xsd:string"/>
 			<param name="location" style="query" type="xsd:string"/>
 			<param name="channel" style="query" type="xsd:string"/>
+			<param name="format" style="query" type="xsd:string" default="miniseed"/>
+			<param name="nodata" style="query" type="xs:int" default="204">
+                <option value="204"/>
+                <option value="404"/>
+            </param>
 		</request>
 		<response status="200">
 			<representation mediaType="application/vnd.fdsn.mseed"/>

@@ -91,6 +91,14 @@
                         <option value="xml" mediaType="application/xml"/>
                         <option value="text" mediaType="text/plain"/>
                     </param>
+                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="nodata" style="query" type="xs:int" default="204">
+                        <doc xml:lang="english" title="Specify which HTML Status code is returned when no data is found."/>
+                        <option value="204"/>
+                        <option value="404"/>
+                    </param>
+                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="updatedafter" style="query" type="xs:date">
+                        <doc xml:lang="english" title="Limit to events updated after the specified time"/>
+                    </param>
                 </request>
                 <response>
                     <representation mediaType="text/plain"/>
