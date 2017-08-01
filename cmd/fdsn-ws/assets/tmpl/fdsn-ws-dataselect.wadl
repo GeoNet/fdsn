@@ -1,7 +1,8 @@
+{{define "body" -}}
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <application xmlns="http://wadl.dev.java.net/2009/02"
 		xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<resources base="https://service.geonet.org.nz/fdsnws/dataselect/1/">
+	<resources base="https://{{.}}/fdsnws/dataselect/1/">
 		<resource path="query">
 			<method href="#queryGET"/>
 			<method href="#queryPOST"/>
@@ -29,6 +30,11 @@
 			<param name="station" style="query" type="xsd:string"/>
 			<param name="location" style="query" type="xsd:string"/>
 			<param name="channel" style="query" type="xsd:string"/>
+			<param name="format" style="query" type="xsd:string" default="miniseed"/>
+			<param name="nodata" style="query" type="xs:int" default="204">
+                <option value="204"/>
+                <option value="404"/>
+            </param>
 		</request>
 		<response status="200">
 			<representation mediaType="application/vnd.fdsn.mseed"/>
@@ -46,3 +52,4 @@
 		</response>
 	</method>
 </application>
+{{end}}

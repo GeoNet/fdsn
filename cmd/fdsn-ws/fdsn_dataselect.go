@@ -14,8 +14,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"reflect"
 	"strings"
+	"text/template"
 )
 
 const (
@@ -46,10 +48,17 @@ func init() {
 	})
 
 	var err error
-	fdsnDataselectWadlFile, err = ioutil.ReadFile("assets/fdsn-ws-dataselect.wadl")
+	var b bytes.Buffer
+
+	t, err := template.New("t").ParseFiles("assets/tmpl/fdsn-ws-dataselect.wadl")
 	if err != nil {
-		log.Printf("error reading assets/fdsn-ws-dataselect.wadl: %s", err.Error())
+		log.Printf("error parsing assets/tmpl/fdsn-ws-dataselect.wadl: %s", err.Error())
 	}
+	err = t.ExecuteTemplate(&b, "body", os.Getenv("HOST_CNAME"))
+	if err != nil {
+		log.Printf("error executing assets/tmpl/fdsn-ws-dataselect.wadl: %s", err.Error())
+	}
+	fdsnDataselectWadlFile = b.Bytes()
 
 	fdsnDataselectIndex, err = ioutil.ReadFile("assets/fdsn-ws-dataselect.html")
 	if err != nil {
@@ -118,7 +127,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 	}
 
 	if files == 0 {
-		return &weft.Result{Ok: false, Code: http.StatusNoContent, Msg: "No results for specified query"}
+		return &weft.Result{Ok: false, Code: params[0].NoData, Msg: "No results for specified query"}
 	}
 
 	// Fetch the miniSEED files from S3.  Parse them and write
