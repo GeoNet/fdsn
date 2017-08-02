@@ -11,20 +11,20 @@ type Event struct {
 }
 
 type EventRecord struct {
-	EventName string
-	S3        EventS3
+	EventName string  `json:"eventName,omitempty"`
+	S3        EventS3 `json:"s3,omitempty"`
 }
 
 type EventS3 struct {
-	Object EventObject
-	Bucket EventBucket
+	Object EventObject `json:"object,omitempty"`
+	Bucket EventBucket `json:"bucket,omitempty"`
 }
 
 type EventBucket struct {
-	Name string
+	Name string `json:"name,omitempty"`
 }
 
 type EventObject struct {
-	Key       string
-	VersionId string
+	Key       string `json:"key,omitempty"`
+	VersionId string `json:"versionId,omitempty"`
 }
