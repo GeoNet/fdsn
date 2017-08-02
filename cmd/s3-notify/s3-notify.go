@@ -72,7 +72,7 @@ func main() {
 		})
 
 	if err != nil {
-		log.Fatalf("listing s3 objects:", err)
+		log.Fatalf("listing s3 objects: %s", err)
 	}
 
 	fmt.Println("Total keys matched:", cnt)
