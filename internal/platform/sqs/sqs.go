@@ -97,3 +97,14 @@ func (s *SQS) Delete(queueURL, receiptHandle string) error {
 
 	return err
 }
+
+func (s *SQS) Send(queueURL string, msg Raw) error {
+	params := sqs.SendMessageInput{
+		QueueUrl:aws.String(queueURL),
+		MessageBody:aws.String(msg.Body),
+	}
+
+	_, err := s.client.SendMessage(&params)
+
+	return err
+}
