@@ -9,5 +9,6 @@ cmd/fdsn-holdings-consumer/fdsn-holdings-consumer
 cmd/fdsn-ws-holdings-loader/fdsn-ws-holdings-loader
 cmd/fdsn-slink-db/fdsn-slink-db
 cmd/slink-strong-db/slink-strong-db
+cmd/s3-notify/s3-notify
 *.o
 *.a
