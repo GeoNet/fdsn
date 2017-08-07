@@ -69,7 +69,7 @@ type fdsnStationV1Parm struct {
 	Longitude           float64  `schema:"longitude"`
 	MinRadius           float64  `schema:"minradius"`
 	MaxRadius           float64  `schema:"maxradius"`
-	NoData              int      `schema:"nodata"`       // Select status code for “no data”, either ‘204’ (default) or ‘404’.
+	NoData              int      `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
 }
 
 type fdsnStationV1Search struct {

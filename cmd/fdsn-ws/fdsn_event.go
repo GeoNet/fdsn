@@ -17,6 +17,20 @@ import (
 	"time"
 )
 
+var eventAbbreviations = map[string]string{
+	"start":   "starttime",
+	"end":     "endtime",
+	"minlat":  "minlatitude",
+	"maxlat":  "maxlatitude",
+	"minlon":  "minlongitude",
+	"maxlon":  "maxlongitude",
+	"lat":     "latitude",
+	"lon":     "longitude",
+	"minmag":  "minmagnitude",
+	"maxmag":  "maxmagnitude",
+	"magtype": "magnitudetype",
+}
+
 // supported query parameters for the event service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
 type fdsnEventV1 struct {
 	PublicID             string  `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
@@ -121,6 +135,13 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		MinRadius:    0.0,
 		MaxRadius:    180.0,
 		NoData:       204,
+	}
+
+	for abbrev, expanded := range eventAbbreviations {
+		if val, ok := v[abbrev]; ok {
+			v[expanded] = val
+			delete(v, abbrev)
+		}
 	}
 
 	for key, val := range v {

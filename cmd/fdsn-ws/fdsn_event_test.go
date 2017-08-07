@@ -279,3 +279,69 @@ func TestEventBoundingRadius(t *testing.T) {
 		t.Errorf("expected 0 record got %d.", c)
 	}
 }
+
+func TestEventAbbreviations(t *testing.T) {
+	vals := []struct {
+		k string
+		v string
+	}{
+		{"minlat", "-38.0"},
+		{"maxlat", "-46.0"},
+		{"minlon", "-176.0"},
+		{"maxlon", "-178.0"},
+		{"lat", "-37.5"},
+		{"lon", "-176.5"},
+		{"minmag", "1.1"},
+		{"maxmag", "2.2"},
+		{"start", "2016-09-04T00:00:00"},
+		{"end", "2016-09-05T00:00:00"},
+	}
+
+	// remake v in the loop to test each entry in vals independently.
+	var v url.Values
+
+	v = make(map[string][]string)
+	for _, q := range vals {
+		v.Set(q.k, q.v)
+	}
+
+	e, err := parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if e.MinLatitude != -38.0 {
+		t.Errorf("expected -38.0 for minlat got %f.\n", e.MinLatitude)
+	}
+	if e.MaxLatitude != -46.0 {
+		t.Errorf("expected -46.0 for maxlat got %f.\n", e.MaxLatitude)
+	}
+	if e.MinLongitude != -176.0 {
+		t.Errorf("expected -176.0 for minlon got %f.\n", e.MinLongitude)
+	}
+	if e.MaxLongitude != -178.0 {
+		t.Errorf("expected -178.0 for maxlon got %f.\n", e.MaxLongitude)
+	}
+	if e.Latitude != -37.5 {
+		t.Errorf("expected -37.5 for lat got %f.\n", e.Latitude)
+	}
+	if e.Longitude != -176.5 {
+		t.Errorf("expected -176.5 for lon got %f.\n", e.Longitude)
+	}
+	if e.MinMagnitude != 1.1 {
+		t.Errorf("expected 1.1 for minmag %f.\n", e.MinMagnitude)
+	}
+	if e.MaxMagnitude != 2.2 {
+		t.Errorf("expected 2.2 for maxmag %f.\n", e.MaxMagnitude)
+	}
+
+	tm, _ := time.Parse(time.RFC3339Nano, "2016-09-04T00:00:00.000000000Z")
+	if !e.StartTime.Equal(tm) {
+		t.Errorf("start parameter error: %s", e.StartTime.Format(time.RFC3339Nano))
+	}
+
+	tm, _ = time.Parse(time.RFC3339Nano, "2016-09-05T00:00:00.000000000Z")
+	if !e.EndTime.Equal(tm) {
+		t.Errorf("end parameter error: %s", e.EndTime.Format(time.RFC3339Nano))
+	}
+}
