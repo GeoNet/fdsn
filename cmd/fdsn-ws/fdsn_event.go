@@ -301,13 +301,13 @@ func (e *fdsnEventV1) filter() (q string, args []interface{}) {
 	}
 
 	if e.MinLongitude != math.MaxFloat64 {
-		q = fmt.Sprintf("%s longitude >= $%d AND", q, i)
+		q = fmt.Sprintf("%s ST_X(ST_ShiftLongitude(ST_MakePoint(longitude,0.0))) >= ST_X(ST_ShiftLongitude(ST_MakePoint($%d,0.0))) AND", q, i)
 		args = append(args, e.MinLongitude)
 		i++
 	}
 
 	if e.MaxLongitude != math.MaxFloat64 {
-		q = fmt.Sprintf("%s longitude <= $%d AND", q, i)
+		q = fmt.Sprintf("%s ST_X(ST_ShiftLongitude(ST_MakePoint(longitude,0.0))) <= ST_X(ST_ShiftLongitude(ST_MakePoint($%d,0.0))) AND", q, i)
 		args = append(args, e.MaxLongitude)
 		i++
 	}

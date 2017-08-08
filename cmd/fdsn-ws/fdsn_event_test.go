@@ -68,7 +68,7 @@ func TestEventV1Query(t *testing.T) {
 
 	s, a := e.filter()
 
-	if s != " publicid = $1 AND latitude >= $2 AND latitude <= $3 AND longitude >= $4 AND longitude <= $5 AND depth > $6 AND depth < $7 AND magnitude > $8 AND magnitude < $9 AND origintime >= $10 AND origintime <= $11" {
+	if s != " publicid = $1 AND latitude >= $2 AND latitude <= $3 AND ST_X(ST_ShiftLongitude(ST_MakePoint(longitude,0.0))) >= ST_X(ST_ShiftLongitude(ST_MakePoint($4,0.0))) AND ST_X(ST_ShiftLongitude(ST_MakePoint(longitude,0.0))) <= ST_X(ST_ShiftLongitude(ST_MakePoint($5,0.0))) AND depth > $6 AND depth < $7 AND magnitude > $8 AND magnitude < $9 AND origintime >= $10 AND origintime <= $11" {
 		t.Errorf("query string not correct got %s", s)
 	}
 
