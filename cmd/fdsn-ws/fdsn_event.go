@@ -257,7 +257,7 @@ func (e *fdsnEventV1) query() (*sql.Rows, error) {
 	case "magnitude":
 		q += " ORDER BY magnitude desc"
 	case "magnitude-asc":
-		q += " ORDER BY magnitude desc"
+		q += " ORDER BY magnitude asc"
 	}
 
 	return db.Query(q, args...)
