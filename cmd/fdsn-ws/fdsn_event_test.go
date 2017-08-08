@@ -345,3 +345,59 @@ func TestEventAbbreviations(t *testing.T) {
 		t.Errorf("end parameter error: %s", e.EndTime.Format(time.RFC3339Nano))
 	}
 }
+
+func TestLongitudeWrap180(t *testing.T) {
+	setup(t)
+	defer teardown()
+	var v url.Values
+
+	// test data: one at 176.3257242 and another at -176.3257242
+	v = make(map[string][]string)
+	v.Set("minlon", "177.0")
+	e, err := parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err := e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 1 {
+		t.Errorf("expected 1 records got %d\n", c)
+	}
+
+	v.Set("minlon", "176")
+	v.Set("maxlon", "-176")
+	e, err = parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err = e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 2 {
+		t.Errorf("expected 2 records got %d\n", c)
+	}
+
+	v.Del("minlon")
+	v.Set("maxlon", "-177.0")
+	e, err = parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err = e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 1 {
+		t.Errorf("expected 1 records got %d\n", c)
+	}
+
+}
