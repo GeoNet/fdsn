@@ -17,6 +17,20 @@ import (
 	"time"
 )
 
+var eventAbbreviations = map[string]string{
+	"start":   "starttime",
+	"end":     "endtime",
+	"minlat":  "minlatitude",
+	"maxlat":  "maxlatitude",
+	"minlon":  "minlongitude",
+	"maxlon":  "maxlongitude",
+	"lat":     "latitude",
+	"lon":     "longitude",
+	"minmag":  "minmagnitude",
+	"maxmag":  "maxmagnitude",
+	"magtype": "magnitudetype",
+}
+
 // supported query parameters for the event service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
 type fdsnEventV1 struct {
 	PublicID             string  `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
@@ -121,6 +135,13 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		MinRadius:    0.0,
 		MaxRadius:    180.0,
 		NoData:       204,
+	}
+
+	for abbrev, expanded := range eventAbbreviations {
+		if val, ok := v[abbrev]; ok {
+			v[expanded] = val
+			delete(v, abbrev)
+		}
 	}
 
 	for key, val := range v {
@@ -236,7 +257,7 @@ func (e *fdsnEventV1) query() (*sql.Rows, error) {
 	case "magnitude":
 		q += " ORDER BY magnitude desc"
 	case "magnitude-asc":
-		q += " ORDER BY magnitude desc"
+		q += " ORDER BY magnitude asc"
 	}
 
 	return db.Query(q, args...)
@@ -280,13 +301,13 @@ func (e *fdsnEventV1) filter() (q string, args []interface{}) {
 	}
 
 	if e.MinLongitude != math.MaxFloat64 {
-		q = fmt.Sprintf("%s longitude >= $%d AND", q, i)
+		q = fmt.Sprintf("%s ST_X(ST_ShiftLongitude(ST_MakePoint(longitude,0.0))) >= ST_X(ST_ShiftLongitude(ST_MakePoint($%d,0.0))) AND", q, i)
 		args = append(args, e.MinLongitude)
 		i++
 	}
 
 	if e.MaxLongitude != math.MaxFloat64 {
-		q = fmt.Sprintf("%s longitude <= $%d AND", q, i)
+		q = fmt.Sprintf("%s ST_X(ST_ShiftLongitude(ST_MakePoint(longitude,0.0))) <= ST_X(ST_ShiftLongitude(ST_MakePoint($%d,0.0))) AND", q, i)
 		args = append(args, e.MaxLongitude)
 		i++
 	}

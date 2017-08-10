@@ -68,7 +68,7 @@ func TestEventV1Query(t *testing.T) {
 
 	s, a := e.filter()
 
-	if s != " publicid = $1 AND latitude >= $2 AND latitude <= $3 AND longitude >= $4 AND longitude <= $5 AND depth > $6 AND depth < $7 AND magnitude > $8 AND magnitude < $9 AND origintime >= $10 AND origintime <= $11" {
+	if s != " publicid = $1 AND latitude >= $2 AND latitude <= $3 AND ST_X(ST_ShiftLongitude(ST_MakePoint(longitude,0.0))) >= ST_X(ST_ShiftLongitude(ST_MakePoint($4,0.0))) AND ST_X(ST_ShiftLongitude(ST_MakePoint(longitude,0.0))) <= ST_X(ST_ShiftLongitude(ST_MakePoint($5,0.0))) AND depth > $6 AND depth < $7 AND magnitude > $8 AND magnitude < $9 AND origintime >= $10 AND origintime <= $11" {
 		t.Errorf("query string not correct got %s", s)
 	}
 
@@ -278,4 +278,126 @@ func TestEventBoundingRadius(t *testing.T) {
 	if c != 0 {
 		t.Errorf("expected 0 record got %d.", c)
 	}
+}
+
+func TestEventAbbreviations(t *testing.T) {
+	vals := []struct {
+		k string
+		v string
+	}{
+		{"minlat", "-38.0"},
+		{"maxlat", "-46.0"},
+		{"minlon", "-176.0"},
+		{"maxlon", "-178.0"},
+		{"lat", "-37.5"},
+		{"lon", "-176.5"},
+		{"minmag", "1.1"},
+		{"maxmag", "2.2"},
+		{"start", "2016-09-04T00:00:00"},
+		{"end", "2016-09-05T00:00:00"},
+	}
+
+	// remake v in the loop to test each entry in vals independently.
+	var v url.Values
+
+	v = make(map[string][]string)
+	for _, q := range vals {
+		v.Set(q.k, q.v)
+	}
+
+	e, err := parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if e.MinLatitude != -38.0 {
+		t.Errorf("expected -38.0 for minlat got %f.\n", e.MinLatitude)
+	}
+	if e.MaxLatitude != -46.0 {
+		t.Errorf("expected -46.0 for maxlat got %f.\n", e.MaxLatitude)
+	}
+	if e.MinLongitude != -176.0 {
+		t.Errorf("expected -176.0 for minlon got %f.\n", e.MinLongitude)
+	}
+	if e.MaxLongitude != -178.0 {
+		t.Errorf("expected -178.0 for maxlon got %f.\n", e.MaxLongitude)
+	}
+	if e.Latitude != -37.5 {
+		t.Errorf("expected -37.5 for lat got %f.\n", e.Latitude)
+	}
+	if e.Longitude != -176.5 {
+		t.Errorf("expected -176.5 for lon got %f.\n", e.Longitude)
+	}
+	if e.MinMagnitude != 1.1 {
+		t.Errorf("expected 1.1 for minmag %f.\n", e.MinMagnitude)
+	}
+	if e.MaxMagnitude != 2.2 {
+		t.Errorf("expected 2.2 for maxmag %f.\n", e.MaxMagnitude)
+	}
+
+	tm, _ := time.Parse(time.RFC3339Nano, "2016-09-04T00:00:00.000000000Z")
+	if !e.StartTime.Equal(tm) {
+		t.Errorf("start parameter error: %s", e.StartTime.Format(time.RFC3339Nano))
+	}
+
+	tm, _ = time.Parse(time.RFC3339Nano, "2016-09-05T00:00:00.000000000Z")
+	if !e.EndTime.Equal(tm) {
+		t.Errorf("end parameter error: %s", e.EndTime.Format(time.RFC3339Nano))
+	}
+}
+
+func TestLongitudeWrap180(t *testing.T) {
+	setup(t)
+	defer teardown()
+	var v url.Values
+
+	// test data: one at 176.3257242 and another at -176.3257242
+	v = make(map[string][]string)
+	v.Set("minlon", "177.0")
+	e, err := parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err := e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 1 {
+		t.Errorf("expected 1 records got %d\n", c)
+	}
+
+	v.Set("minlon", "176")
+	v.Set("maxlon", "-176")
+	e, err = parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err = e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 2 {
+		t.Errorf("expected 2 records got %d\n", c)
+	}
+
+	v.Del("minlon")
+	v.Set("maxlon", "-177.0")
+	e, err = parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err = e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 1 {
+		t.Errorf("expected 1 records got %d\n", c)
+	}
+
 }
