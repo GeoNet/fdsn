@@ -9,7 +9,7 @@ import (
 // holdingsSearch searches for S3 keys matching the query.
 // network, station, channel, and location are matched using POSIX regular expressions.
 // https://www.postgresql.org/docs/9.3/static/functions-matching.html
-// start and end should be set for all queries.  24 hours will be subtracted from the Start time to include all records
+// start and end should be set for all queries.  24 hours will be subtracted from the Start time and be added from the End time to include all records
 // in each day long file.
 func holdingsSearch(d fdsn.DataSearch) (keys []string, err error) {
 	var rows *sql.Rows
@@ -20,7 +20,7 @@ func holdingsSearch(d fdsn.DataSearch) (keys []string, err error) {
 	AND channel ~ $3
 	AND location ~ $4)
 	SELECT DISTINCT ON (key) key FROM s JOIN fdsn.holdings USING (streampk) WHERE start_time >= $5 AND start_time <= $6`,
-		d.Network, d.Station, d.Channel, d.Location, d.Start.Add(time.Hour*-24), d.End)
+		d.Network, d.Station, d.Channel, d.Location, d.Start.Add(time.Hour*-24), d.End.Add(time.Hour*24))
 	if err != nil {
 		return
 	}

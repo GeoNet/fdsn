@@ -166,7 +166,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 					return weft.InternalServerError(err)
 				}
 
-				if msr.Starttime().After(v.d.Start) && msr.Endtime().Before(v.d.End) {
+				if msr.Starttime().Before(v.d.End) && msr.Endtime().After(v.d.Start) {
 					w.Write(record)
 				}
 			}
