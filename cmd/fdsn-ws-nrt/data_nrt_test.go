@@ -7,7 +7,6 @@ import (
 	"github.com/golang/groupcache"
 	"io"
 	"os"
-	"strings"
 	"testing"
 	"time"
 )
@@ -76,19 +75,19 @@ func TestGetRecord(t *testing.T) {
 		t.Error(err)
 	}
 
-	if strings.Trim(msr.Network(), "\x00") != "NZ" {
+	if msr.Network() != "NZ" {
 		t.Errorf("expected network NZ got %s", msr.Network())
 	}
 
-	if strings.Trim(msr.Station(), "\x00") != "ABAZ" {
+	if msr.Station() != "ABAZ" {
 		t.Errorf("expected station ABAZ got %s", msr.Station())
 	}
 
-	if strings.Trim(msr.Channel(), "\x00") != "EHE" {
+	if msr.Channel() != "EHE" {
 		t.Errorf("expected channel EHE got %s", msr.Channel())
 	}
 
-	if strings.Trim(msr.Location(), "\x00") != "10" {
+	if msr.Location() != "10" {
 		t.Errorf("expected location 10 got %s", msr.Location())
 	}
 
@@ -249,10 +248,10 @@ func testLoad(file string, t testing.TB) {
 			continue
 		}
 
-		network := strings.Trim(msr.Network(), "\x00")
-		station := strings.Trim(msr.Station(), "\x00")
-		channel := strings.Trim(msr.Channel(), "\x00")
-		location := strings.Trim(msr.Location(), "\x00")
+		network := msr.Network()
+		station := msr.Station()
+		channel := msr.Channel()
+		location := msr.Location()
 
 		// not bothering setting min and max
 
@@ -312,10 +311,10 @@ func testLoadFirst(file string, t testing.TB) {
 		return
 	}
 
-	network := strings.Trim(msr.Network(), "\x00")
-	station := strings.Trim(msr.Station(), "\x00")
-	channel := strings.Trim(msr.Channel(), "\x00")
-	location := strings.Trim(msr.Location(), "\x00")
+	network := msr.Network()
+	station := msr.Station()
+	channel := msr.Channel()
+	location := msr.Location()
 
 	// not bothering setting min and max
 
