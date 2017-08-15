@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"unsafe"
+	"unicode/utf8"
 )
 
 type MSRecord _Ctype_struct_MSRecord_s
@@ -24,16 +25,16 @@ func (m *MSRecord) SequenceNumber() int32 {
 	return int32(m.sequence_number)
 }
 func (m *MSRecord) Network() string {
-	return strings.TrimRight(C.GoStringN(&m.network[0], 2), " ")
+	return cleanString(C.GoStringN(&m.network[0], 2))
 }
 func (m *MSRecord) Station() string {
-	return strings.TrimRight(C.GoStringN(&m.station[0], 5), " ")
+	return cleanString(C.GoStringN(&m.station[0], 5))
 }
 func (m *MSRecord) Location() string {
-	return strings.TrimRight(C.GoStringN(&m.location[0], 2), " ")
+	return cleanString(C.GoStringN(&m.location[0], 2))
 }
 func (m *MSRecord) Channel() string {
-	return strings.TrimRight(C.GoStringN(&m.channel[0], 3), " ")
+	return cleanString(C.GoStringN(&m.channel[0], 3))
 }
 func (m *MSRecord) Dataquality() byte {
 	return byte(m.dataquality)
@@ -132,4 +133,26 @@ func (m *MSRecord) SrcName(quality int8) string {
 	defer C.free(unsafe.Pointer(csrcname))
 	C.msr_srcname((*_Ctype_struct_MSRecord_s)(m), csrcname, C.flag(quality))
 	return C.GoString(csrcname)
+}
+
+// cleanString removes all non UTF8, spaces, and null termination
+// characters from s.
+func cleanString(s string) string {
+	if !utf8.ValidString(s) {
+		v := make([]rune, 0, len(s))
+		for i, r := range s {
+			if r == utf8.RuneError {
+				_, size := utf8.DecodeRuneInString(s[i:])
+				if size == 1 {
+					continue
+				}
+			}
+			v = append(v, r)
+		}
+		s = string(v)
+	}
+
+	s = strings.Replace(s, " ", "", -1)
+
+	return strings.Replace(s, "\x00", "", -1)
 }
