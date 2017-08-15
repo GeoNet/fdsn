@@ -4,7 +4,6 @@ package holdings
 import (
 	"github.com/GeoNet/kit/mseed"
 	"io"
-	"strings"
 	"time"
 )
 
@@ -42,10 +41,10 @@ func SingleStream(r io.Reader) (Holding, error) {
 	}
 
 	h := Holding{
-		Network:    strings.Trim(msr.Network(), "\x00"),
-		Station:    strings.Trim(msr.Station(), "\x00"),
-		Channel:    strings.Trim(msr.Channel(), "\x00"),
-		Location:   strings.Trim(msr.Location(), "\x00"),
+		Network:    msr.Network(),
+		Station:    msr.Station(),
+		Channel:    msr.Channel(),
+		Location:   msr.Location(),
 		Start:      msr.Starttime(),
 		NumSamples: int(msr.Numsamples()),
 	}

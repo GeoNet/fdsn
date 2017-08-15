@@ -42,22 +42,22 @@
 			"tree": true
 		},
 		{
-			"checksumSHA1": "EiYTGjWEG36hVCdQ8uFNJpxzepw=",
+			"checksumSHA1": "kd7ow9jrUio4gc74DV38kl2cMPA=",
 			"path": "github.com/GeoNet/kit/mseed",
-			"revision": "2c00bd8989f810e3c3746c01cda4bcfc1bb1f559",
-			"revisionTime": "2017-05-29T05:10:37Z"
+			"revision": "5203fd0a601edb389818488f5d2ee5fb4ee9d477",
+			"revisionTime": "2017-06-28T22:00:05Z"
 		},
 		{
 			"checksumSHA1": "3JsW/vlMhZWOm9tAS+ZoOYUy8aQ=",
 			"path": "github.com/GeoNet/kit/sc3ml",
-			"revision": "2f9da4f307c2035e47546391da8701a642fc9598",
-			"revisionTime": "2017-02-06T08:02:36Z"
+			"revision": "5203fd0a601edb389818488f5d2ee5fb4ee9d477",
+			"revisionTime": "2017-06-28T22:00:05Z"
 		},
 		{
 			"checksumSHA1": "2+qgbnzd5tfpcwZols7hyOQjzu8=",
 			"path": "github.com/GeoNet/kit/slink",
-			"revision": "2c00bd8989f810e3c3746c01cda4bcfc1bb1f559",
-			"revisionTime": "2017-05-29T05:10:37Z"
+			"revision": "5203fd0a601edb389818488f5d2ee5fb4ee9d477",
+			"revisionTime": "2017-06-28T22:00:05Z"
 		},
 		{
 			"checksumSHA1": "FcAtIa3dCgJBin+SrFiTOEU/bsA=",

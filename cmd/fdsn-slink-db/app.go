@@ -7,7 +7,6 @@ import (
 	"github.com/GeoNet/kit/mseed"
 	"github.com/pkg/errors"
 	"log"
-	"strings"
 	"time"
 )
 
@@ -78,10 +77,10 @@ func (a *app) save(inbound chan []byte) {
 
 			for {
 				err = a.saveRecord(record{
-					network:      strings.Trim(msr.Network(), "\x00"),
-					station:      strings.Trim(msr.Station(), "\x00"),
-					channel:      strings.Trim(msr.Channel(), "\x00"),
-					location:     strings.Trim(msr.Location(), "\x00"),
+					network:      msr.Network(),
+					station:      msr.Station(),
+					channel:      msr.Channel(),
+					location:     msr.Location(),
 					start:        msr.Starttime(),
 					latency_tx:   time.Now().UTC().Sub(msr.Endtime()).Seconds(),
 					latency_data: time.Now().UTC().Sub(msr.Starttime()).Seconds(),
