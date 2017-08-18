@@ -19,6 +19,7 @@ type holding struct {
 
 func (h *holding) save() error {
 	r, err := h.saveHoldings()
+
 	switch {
 	case err != nil:
 		return err
@@ -40,28 +41,7 @@ func (h *holding) save() error {
 }
 
 func (h *holding) saveHoldings() (int64, error) {
-	txn, err := db.Begin()
-
-	_, err = txn.Exec(`DELETE FROM fdsn.holdings WHERE key=$1`, h.key)
-	if err != nil {
-		txn.Rollback()
-		return 0, err
-	}
-
-	r, err := txn.Exec(`INSERT INTO fdsn.holdings (streamPK, start_time, numsamples, key)
-	SELECT streamPK, $5, $6, $7
-	FROM fdsn.stream
-	WHERE network = $1
-	AND station = $2
-	AND channel = $3
-	AND location = $4`, h.Network, h.Station, h.Channel, h.Location, h.Start,
-		h.NumSamples, h.key)
-	if err != nil {
-		txn.Rollback()
-		return 0, err
-	}
-
-	err = txn.Commit()
+	r, err := saveHoldings.Exec(h.Network, h.Station, h.Channel, h.Location, h.Start, h.NumSamples, h.key)
 	if err != nil {
 		return 0, err
 	}

@@ -28,11 +28,12 @@ import (
 )
 
 var (
-	db        *sql.DB
-	queueURL  = os.Getenv("SQS_QUEUE_URL")
-	sqsClient sqs.SQS
-	s3Session *session.Session
-	s3Client  *s3.S3
+	db           *sql.DB
+	queueURL     = os.Getenv("SQS_QUEUE_URL")
+	sqsClient    sqs.SQS
+	s3Session    *session.Session
+	s3Client     *s3.S3
+	saveHoldings *sql.Stmt
 )
 
 type event struct {
@@ -50,6 +51,25 @@ func main() {
 		log.Fatalf("error with DB config: %s", err)
 	}
 	defer db.Close()
+
+	// TODO - this is duplicated in the test set up.
+	// make a struct like in fdsn-holdings-consumer and move the
+	// db connection and set up to that.
+	saveHoldings, err = db.Prepare(`INSERT INTO fdsn.holdings (streamPK, start_time, numsamples, key)
+	SELECT streamPK, $5, $6, $7
+	FROM fdsn.stream
+	WHERE network = $1
+	AND station = $2
+	AND channel = $3
+	AND location = $4
+	ON CONFLICT (streamPK, key) DO UPDATE SET
+	start_time = EXCLUDED.start_time,
+	numsamples = EXCLUDED.numsamples`)
+	if err != nil {
+		log.Fatalf("preparing saveHoldings statement: %s", err.Error())
+	}
+
+	defer saveHoldings.Close()
 
 	db.SetMaxIdleConns(p.MaxIdle)
 	db.SetMaxOpenConns(p.MaxOpen)
