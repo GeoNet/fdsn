@@ -55,8 +55,8 @@ func main() {
 	// TODO - this is duplicated in the test set up.
 	// make a struct like in fdsn-holdings-consumer and move the
 	// db connection and set up to that.
-	saveHoldings, err = db.Prepare(`INSERT INTO fdsn.holdings (streamPK, start_time, numsamples, key)
-	SELECT streamPK, $5, $6, $7
+	saveHoldings, err = db.Prepare(`INSERT INTO fdsn.holdings (streamPK, start_time, numsamples, key, error_data, error_msg)
+	SELECT streamPK, $5, $6, $7, $8, $9
 	FROM fdsn.stream
 	WHERE network = $1
 	AND station = $2
@@ -64,7 +64,9 @@ func main() {
 	AND location = $4
 	ON CONFLICT (streamPK, key) DO UPDATE SET
 	start_time = EXCLUDED.start_time,
-	numsamples = EXCLUDED.numsamples`)
+	numsamples = EXCLUDED.numsamples,
+	error_data = EXCLUDED.error_data,
+	error_msg = EXCLUDED.error_msg`)
 	if err != nil {
 		log.Fatalf("preparing saveHoldings statement: %s", err.Error())
 	}
@@ -138,9 +140,12 @@ func (e *event) Process(msg []byte) error {
 	for _, v := range e.Records {
 		switch {
 		case strings.HasPrefix(v.EventName, "ObjectCreated"):
+			// TODO (GMC) setting errors like this will include miniSEED errors as well
+			// errors from reading from S3.  Is this ok or should it just be miniSEED errors?
 			h, err := holdingS3(v.S3.Bucket.Name, v.S3.Object.Key)
 			if err != nil {
-				return errors.Wrapf(err, "error creating holdings for %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
+				h.errorData = true
+				h.errorMsg = err.Error()
 			}
 
 			err = h.save()

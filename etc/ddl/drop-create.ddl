@@ -45,6 +45,8 @@ CREATE TABLE fdsn.holdings (
   start_time    TIMESTAMP(6) WITH TIME ZONE NOT NULL,
   numsamples INTEGER NOT NULL,
   key      TEXT                     NOT NULL,
+  error_data BOOLEAN NOT NULL,
+  error_msg TEXT NOT NULL,
   UNIQUE (streamPK, key)
 );
 

@@ -19,7 +19,10 @@ func holdingsSearch(d fdsn.DataSearch) (keys []string, err error) {
 	AND station ~ $2
 	AND channel ~ $3
 	AND location ~ $4)
-	SELECT DISTINCT ON (key) key FROM s JOIN fdsn.holdings USING (streampk) WHERE start_time >= $5 AND start_time <= $6`,
+	SELECT DISTINCT ON (key) key FROM s JOIN fdsn.holdings USING (streampk)
+	WHERE start_time >= $5
+	AND start_time <= $6
+	AND error_data = false`,
 		d.Network, d.Station, d.Channel, d.Location, d.Start.Add(time.Hour*-24), d.End.Add(time.Hour*24))
 	if err != nil {
 		return
