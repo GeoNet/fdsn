@@ -144,6 +144,7 @@ func (e *event) Process(msg []byte) error {
 			// errors from reading from S3.  Is this ok or should it just be miniSEED errors?
 			h, err := holdingS3(v.S3.Bucket.Name, v.S3.Object.Key)
 			if err != nil {
+				h.key = v.S3.Object.Key
 				h.errorData = true
 				h.errorMsg = err.Error()
 			}
