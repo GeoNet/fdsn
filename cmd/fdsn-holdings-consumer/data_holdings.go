@@ -14,7 +14,9 @@ const (
 
 type holding struct {
 	holdings.Holding
-	key string // the S3 bucket key
+	key       string // the S3 bucket key
+	errorData bool   // the miniSEED file has errors
+	errorMsg  string // the cause of the errors
 }
 
 func (h *holding) save() error {
@@ -41,7 +43,7 @@ func (h *holding) save() error {
 }
 
 func (h *holding) saveHoldings() (int64, error) {
-	r, err := saveHoldings.Exec(h.Network, h.Station, h.Channel, h.Location, h.Start, h.NumSamples, h.key)
+	r, err := saveHoldings.Exec(h.Network, h.Station, h.Channel, h.Location, h.Start, h.NumSamples, h.key, h.errorData, h.errorMsg)
 	if err != nil {
 		return 0, err
 	}

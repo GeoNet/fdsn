@@ -15,7 +15,9 @@ const (
 
 type holding struct {
 	holdings.Holding
-	key string // the S3 bucket key
+	key       string // the S3 bucket key
+	errorData bool   // the miniSEED file has errors
+	errorMsg  string // the cause of the errors
 }
 
 func TestSaveHoldings(t *testing.T) {
@@ -140,14 +142,14 @@ func (h *holding) saveHoldings() (int64, error) {
 		return 0, err
 	}
 
-	r, err := txn.Exec(`INSERT INTO fdsn.holdings (streamPK, start_time, numsamples, key)
-	SELECT streamPK, $5, $6, $7
+	r, err := txn.Exec(`INSERT INTO fdsn.holdings (streamPK, start_time, numsamples, key, error_data, error_msg)
+	SELECT streamPK, $5, $6, $7, $8, $9
 	FROM fdsn.stream
 	WHERE network = $1
 	AND station = $2
 	AND channel = $3
 	AND location = $4`, h.Network, h.Station, h.Channel, h.Location, h.Start,
-		h.NumSamples, h.key)
+		h.NumSamples, h.key, h.errorData, h.errorMsg)
 	if err != nil {
 		txn.Rollback()
 		return 0, err

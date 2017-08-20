@@ -70,8 +70,8 @@ func setup(t *testing.T) {
 		t.Fatal("ERROR: problem pinging DB")
 	}
 
-	saveHoldings, err = db.Prepare(`INSERT INTO fdsn.holdings (streamPK, start_time, numsamples, key)
-	SELECT streamPK, $5, $6, $7
+	saveHoldings, err = db.Prepare(`INSERT INTO fdsn.holdings (streamPK, start_time, numsamples, key, error_data, error_msg)
+	SELECT streamPK, $5, $6, $7, $8, $9
 	FROM fdsn.stream
 	WHERE network = $1
 	AND station = $2
@@ -79,7 +79,9 @@ func setup(t *testing.T) {
 	AND location = $4
 	ON CONFLICT (streamPK, key) DO UPDATE SET
 	start_time = EXCLUDED.start_time,
-	numsamples = EXCLUDED.numsamples`)
+	numsamples = EXCLUDED.numsamples,
+	error_data = EXCLUDED.error_data,
+	error_msg = EXCLUDED.error_msg`)
 	if err != nil {
 		t.Fatalf("preparing saveHoldings statement: %s", err.Error())
 	}
