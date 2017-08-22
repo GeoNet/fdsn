@@ -78,6 +78,7 @@ func setup(t *testing.T) {
 	AND channel = $3
 	AND location = $4
 	ON CONFLICT (streamPK, key) DO UPDATE SET
+	streamPK = EXCLUDED.streamPK,
 	start_time = EXCLUDED.start_time,
 	numsamples = EXCLUDED.numsamples,
 	error_data = EXCLUDED.error_data,

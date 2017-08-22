@@ -55,6 +55,12 @@ func main() {
 	// TODO - this is duplicated in the test set up.
 	// make a struct like in fdsn-holdings-consumer and move the
 	// db connection and set up to that.
+	//
+	// when a miniSEED file has errors the error state and message are saved to
+	// the holdings db.  The key is the file name and the streamPK will be
+	// based on a nscl with zero strings "".""."".""
+	// if the error is corrected the stream will change to some valid nscl.
+	// To handle this the streamPK is updated on conflict.
 	saveHoldings, err = db.Prepare(`INSERT INTO fdsn.holdings (streamPK, start_time, numsamples, key, error_data, error_msg)
 	SELECT streamPK, $5, $6, $7, $8, $9
 	FROM fdsn.stream
@@ -63,6 +69,7 @@ func main() {
 	AND channel = $3
 	AND location = $4
 	ON CONFLICT (streamPK, key) DO UPDATE SET
+	streamPK = EXCLUDED.streamPK,
 	start_time = EXCLUDED.start_time,
 	numsamples = EXCLUDED.numsamples,
 	error_data = EXCLUDED.error_data,
