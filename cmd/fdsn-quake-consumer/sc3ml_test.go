@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -72,6 +74,57 @@ func TestEventUnmarshal(t *testing.T) {
 
 	if !reflect.DeepEqual(e, c) {
 		t.Errorf("c not equal to e, expected: %+v", e)
+	}
+}
+
+// TestEventType tests that the remapping of SC3ML event type to QuakeML is correct.
+// The bug in the sc3ml_*_quakeml_1.2.xsl conversion (inserting "other" instead of "other event"
+// has been fixed locally and reported upstream.  GMC 12 Sept 2017
+func TestEventType(t *testing.T) {
+	testCases := []struct {
+		id        string
+		version   []byte
+		eventType []byte
+	}{
+		{id: loc(), version: sc3ml07, eventType: []byte("<type>not locatable</type>")},
+		{id: loc(), version: sc3ml07, eventType: []byte("<type>outside of network interest</type>")},
+		{id: loc(), version: sc3ml07, eventType: []byte("<type>duplicate</type>")},
+		{id: loc(), version: sc3ml08, eventType: []byte("<type>not locatable</type>")},
+		{id: loc(), version: sc3ml08, eventType: []byte("<type>outside of network interest</type>")},
+		{id: loc(), version: sc3ml08, eventType: []byte("<type>duplicate</type>")},
+		{id: loc(), version: sc3ml09, eventType: []byte("<type>not locatable</type>")},
+		{id: loc(), version: sc3ml09, eventType: []byte("<type>outside of network interest</type>")},
+		{id: loc(), version: sc3ml09, eventType: []byte("<type>duplicate</type>")},
+	}
+
+	for _, v := range testCases {
+
+		var err error
+		var f *os.File
+		var b []byte
+
+		// input test file is sc3ml 0.7 change the version string below to test each
+		// sc3ml version that is supported.
+		if f, err = os.Open("etc/2015p768477.xml"); err != nil {
+			t.Fatal(err)
+		}
+
+		if b, err = ioutil.ReadAll(f); err != nil {
+			t.Fatal(err)
+		}
+		f.Close()
+
+		b = bytes.Replace(b, sc3ml07, v.version, -1)
+		b = bytes.Replace(b, []byte("<type>earthquake</type>"), v.eventType, -1)
+
+		var e string
+		if e, err = toQuakeMLEvent(b); err != nil {
+			t.Errorf("%s %s", v.id, err.Error())
+		}
+
+		if !strings.Contains(e, "<type>other event</type>") {
+			t.Errorf("%s expected event type <type>other event</type>", v.id)
+		}
 	}
 }
 
@@ -222,4 +275,9 @@ func setup(t *testing.T) {
 
 func teardown() {
 	db.Close()
+}
+
+func loc() string {
+	_, _, l, _ := runtime.Caller(1)
+	return "L" + strconv.Itoa(l)
 }
