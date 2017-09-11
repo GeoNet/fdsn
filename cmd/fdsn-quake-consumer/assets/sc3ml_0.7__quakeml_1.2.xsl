@@ -257,9 +257,9 @@
             <xsl:choose>
                 <xsl:when test="$v='induced earthquake'">induced or triggered event</xsl:when>
                 <xsl:when test="$v='meteor impact'">meteorite</xsl:when>
-                <xsl:when test="$v='not locatable'">other</xsl:when>
-                <xsl:when test="$v='outside of network interest'">other</xsl:when>
-                <xsl:when test="$v='duplicate'">other</xsl:when>
+                <xsl:when test="$v='not locatable'">other event</xsl:when>
+                <xsl:when test="$v='outside of network interest'">other event</xsl:when>
+                <xsl:when test="$v='duplicate'">other event</xsl:when>
                 <xsl:otherwise><xsl:value-of select="$v"/></xsl:otherwise>
             </xsl:choose>
         </xsl:element>
