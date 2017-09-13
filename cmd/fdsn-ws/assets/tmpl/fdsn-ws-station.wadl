@@ -37,11 +37,6 @@
 					<param name="format" style="query" type="xsd:string" default="xml">
 						<option value="xml"/>
 						<option value="text"/>
-
-						<!-- additional, non standard options -->
-						<option value="fdsnxml"/>
-						<option value="stationxml"/>
-						<option value="sc3ml"/>
 					</param>
 
 					<!-- additional, non standard parameters -->

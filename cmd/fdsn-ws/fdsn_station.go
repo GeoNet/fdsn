@@ -845,7 +845,7 @@ func (d xsdDateTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		return nil
 	}
 	s, err := d.MarshalText()
-	if err!= nil {
+	if err != nil {
 		return e.EncodeElement(nil, start)
 	}
 	return e.EncodeElement(s, start)

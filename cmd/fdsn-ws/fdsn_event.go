@@ -132,6 +132,7 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		MaxMagnitude: math.MaxFloat64,
 		Latitude:     math.MaxFloat64,
 		Longitude:    math.MaxFloat64,
+		Format:       "xml",
 		MinRadius:    0.0,
 		MaxRadius:    180.0,
 		NoData:       204,
@@ -156,6 +157,10 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 	err := decoder.Decode(&e, v)
 	if err != nil {
 		return e, err
+	}
+
+	if e.Format != "xml" && e.Format != "text" {
+		return e, errors.New("Invalid format.")
 	}
 
 	if e.IncludeAllMagnitudes {
@@ -239,8 +244,32 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 
 // query queries the DB for events matching e.
 // The caller must close sql.Rows.
-func (e *fdsnEventV1) query() (*sql.Rows, error) {
+func (e *fdsnEventV1) queryQuakeML12Event() (*sql.Rows, error) {
 	q := "SELECT Quakeml12Event FROM fdsn.event WHERE deleted != true"
+
+	qq, args := e.filter()
+
+	if qq != "" {
+		q = q + " AND " + qq
+	}
+
+	switch e.OrderBy {
+	case "":
+	case "time":
+		q += " ORDER BY origintime desc"
+	case "time-asc":
+		q += " ORDER BY origintime asc"
+	case "magnitude":
+		q += " ORDER BY magnitude desc"
+	case "magnitude-asc":
+		q += " ORDER BY magnitude asc"
+	}
+
+	return db.Query(q, args...)
+}
+
+func (e *fdsnEventV1) queryRaw() (*sql.Rows, error) {
+	q := "SELECT PublicID,OriginTime,Latitude,Longitude,Depth,MagnitudeType,Magnitude FROM fdsn.event WHERE deleted != true"
 
 	qq, args := e.filter()
 
@@ -401,32 +430,57 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.R
 		}
 	}
 
-	rows, err := e.query()
-	if err != nil {
-		return weft.ServiceUnavailableError(err)
-	}
-	defer rows.Close()
-
-	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>
-	<q:quakeml xmlns:q="http://quakeml.org/xmlns/quakeml/1.2" xmlns="http://quakeml.org/xmlns/bed/1.2">
-	  <eventParameters publicID="smi:nz.org.geonet/NA">`)
-
-	var xml string
-
-	for rows.Next() {
-		err = rows.Scan(&xml)
+	if e.Format == "xml" {
+		rows, err := e.queryQuakeML12Event()
 		if err != nil {
 			return weft.ServiceUnavailableError(err)
 		}
+		defer rows.Close()
 
-		b.WriteString(xml)
+		b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>
+	<q:quakeml xmlns:q="http://quakeml.org/xmlns/quakeml/1.2" xmlns="http://quakeml.org/xmlns/bed/1.2">
+	  <eventParameters publicID="smi:nz.org.geonet/NA">`)
+
+		var xml string
+
+		for rows.Next() {
+			err = rows.Scan(&xml)
+			if err != nil {
+				return weft.ServiceUnavailableError(err)
+			}
+
+			b.WriteString(xml)
+		}
+
+		b.WriteString(`</eventParameters></q:quakeml>`)
+
+		h.Set("Content-Type", "application/xml")
+	} else {
+		rows, err := e.queryRaw()
+		if err != nil {
+			return weft.ServiceUnavailableError(err)
+		}
+		defer rows.Close()
+
+		b.WriteString("#EventID | Time | Latitude | Longitude | Depth/km | Author | Catalog | Contributor | ContributorID | MagType | Magnitude | MagAuthor | EventLocationName\n")
+
+		var eventID, magType string
+		var tm time.Time
+		var latitude, longitude, depth, magnitude float64
+		for rows.Next() {
+			err = rows.Scan(&eventID, &tm, &latitude, &longitude, &depth, &magType, &magnitude)
+			if err != nil {
+				return weft.ServiceUnavailableError(err)
+			}
+			// We don't provide EventLocationName
+			s := fmt.Sprintf("%s|%s|%.3f|%.3f|%.1f|GNS|GNS|GNS|%s|%s|%.1f|GNS|\n", eventID, tm.Format("2006-01-02T15:04:05"), latitude, longitude, depth, eventID, magType, magnitude)
+			b.WriteString(s)
+		}
+
+		h.Set("Content-Type", "text/plain")
 	}
 
-	b.WriteString(`</eventParameters></q:quakeml>`)
-
 	log.Printf("%s found %d events, result size %.1f (MB)", r.RequestURI, c, float64(b.Len())/1000000.0)
-
-	h.Set("Content-Type", "application/xml")
 
 	return &weft.StatusOK
 }
