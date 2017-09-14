@@ -50,6 +50,7 @@ func TestEventV1Query(t *testing.T) {
 		MaxRadius:    180.0,
 		MinRadius:    0.0,
 		NoData:       204,
+		Format:       "xml",
 	}
 
 	ex.StartTime.Time, err = time.Parse(time.RFC3339Nano, "2015-01-12T12:12:12.000000000Z")
