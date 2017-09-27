@@ -89,7 +89,7 @@ func TestStationFilter(t *testing.T) {
 	c = *fdsnStations.fdsn
 	v.Set("station", "ARAZ")
 	v.Set("channel", "EHE")
-	v.Set("level", "channel")
+	v.Set("level", "response")
 
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
@@ -108,12 +108,29 @@ func TestStationFilter(t *testing.T) {
 		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
 	}
 
+	if len(c.Network[0].Station[0].Channel[0].Response.Stage) != 3 {
+		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel[0].Response.Stage))
+	}
+
+	// check trimming
+	v.Set("level", "channel")
+
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+	c.doFilter([]fdsnStationV1Search{e})
+
+	if c.Network[0].Station[0].Channel[0].Response.Stage != nil {
+		t.Errorf("Incorrect filter result. Expect nil got %d", len(c.Network[0].Station[0].Channel[0].Response.Stage))
+	}
+
 	// latlng radius matching
 	c = *fdsnStations.fdsn
 	v = make(map[string][]string)
 	v.Set("latitude", "-38.6")
 	v.Set("longitude", "176.1")
 	v.Set("maxradius", "0.5")
+	v.Set("level", "channel")
 
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
@@ -127,7 +144,7 @@ func TestStationFilter(t *testing.T) {
 		t.Errorf("Incorrect filter result. Expect 1 got %d", len(c.Network[0].Station))
 	}
 
-	if len(c.Network[0].Station[0].Channel) != 6 {
+	if len(c.Network[0].Station[0].Channel) != 9 {
 		t.Errorf("Incorrect filter result. Expect 6 got %d", len(c.Network[0].Station[0].Channel))
 	}
 
