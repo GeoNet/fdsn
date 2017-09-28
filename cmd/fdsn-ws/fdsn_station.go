@@ -433,10 +433,6 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 		return &weft.Result{Ok: true, Code: params[0].NoData, Msg: ""}
 	}
 
-	// Then trim the tree to the level specified in parameter before marshaling.
-	// (Note: all params have the same level so I'm taking the first param's level.)
-	c.trimLevel(params[0].LevelValue)
-
 	if params[0].Format == "xml" {
 		by, err := xml.Marshal(c)
 		if err != nil {
@@ -470,7 +466,15 @@ func (r *FDSNStationXML) trimLevel(level int) {
 			for c := 0; c < len(st.Channel); c++ {
 				ch := &st.Channel[c]
 				if level < STATION_LEVEL_RESPONSE {
-					ch.Response.Stage = nil // Masking response only stops displaying "Stage"s
+					// ch.Response is a pointer to source struct so we want to keep the source intact
+					res := &ResponseType{
+						ResourceId: ch.Response.ResourceId,
+						Items:      ch.Response.Items,
+						InstrumentSensitivity: ch.Response.InstrumentSensitivity,
+						InstrumentPolynomial:  ch.Response.InstrumentPolynomial,
+						Stage:                 nil,
+					}
+					ch.Response = res
 					continue
 				}
 			}
@@ -543,6 +547,10 @@ func (r *FDSNStationXML) doFilter(params []fdsnStationV1Search) bool {
 		// No result ( no "Network" node )
 		return false
 	}
+
+	// Then trim the tree to the level specified in parameter before marshaling.
+	// (Note: all params have the same level so I'm taking the first param's level.)
+	r.trimLevel(params[0].LevelValue)
 
 	return true
 }
@@ -650,6 +658,7 @@ func (c *ChannelType) doFilter(params []fdsnStationV1Search) bool {
 		if !p.validBounding(c.Latitude.Value, c.Longitude.Value) {
 			continue
 		}
+
 		return true
 	}
 
