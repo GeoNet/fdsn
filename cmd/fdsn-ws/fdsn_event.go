@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/weft"
+	"github.com/GeoNet/kit/wgs84"
 	"io/ioutil"
 	"log"
 	"math"
@@ -472,8 +473,11 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.R
 			if err != nil {
 				return weft.ServiceUnavailableError(err)
 			}
-			// We don't provide EventLocationName
-			s := fmt.Sprintf("%s|%s|%.3f|%.3f|%.1f|GNS|GNS|GNS|%s|%s|%.1f|GNS|\n", eventID, tm.Format("2006-01-02T15:04:05"), latitude, longitude, depth, eventID, magType, magnitude)
+			loc := ""
+			if l, err := wgs84.ClosestNZ(latitude, longitude); err == nil {
+				loc = l.Description()
+			}
+			s := fmt.Sprintf("%s|%s|%.3f|%.3f|%.1f|GNS|GNS|GNS|%s|%s|%.1f|GNS|%s\n", eventID, tm.Format("2006-01-02T15:04:05"), latitude, longitude, depth, eventID, magType, magnitude, loc)
 			b.WriteString(s)
 		}
 

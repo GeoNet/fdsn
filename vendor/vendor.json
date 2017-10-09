@@ -3,45 +3,6 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "x66dBA9On6IvryKWc/nUaIAw3k8=",
-			"origin": "github.com/GeoNet/haz/vendor/github.com/GeoNet/Golang-Ellipsoid/ellipsoid",
-			"path": "github.com/GeoNet/Golang-Ellipsoid/ellipsoid",
-			"revision": "c86387b7d6cd380cb26cd4e3a9cb1d3c6cdbccf9",
-			"revisionTime": "2016-12-18T06:52:36Z"
-		},
-		{
-			"checksumSHA1": "VFgFU+lG4iAqCPnqak2mZdzIYBo=",
-			"path": "github.com/GeoNet/delta",
-			"revision": "8314a19149c621789d15a6948c310b01249d1191",
-			"revisionTime": "2017-01-06T00:42:38Z"
-		},
-		{
-			"checksumSHA1": "QOSMCi5XSKFryhB507FXLXBHjXk=",
-			"path": "github.com/GeoNet/haz/database",
-			"revision": "c86387b7d6cd380cb26cd4e3a9cb1d3c6cdbccf9",
-			"revisionTime": "2016-12-18T06:52:36Z"
-		},
-		{
-			"checksumSHA1": "OiWRmUyeQXs/AVF1kXpKXyEYDqA=",
-			"path": "github.com/GeoNet/haz/msg",
-			"revision": "c86387b7d6cd380cb26cd4e3a9cb1d3c6cdbccf9",
-			"revisionTime": "2016-12-18T06:52:36Z"
-		},
-		{
-			"checksumSHA1": "W53yVzxaesOkxQIM0QhIT6SUdBc=",
-			"path": "github.com/GeoNet/kit/cvendor/libmseed",
-			"revision": "2c00bd8989f810e3c3746c01cda4bcfc1bb1f559",
-			"revisionTime": "2017-05-29T05:10:37Z",
-			"tree": true
-		},
-		{
-			"checksumSHA1": "QFCqVtG2kWcWgQ1zUwn8zlvOKMs=",
-			"path": "github.com/GeoNet/kit/cvendor/libslink",
-			"revision": "2c00bd8989f810e3c3746c01cda4bcfc1bb1f559",
-			"revisionTime": "2017-05-29T05:10:37Z",
-			"tree": true
-		},
-		{
 			"checksumSHA1": "kd7ow9jrUio4gc74DV38kl2cMPA=",
 			"path": "github.com/GeoNet/kit/mseed",
 			"revision": "5203fd0a601edb389818488f5d2ee5fb4ee9d477",
@@ -60,22 +21,10 @@
 			"revisionTime": "2017-06-28T22:00:05Z"
 		},
 		{
-			"checksumSHA1": "FcAtIa3dCgJBin+SrFiTOEU/bsA=",
-			"path": "github.com/GeoNet/mtr/internal",
-			"revision": "99c6241a78247b0ee08d200c7f485711d546aa8f",
-			"revisionTime": "2016-12-20T21:32:52Z"
-		},
-		{
-			"checksumSHA1": "oyzYMUNOEaxnse/GPkadnPeMjTM=",
-			"path": "github.com/GeoNet/mtr/mtrapp",
-			"revision": "99c6241a78247b0ee08d200c7f485711d546aa8f",
-			"revisionTime": "2016-12-20T21:32:52Z"
-		},
-		{
-			"checksumSHA1": "ghXMRHH7SQBQr28kX4LYXSY2P1o=",
-			"path": "github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid",
-			"revision": "8fa6ccb8ea661b7d37e95abcb5b30a3405f8ab7c",
-			"revisionTime": "2016-08-19T07:40:24Z"
+			"checksumSHA1": "ZaRt2zcEiskONBekq+WjpJDPyHI=",
+			"path": "github.com/GeoNet/kit/wgs84",
+			"revision": "f0dd06c8d58ab8d6a31ef4607601c2838ac55bf5",
+			"revisionTime": "2017-10-05T22:37:27Z"
 		},
 		{
 			"checksumSHA1": "AABXmJ/z1892mbei9/UWUHIf+Wg=",
@@ -212,12 +161,6 @@
 		{
 			"checksumSHA1": "o7qpn0kxj43Ej/RwfCb9JbzfbfQ=",
 			"path": "github.com/aws/aws-sdk-go/service/s3",
-			"revision": "0bbc97afc1bd36f23958f2f26764ecf0253834bd",
-			"revisionTime": "2017-04-05T23:52:32Z"
-		},
-		{
-			"checksumSHA1": "4b8bqkOCj9omK0Pm0UXVLGg+yRQ=",
-			"path": "github.com/aws/aws-sdk-go/service/s3/s3iface",
 			"revision": "0bbc97afc1bd36f23958f2f26764ecf0253834bd",
 			"revisionTime": "2017-04-05T23:52:32Z"
 		},

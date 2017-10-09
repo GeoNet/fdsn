@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/platform/s3"
 	"github.com/GeoNet/fdsn/internal/weft"
-	"github.com/StefanSchroeder/Golang-Ellipsoid/ellipsoid"
+	"github.com/GeoNet/kit/wgs84"
 	"io"
 	"io/ioutil"
 	"log"
@@ -95,7 +95,6 @@ var (
 	errNotModified      = fmt.Errorf("Not modified.")
 	s3Bucket            string
 	s3Meta              string
-	geo                 ellipsoid.Ellipsoid
 )
 var stationNotSupported = map[string]bool{
 	"startafter":  true,
@@ -105,8 +104,6 @@ var stationNotSupported = map[string]bool{
 }
 
 func init() {
-	geo = ellipsoid.Init("WGS84", ellipsoid.Degrees, ellipsoid.Kilometer, ellipsoid.LongitudeIsSymmetric, ellipsoid.BearingNotSymmetric)
-
 	var err error
 	var b bytes.Buffer
 
@@ -703,7 +700,11 @@ func (v fdsnStationV1Search) validBounding(latitude, longitude float64) bool {
 		return true
 	}
 
-	d, _ := geo.To(v.Latitude, v.Longitude, latitude, longitude)
+	d, _, err := wgs84.DistanceBearing(v.Latitude, v.Longitude, latitude, longitude)
+	if err != nil {
+		log.Printf("Error checking bounding:%s\n", err.Error())
+		return false
+	}
 	d = d / NZ_KM_DEGREE
 
 	if d < v.MinRadius {
