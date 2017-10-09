@@ -140,8 +140,15 @@ func (e *event) Process(msg []byte) error {
 		return err
 	}
 
-	if e.Records == nil || len(e.Records) == 0 {
-		return nil
+	// add testing on the message.  If these return errors the message should
+	// go to the DLQ for further inspectio.  Will catch errors such
+	// as SQS->SNS subscriptions being not for raw messages.S
+	if e.Records == nil {
+		return errors.New("got nil Records pointer in notification message")
+	}
+
+	if len(e.Records) == 0 {
+		return errors.New("got zero Records in notification message")
 	}
 
 	for _, v := range e.Records {
