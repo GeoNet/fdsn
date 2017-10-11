@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/GeoNet/fdsn/internal/ddoghttp"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	"github.com/gorilla/schema"
 	_ "github.com/lib/pq"
@@ -15,15 +14,11 @@ import (
 var (
 	db           *sql.DB
 	decoder      = schema.NewDecoder() // decoder for URL queries.
-	Prefix       string                // prefix for logging
 	S3_BUCKET    string                // the S3 bucket storing the miniseed files used by dataselect
 	zeroDateTime time.Time
 )
 
 func init() {
-	if Prefix != "" {
-		log.SetPrefix(Prefix + " ")
-	}
 	zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 

@@ -3,11 +3,11 @@ package main
 import (
 	"database/sql"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
-	"github.com/GeoNet/fdsn/internal/platform/metrics"
 	"github.com/GeoNet/kit/mseed"
 	"github.com/pkg/errors"
 	"log"
 	"time"
+	"github.com/GeoNet/kit/metrics"
 )
 
 // app is for shared application resources

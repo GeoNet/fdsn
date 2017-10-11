@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "GllgKonjGlhCkBCvW2UXSvNlUAI=",
+			"path": "github.com/GeoNet/kit/metrics",
+			"revision": "38d17a814f3e22d529a1a9cedef6a9aa30ab7e6e",
+			"revisionTime": "2017-10-10T02:11:27Z"
+		},
+		{
 			"checksumSHA1": "kd7ow9jrUio4gc74DV38kl2cMPA=",
 			"path": "github.com/GeoNet/kit/mseed",
 			"revision": "5203fd0a601edb389818488f5d2ee5fb4ee9d477",

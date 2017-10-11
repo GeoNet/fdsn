@@ -1,13 +1,20 @@
 package main
 
-import "log"
+import (
+	"github.com/GeoNet/kit/metrics"
+	"log"
+	"os"
+)
 
 var Prefix string
 
-// set the log prefix in main instead of importing a pkg to do this
-// ensures start up order.
 func init() {
+	logger := log.New(os.Stderr, "", log.LstdFlags)
+
 	if Prefix != "" {
 		log.SetPrefix(Prefix + " ")
+		logger.SetPrefix(Prefix + " ")
 	}
+
+	metrics.DataDogMsg(os.Getenv("DDOG_API_KEY"), metrics.HostName(), metrics.AppName(), logger)
 }
