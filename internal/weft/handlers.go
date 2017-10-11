@@ -3,11 +3,11 @@ package weft
 import (
 	"bytes"
 	"compress/gzip"
-	"github.com/GeoNet/fdsn/internal/platform/metrics"
 	"log"
 	"net/http"
 	"strings"
 	"sync"
+	"github.com/GeoNet/kit/metrics"
 )
 
 var bufferPool = sync.Pool{

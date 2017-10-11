@@ -2,9 +2,8 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/GeoNet/fdsn/internal/ddoghttp"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
-	"github.com/GeoNet/fdsn/internal/platform/metrics"
+	"github.com/GeoNet/kit/metrics"
 	"github.com/golang/groupcache"
 	"github.com/gorilla/schema"
 	_ "github.com/lib/pq"
@@ -18,16 +17,9 @@ import (
 var (
 	db          *sql.DB
 	decoder     = schema.NewDecoder() // decoder for URL queries.
-	Prefix      string                // prefix for logging
 	recordStmt  *sql.Stmt
 	recordCache *groupcache.Group
 )
-
-func init() {
-	if Prefix != "" {
-		log.SetPrefix(Prefix + " ")
-	}
-}
 
 func main() {
 	p, err := cfg.PostgresEnv()

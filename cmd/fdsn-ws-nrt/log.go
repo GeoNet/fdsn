@@ -16,5 +16,5 @@ func init() {
 		logger.SetPrefix(Prefix + " ")
 	}
 
-	metrics.DataDogMsg(os.Getenv("DDOG_API_KEY"), metrics.HostName(), metrics.AppName(), logger)
+	metrics.DataDogHttp(os.Getenv("DDOG_API_KEY"), metrics.HostName(), metrics.AppName(), logger)
 }

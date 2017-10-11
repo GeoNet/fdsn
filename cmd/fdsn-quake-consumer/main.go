@@ -7,15 +7,14 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	_ "github.com/GeoNet/fdsn/internal/ddogmsg"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
-	"github.com/GeoNet/fdsn/internal/platform/msg"
 	"github.com/GeoNet/fdsn/internal/platform/s3"
 	"github.com/GeoNet/fdsn/internal/platform/sqs"
 	"github.com/pkg/errors"
 	"log"
 	"os"
 	"time"
+	"github.com/GeoNet/kit/metrics"
 )
 
 var (
@@ -78,7 +77,7 @@ ping:
 			continue
 		}
 
-		err = msg.DoProcess(&n, []byte(r.Body))
+		err = metrics.DoProcess(&n, []byte(r.Body))
 		if err != nil {
 			log.Printf("problem processing message, skipping deletion for redelivery: %s", err)
 			continue
