@@ -2,7 +2,10 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
+	"fmt"
 	"github.com/GeoNet/fdsn/internal/weft"
+	"log"
 	"net/http"
 )
 
@@ -76,9 +79,24 @@ func soh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// is there anything meaningful to test in the API here?
+	// miniSEED is loaded into the archive 7 days behind real time.  There should be data in the
+	// holdings DB within the last 10 days.
+	var numSamples sql.NullInt64
+	err := db.QueryRow(`SELECT sum(numsamples) FROM fdsn.holdings WHERE start_time > now() - interval '10 days'`).Scan(&numSamples)
+	if err != nil {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("<html><head></head><body>service error</body></html>"))
+		log.Printf("ERROR: soh service error %s", err)
+		return
+	}
+
+	if numSamples.Int64 == 0 {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("<html><head></head><body>holdings database has zero samples for the last ten days.</body></html>"))
+		return
+	}
 
 	w.Header().Set("Surrogate-Control", "max-age=10")
 
-	w.Write([]byte("<html><head></head><body>ok</body></html>"))
+	w.Write([]byte(fmt.Sprintf("<html><head></head><body>holdings database has %d samples for the last ten days.</body></html>", numSamples.Int64)))
 }

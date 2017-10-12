@@ -2,7 +2,10 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
+	"fmt"
 	"github.com/GeoNet/fdsn/internal/weft"
+	"log"
 	"net/http"
 	"net/http/httputil"
 )
@@ -78,9 +81,23 @@ func soh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// is there anything meaningful to test in the API here?
+	// miniSEED records arrive continuously.  There should be records in the DB in the last hour.
+	var numRecords sql.NullInt64
+	err := db.QueryRow(`SELECT count(*) FROM fdsn.record WHERE start_time > now() - interval '1 hour'`).Scan(&numRecords)
+	if err != nil {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("<html><head></head><body>service error</body></html>"))
+		log.Printf("ERROR: soh service error %s", err)
+		return
+	}
+
+	if numRecords.Int64 == 0 {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("<html><head></head><body>have zero miniSEED records for the last hour.</body></html>"))
+		return
+	}
 
 	w.Header().Set("Surrogate-Control", "max-age=10")
 
-	w.Write([]byte("<html><head></head><body>ok</body></html>"))
+	w.Write([]byte(fmt.Sprintf("<html><head></head><body>have %d miniSEED records for the last hour.</body></html>", numRecords.Int64)))
 }
