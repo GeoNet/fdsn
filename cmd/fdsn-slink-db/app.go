@@ -3,11 +3,11 @@ package main
 import (
 	"database/sql"
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
+	"github.com/GeoNet/kit/metrics"
 	"github.com/GeoNet/kit/mseed"
 	"github.com/pkg/errors"
 	"log"
 	"time"
-	"github.com/GeoNet/kit/metrics"
 )
 
 // app is for shared application resources
@@ -103,13 +103,15 @@ func (a *app) save(inbound chan []byte) {
 	}
 }
 
+// expire removes old data from the DB.  The archive runs 7 days between real time.  Keep
+// 8 days to allow some overlap.
 func (a *app) expire() {
 	ticker := time.NewTicker(time.Minute).C
 	var err error
 	for {
 		select {
 		case <-ticker:
-			_, err = a.db.Exec(`DELETE FROM fdsn.record WHERE start_time < now() - interval '72 hours'`)
+			_, err = a.db.Exec(`DELETE FROM fdsn.record WHERE start_time < now() - interval '8 days'`)
 			if err != nil {
 				log.Printf("deleting old records: %s", err.Error())
 			}
