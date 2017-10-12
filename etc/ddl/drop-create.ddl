@@ -50,6 +50,8 @@ CREATE TABLE fdsn.holdings (
   UNIQUE (streamPK, key)
 );
 
+CREATE INDEX ON fdsn.holdings(start_time);
+
 CREATE FUNCTION fdsn.event_geom()
   RETURNS TRIGGER AS
 $$
