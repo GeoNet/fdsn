@@ -57,6 +57,10 @@ var routes = wt.Requests{
 	// allow for this by ignoring includeavailability=false
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml&includeavailability=false", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml&includeavailability=true", Content: "text/plain", Status: http.StatusBadRequest},
+
+	{ID: wt.L(), URL: "/metrics/fdsnws/dataselect/1/query?starttime=2016-01-09T00:00:00&endtime=2016-01-09T23:00:00&network=INVALID_NETWORK&station=CHST&location=01&channel=LOG", Content: "text/plain; charset=utf-8",
+		Status: http.StatusNoContent},
+	{ID: wt.L(), URL: "/metrics/fdsnws/dataselect/1/query?starttime=2016-01-09T00:00:00&endtime=2016-01-09T23:00:00&network=NZ&station=CHST&location=01&channel=LOG"},
 }
 
 // Test all routes give the expected response.  Also check with

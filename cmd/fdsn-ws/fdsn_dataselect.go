@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
 	"github.com/GeoNet/fdsn/internal/weft"
@@ -72,6 +73,65 @@ func init() {
 
 	s3Session.Config.Retryer = client.DefaultRetryer{NumMaxRetries: 3}
 	s3Client = s3.New(s3Session)
+}
+
+// fdsnDataMetricsV1Handler handles all datametrics queries.
+func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
+	var params []fdsn.DataSelect
+
+	switch r.Method {
+	case "POST":
+		defer r.Body.Close()
+		if err := fdsn.ParseDataSelectPost(r.Body, &params); err != nil {
+			return weft.BadRequest(err.Error())
+		}
+	case "GET":
+		d, err := fdsn.ParseDataSelectGet(r.URL.Query())
+		if err != nil {
+			return weft.BadRequest(err.Error())
+		}
+
+		params = append(params, d)
+	default:
+		return &weft.MethodNotAllowed
+	}
+
+	if len(params) > MAX_QUERIES {
+		return &weft.Result{Code: http.StatusRequestEntityTooLarge,
+			Msg: fmt.Sprintf("Number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
+	}
+
+	var metrics []metric
+
+	for _, v := range params {
+		d := v.Regexp()
+
+		m, err := metricsSearch(d)
+		if err != nil {
+			return weft.InternalServerError(err)
+		}
+
+		if len(metrics) > MAX_FILES {
+			return &weft.Result{Code: http.StatusRequestEntityTooLarge,
+				Msg: fmt.Sprintf("Number of files found: %d exceeded the limit: %d", len(metrics), MAX_FILES)}
+		}
+
+		metrics = append(metrics, m...)
+	}
+
+	if len(metrics) == 0 {
+		return &weft.Result{Ok: false, Code: params[0].NoData, Msg: "No results for specified query"}
+	}
+
+	by, err := json.Marshal(metrics)
+	if err != nil {
+		return weft.InternalServerError(err)
+	}
+
+	b.Write(by)
+	h.Set("Content-Type", "application/json")
+
+	return &weft.StatusOK
 }
 
 // fdsnDataselectV1Handler handles all dataselect queries.  It searches for matching keys in S3 and
