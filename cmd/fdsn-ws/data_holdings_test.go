@@ -20,6 +20,51 @@ type holding struct {
 	errorMsg  string // the cause of the errors
 }
 
+func TestMetricsSearch(t *testing.T) {
+	setup(t)
+	defer teardown()
+
+	h := holding{
+		key: "NZ.ABAZ.01.ACE.D.2016.097",
+		Holding: holdings.Holding{
+			Network:    "NZ",
+			Station:    "ABAZ",
+			Location:   "01",
+			Channel:    "ACE",
+			Start:      time.Date(2016, time.January, 2, 0, 0, 0, 0, time.UTC),
+			NumSamples: 500000,
+		},
+	}
+
+	err := h.save()
+	if err != nil {
+		t.Error(err)
+	}
+
+	start := time.Date(2016, time.January, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)
+
+	d := fdsn.DataSearch{
+		Network:  "NZ",
+		Station:  "A.AZ",
+		Location: "01",
+		Channel:  "A.",
+		Start:    start,
+		End:      end,
+	}
+
+	m, err := metricsSearch(d)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(m) == 0 {
+		t.Error("expected more than 0 keys")
+	}
+
+	t.Log(m)
+}
+
 func TestSaveHoldings(t *testing.T) {
 	setup(t)
 	defer teardown()
