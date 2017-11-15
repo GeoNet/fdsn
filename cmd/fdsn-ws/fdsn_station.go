@@ -510,13 +510,18 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 				} else {
 					for c := 0; c < len(sta.Channel); c++ {
 						cha := &sta.Channel[c]
+						var frequency float64
+						if cha.Response.InstrumentSensitivity.Frequency != nil {
+							frequency = *cha.Response.InstrumentSensitivity.Frequency
+						}
+
 						by.WriteString(fmt.Sprintf("%s|%s|%s|%s|%f|%f|%f|%f|%f|%f|%s|%f|%f|%s|%f|%s|%s\n",
 							net.Code, sta.Code, cha.LocationCode, cha.Code,
 							cha.Latitude.Value, cha.Longitude.Value, cha.Elevation.Value,
 							cha.Depth.Value, cha.Azimuth.Value, cha.Dip.Value,
-							cha.Sensor.Description,
+							cha.Sensor.Type,
 							cha.Response.InstrumentSensitivity.Value,
-							cha.Response.InstrumentSensitivity.Frequency,
+							frequency,
 							cha.Response.InstrumentSensitivity.InputUnits.Name,
 							cha.SampleRate.Value,
 							cha.StartDate.MarshalFormatText(), cha.EndDate.MarshalFormatText()))
