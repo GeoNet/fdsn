@@ -577,10 +577,29 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
 		}
 	}
 
-	// Special case: when requested level is deeper than this level,
-	// but no child node from this node, then we should skip this node.
-	if params[0].LevelValue > STATION_LEVEL_NETWORK && len(ss) == 0 {
-		return false
+	if len(ss) ==0 {
+		// Special case: when requested level is deeper than this level,
+		// but no child node from this node, then we should skip this node.
+		if params[0].LevelValue > STATION_LEVEL_NETWORK {
+			return false
+		}
+
+		// NOTE: the long description under is unlikely to happen since we only got 1 network.
+		//   However I still included the logic.
+		// ---
+		// Normally this network is included since it has met the query parameters for network.
+		// However, there's another case:
+		//   e.g. "query?station=ZZZZ&level=network"
+		// This kind of query makes the network test bypassed due to no query parameter for network,
+		//   but when there's no child node for this network we should skip this network.
+		// In short:
+		//   when there's no child node and there's query parameter for station, channel or location,
+		//   this network is excluded.
+		for _, p:=range params {
+			if p.StationReg!=nil ||  p.ChannelReg!=nil || p.LocationReg!=nil {
+				return false;
+			}
+		}
 	}
 
 	n.SelectedNumberStations = len(ss)
@@ -622,10 +641,26 @@ func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
 		}
 	}
 
-	//Special case: when requested level is deeper than this level,
-	//but no child node from this node, then we should skip this node.
-	if params[0].LevelValue > STATION_LEVEL_STATION && len(cs) == 0 {
-		return false
+	if len(cs) ==0 {
+		// Special case: when requested level is deeper than this level,
+		//   but no child node from this node, then we should skip this node.
+		if params[0].LevelValue > STATION_LEVEL_STATION {
+			return false
+		}
+
+		// Normally this stations is included since it has met the query parameters for station.
+		// However, there's another case:
+		//   e.g. "query?channel=BTT"
+		// This kind of query makes the station test bypassed due to no query parameter for station,
+		//   but when there's no child node for this station we should skip this station.
+		// In conclusion:
+		//   when there's no sub child and there's query parameter for channel or location,
+		//   this station is excluded.
+		for _, p:=range params {
+			if p.ChannelReg!=nil || p.LocationReg!=nil {
+				return false;
+			}
+		}
 	}
 
 	s.SelectedNumberChannels = len(cs)
