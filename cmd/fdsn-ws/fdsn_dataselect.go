@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/fdsn/internal/weft"
 	"github.com/GeoNet/kit/mseed"
+	"github.com/GeoNet/kit/weft"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -76,29 +76,29 @@ func init() {
 }
 
 // fdsnDataMetricsV1Handler handles all datametrics queries.
-func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
+func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	var params []fdsn.DataSelect
 
 	switch r.Method {
 	case "POST":
 		defer r.Body.Close()
 		if err := fdsn.ParseDataSelectPost(r.Body, &params); err != nil {
-			return weft.BadRequest(err.Error())
+			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 	case "GET":
 		d, err := fdsn.ParseDataSelectGet(r.URL.Query())
 		if err != nil {
-			return weft.BadRequest(err.Error())
+			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 
 		params = append(params, d)
 	default:
-		return &weft.MethodNotAllowed
+		return weft.StatusError{Code: http.StatusMethodNotAllowed}
 	}
 
 	if len(params) > MAX_QUERIES {
-		return &weft.Result{Code: http.StatusRequestEntityTooLarge,
-			Msg: fmt.Sprintf("Number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
+		return weft.StatusError{Code: http.StatusRequestEntityTooLarge,
+			Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
 	}
 
 	var metrics []metric
@@ -108,59 +108,59 @@ func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *
 
 		m, err := metricsSearch(d)
 		if err != nil {
-			return weft.InternalServerError(err)
+			return err
 		}
 
 		if len(metrics) > MAX_FILES {
-			return &weft.Result{Code: http.StatusRequestEntityTooLarge,
-				Msg: fmt.Sprintf("Number of files found: %d exceeded the limit: %d", len(metrics), MAX_FILES)}
+			return weft.StatusError{Code: http.StatusRequestEntityTooLarge,
+				Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
 		}
 
 		metrics = append(metrics, m...)
 	}
 
 	if len(metrics) == 0 {
-		return &weft.Result{Ok: false, Code: params[0].NoData, Msg: "No results for specified query"}
+		return weft.StatusError{Code: params[0].NoData, Err: fmt.Errorf("%s", "no results for specified query")}
 	}
 
 	by, err := json.Marshal(metrics)
 	if err != nil {
-		return weft.InternalServerError(err)
+		return err
 	}
 
 	b.Write(by)
 	h.Set("Content-Type", "application/json")
 
-	return &weft.StatusOK
+	return nil
 }
 
 // fdsnDataselectV1Handler handles all dataselect queries.  It searches for matching keys in S3 and
 // fetches them, writing matching records to w in the same order they were requested.
 // Results are streamed to the client so a 200 can still be followed by errors which will not
 // be reported to the client.  The potentially large response sizes make this the simplest solution.
-func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Result {
+func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, error) {
 	var params []fdsn.DataSelect
 
 	switch r.Method {
 	case "POST":
 		defer r.Body.Close()
 		if err := fdsn.ParseDataSelectPost(r.Body, &params); err != nil {
-			return weft.BadRequest(err.Error())
+			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 	case "GET":
 		d, err := fdsn.ParseDataSelectGet(r.URL.Query())
 		if err != nil {
-			return weft.BadRequest(err.Error())
+			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 
 		params = append(params, d)
 	default:
-		return &weft.MethodNotAllowed
+		return 0, weft.StatusError{Code: http.StatusMethodNotAllowed}
 	}
 
 	if len(params) > MAX_QUERIES {
-		return &weft.Result{Code: http.StatusRequestEntityTooLarge,
-			Msg: fmt.Sprintf("Number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
+		return 0, weft.StatusError{Code: http.StatusRequestEntityTooLarge,
+			Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
 	}
 
 	// search the holdings DB for the files to fetch from S3.
@@ -173,21 +173,21 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 
 		keys, err := holdingsSearch(d)
 		if err != nil {
-			return weft.InternalServerError(err)
+			return 0, err
 		}
 
 		files += len(keys)
 
 		if files > MAX_FILES {
-			return &weft.Result{Code: http.StatusRequestEntityTooLarge,
-				Msg: fmt.Sprintf("Number of files found: %d exceeded the limit: %d", files, MAX_FILES)}
+			return 0, weft.StatusError{Code: http.StatusRequestEntityTooLarge,
+				Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
 		}
 
 		request = append(request, dataSelect{d: d, keys: keys})
 	}
 
 	if files == 0 {
-		return &weft.Result{Ok: false, Code: params[0].NoData, Msg: "No results for specified query"}
+		return 0, weft.StatusError{Code: params[0].NoData, Err: fmt.Errorf("%s", "no results for specified query")}
 	}
 
 	// Fetch the miniSEED files from S3.  Parse them and write
@@ -199,6 +199,9 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 
 	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
 
+	var n int
+	var written int
+
 	for _, v := range request {
 		for _, k := range v.keys {
 			result, err := s3Client.GetObject(&s3.GetObjectInput{
@@ -206,7 +209,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 				Bucket: aws.String(S3_BUCKET),
 			})
 			if err != nil {
-				return weft.InternalServerError(err)
+				return 0, err
 			}
 			defer result.Body.Close()
 
@@ -218,66 +221,61 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 					break loop
 				case err != nil:
 					result.Body.Close()
-					return weft.InternalServerError(err)
+					return 0, err
 				}
 
 				err = msr.Unpack(record, RECORDLEN, 0, 0)
 				if err != nil {
-					return weft.InternalServerError(err)
+					return 0, err
 				}
 
 				if msr.Starttime().Before(v.d.End) && msr.Endtime().After(v.d.Start) {
-					w.Write(record)
+					n, err = w.Write(record)
+					if err != nil {
+						return 0, err
+					}
+					written += n
 				}
 			}
 			result.Body.Close()
 		}
 	}
 
-	return &weft.StatusOK
+	return int64(written), nil
 }
 
-func fdsnDataselectV1Index(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "text/html")
-		b.Write(fdsnDataselectIndex)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnDataselectV1Index(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "text/html")
+	_, err = b.Write(fdsnDataselectIndex)
+
+	return err
 }
 
-func fdsnDataselectVersion(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "text/plain")
-		b.WriteString("1.1")
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnDataselectVersion(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "text/plain")
+	_, err = b.WriteString("1.1")
+
+	return err
 }
 
-func fdsnDataselectWadl(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "application/xml")
-		b.Write(fdsnDataselectWadlFile)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnDataselectWadl(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "application/xml")
+	_, err = b.Write(fdsnDataselectWadlFile)
+
+	return err
 }

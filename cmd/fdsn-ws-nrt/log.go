@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/GeoNet/kit/metrics"
+	"github.com/GeoNet/kit/weft"
 	"log"
 	"os"
+	"strings"
 )
 
 var Prefix string
@@ -16,5 +17,13 @@ func init() {
 		logger.SetPrefix(Prefix + " ")
 	}
 
-	metrics.DataDogHttp(os.Getenv("DDOG_API_KEY"), metrics.HostName(), metrics.AppName(), logger)
+	weft.SetLogger(logger)
+
+	// find the hostname and appname for use with metrics.
+	h, _ := os.Hostname()
+
+	a := os.Args[0]
+	a = strings.Replace(a[strings.LastIndex(a, "/")+1:], "-", "_", -1)
+
+	weft.DataDog(os.Getenv("DDOG_API_KEY"), h, a, logger)
 }

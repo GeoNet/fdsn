@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/platform/s3"
-	"github.com/GeoNet/fdsn/internal/weft"
+	"github.com/GeoNet/kit/weft"
 	"github.com/GeoNet/kit/wgs84"
 	"io"
 	"io/ioutil"
@@ -350,52 +350,43 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	return s, err
 }
 
-func fdsnStationVersion(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "text/plain")
-		b.WriteString("1.1")
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnStationVersion(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "text/plain")
+	_, err = b.WriteString("1.1")
+
+	return err
 }
 
-func fdsnStationWadl(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "application/xml")
-		b.Write(fdsnStationWadlFile)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnStationWadl(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "application/xml")
+	_, err = b.Write(fdsnStationWadlFile)
+
+	return err
 }
 
-func fdsnStationV1Index(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "text/html")
-		b.Write(fdsnStationIndex)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnStationV1Index(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "text/html")
+	_, err = b.Write(fdsnStationIndex)
+
+	return err
 }
 
-func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
+func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	var v url.Values
 	var params []fdsnStationV1Search
 
@@ -404,20 +395,20 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 		v = r.URL.Query()
 		p, err := parseStationV1(v)
 		if err != nil {
-			return weft.BadRequest(err.Error())
+			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 		params = []fdsnStationV1Search{p}
 	case "POST":
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			return weft.BadRequest(err.Error())
+			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 		params, err = parseStationV1Post(string(body))
 		if err != nil {
-			return weft.BadRequest(err.Error())
+			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 	default:
-		return &weft.MethodNotAllowed
+		return weft.StatusError{Code: http.StatusMethodNotAllowed}
 	}
 
 	fdsnStations.RLock()
@@ -427,13 +418,13 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 	hasContent := c.doFilter(params)
 
 	if !hasContent {
-		return &weft.Result{Ok: true, Code: params[0].NoData, Msg: ""}
+		return weft.StatusError{Code: params[0].NoData}
 	}
 
 	if params[0].Format == "xml" {
 		by, err := xml.Marshal(c)
 		if err != nil {
-			return weft.ServiceUnavailableError(err)
+			return err
 		}
 		b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
 		b.Write(by)
@@ -444,7 +435,7 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft
 		h.Set("Content-Type", "text/plain")
 	}
 
-	return &weft.StatusOK
+	return nil
 }
 
 func (r *FDSNStationXML) trimLevel(level int) {

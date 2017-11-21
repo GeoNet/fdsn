@@ -15,6 +15,7 @@ import (
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	nf "github.com/GeoNet/fdsn/internal/platform/s3"
 	"github.com/GeoNet/fdsn/internal/platform/sqs"
+	"github.com/GeoNet/kit/metrics"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -23,7 +24,6 @@ import (
 	"os"
 	"strings"
 	"time"
-	"github.com/GeoNet/kit/metrics"
 )
 
 var (

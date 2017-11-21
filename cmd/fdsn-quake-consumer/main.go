@@ -10,11 +10,11 @@ import (
 	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	"github.com/GeoNet/fdsn/internal/platform/s3"
 	"github.com/GeoNet/fdsn/internal/platform/sqs"
+	"github.com/GeoNet/kit/metrics"
 	"github.com/pkg/errors"
 	"log"
 	"os"
 	"time"
-	"github.com/GeoNet/kit/metrics"
 )
 
 var (

@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/fdsn/internal/weft"
+	"github.com/GeoNet/kit/weft"
 	"github.com/golang/groupcache"
 	"io/ioutil"
 	"log"
@@ -37,24 +37,27 @@ func init() {
 	}
 }
 
-func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Result {
+func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, error) {
+	// the query parameters come from the URL or body.  This makes using weft.CheckQuery to complicated.
+	// Additional work is done to check the method and parameters.
+
 	var params []fdsn.DataSelect
 
 	switch r.Method {
 	case "POST":
 		defer r.Body.Close()
 		if err := fdsn.ParseDataSelectPost(r.Body, &params); err != nil {
-			return weft.BadRequest(err.Error())
+			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 	case "GET":
 		d, err := fdsn.ParseDataSelectGet(r.URL.Query())
 		if err != nil {
-			return weft.BadRequest(err.Error())
+			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 
 		params = append(params, d)
 	default:
-		return &weft.MethodNotAllowed
+		return 0, weft.StatusError{Code: http.StatusMethodNotAllowed}
 	}
 
 	var err error
@@ -65,70 +68,68 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) *weft.Resul
 	// would make http response codes to the client more accurate.
 
 	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
+	var n int
+	var written int
 
 	for _, v := range params {
 		keys, err = holdingsSearchNrt(v.Regexp())
 		if err != nil {
-			return weft.InternalServerError(err)
+			return 0, err
 		}
 		for _, k := range keys {
 			err = recordCache.Get(nil, k, groupcache.AllocatingByteSliceSink(&rec))
 			switch err {
 			case nil:
-				w.Write(rec)
+				n, err = w.Write(rec)
+				if err != nil {
+					return 0, err
+				}
+				written += n
 			case errNoData:
 			// do nothing for no data, it could be deleted from the db
 			// before we get a chance to request it.
 			default:
-				return weft.InternalServerError(err)
+				return 0, err
 			}
 		}
 	}
 
-	return &weft.StatusOK
+	return int64(written), nil
 }
 
-func fdsnDataselectV1Index(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "text/html")
-		b.Write(fdsnDataselectIndex)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnDataselectV1Index(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "text/html; charset=utf-8")
+
+	_, err = b.Write(fdsnDataselectIndex)
+
+	return err
 }
 
-func fdsnDataselectVersion(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "text/plain")
-		b.WriteString("1.1")
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnDataselectVersion(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "text/plain")
+	_, err = b.WriteString("1.1")
+
+	return err
 }
 
-func fdsnDataselectWadl(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "application/xml")
-		b.Write(fdsnDataselectWadlFile)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnDataselectWadl(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "application/xml")
+	_, err = b.Write(fdsnDataselectWadlFile)
+
+	return err
 }
