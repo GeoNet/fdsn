@@ -5,12 +5,12 @@ slink-ws connects to a SEEDLink server and saves records to a postgres DB.
 */
 
 import (
+	"github.com/GeoNet/kit/metrics"
 	"github.com/GeoNet/kit/slink"
 	_ "github.com/lib/pq"
 	"log"
 	"os"
 	"time"
-	"github.com/GeoNet/kit/metrics"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/GeoNet/fdsn/internal/weft"
+	"github.com/GeoNet/kit/weft"
 	"github.com/GeoNet/kit/wgs84"
 	"io/ioutil"
 	"log"
@@ -405,36 +405,36 @@ func (e *fdsnEventV1) filter() (q string, args []interface{}) {
 eventV1Handler assembles QuakeML event fragments from the DB into a complete
 QuakeML event.  The result set is limited to 10,000 events which will be ~1.2GB.
 */
-func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
+func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	if r.Method != "GET" {
-		return &weft.MethodNotAllowed
+		return weft.StatusError{Code: http.StatusMethodNotAllowed}
 	}
 
 	e, err := parseEventV1(r.URL.Query())
 	if err != nil {
-		return weft.BadRequest(err.Error())
+		return weft.StatusError{Code: http.StatusBadRequest, Err: err}
 	}
 
 	c, err := e.count()
 	if err != nil {
-		return weft.ServiceUnavailableError(err)
+		return err
 	}
 
 	if c == 0 {
-		return &weft.Result{Ok: true, Code: e.NoData, Msg: ""}
+		return weft.StatusError{Code: e.NoData}
 	}
 
 	if c > 10000 {
-		return &weft.Result{
+		return weft.StatusError{
 			Code: http.StatusRequestEntityTooLarge,
-			Msg:  fmt.Sprintf("result to large found %d events, limit is 10,000", c),
+			Err:  fmt.Errorf("result to large found %d events, limit is 10,000", c),
 		}
 	}
 
 	if e.Format == "xml" {
 		rows, err := e.queryQuakeML12Event()
 		if err != nil {
-			return weft.ServiceUnavailableError(err)
+			return err
 		}
 		defer rows.Close()
 
@@ -447,7 +447,7 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.R
 		for rows.Next() {
 			err = rows.Scan(&xml)
 			if err != nil {
-				return weft.ServiceUnavailableError(err)
+				return err
 			}
 
 			b.WriteString(xml)
@@ -459,7 +459,7 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.R
 	} else {
 		rows, err := e.queryRaw()
 		if err != nil {
-			return weft.ServiceUnavailableError(err)
+			return err
 		}
 		defer rows.Close()
 
@@ -471,7 +471,7 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.R
 		for rows.Next() {
 			err = rows.Scan(&eventID, &tm, &latitude, &longitude, &depth, &magType, &magnitude)
 			if err != nil {
-				return weft.ServiceUnavailableError(err)
+				return err
 			}
 			loc := ""
 			if l, err := wgs84.ClosestNZ(latitude, longitude); err == nil {
@@ -486,80 +486,65 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) *weft.R
 
 	log.Printf("%s found %d events, result size %.1f (MB)", r.RequestURI, c, float64(b.Len())/1000000.0)
 
-	return &weft.StatusOK
+	return nil
 }
 
-func fdsnEventVersion(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "text/plain")
-		b.WriteString("1.1")
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnEventVersion(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "text/plain")
+	_, err = b.WriteString("1.1")
+
+	return err
 }
 
-func fdsnEventContributors(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "application/xml")
-		b.WriteString(`<Contributors><Contributor>WEL</Contributor></Contributors>`)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnEventContributors(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "application/xml")
+	_, err = b.WriteString(`<Contributors><Contributor>WEL</Contributor></Contributors>`)
+
+	return err
 }
 
-func fdsnEventCatalogs(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "application/xml")
-		b.WriteString(`<Catalogs><Catalog>GeoNet</Catalog></Catalogs>`)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnEventCatalogs(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "application/xml")
+	_, err = b.WriteString(`<Catalogs><Catalog>GeoNet</Catalog></Catalogs>`)
+
+	return err
 }
 
-func fdsnEventWadl(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "application/xml")
-		b.Write(fdsnEventWadlFile)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnEventWadl(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "application/xml")
+	_, err = b.Write(fdsnEventWadlFile)
+
+	return err
 }
 
-func fdsnEventV1Index(r *http.Request, h http.Header, b *bytes.Buffer) *weft.Result {
-	switch r.Method {
-	case "GET":
-		if res := weft.CheckQuery(r, []string{}, []string{}); !res.Ok {
-			return res
-		}
-
-		h.Set("Content-Type", "text/html")
-		b.Write(fdsnEventIndex)
-		return &weft.StatusOK
-	default:
-		return &weft.MethodNotAllowed
+func fdsnEventV1Index(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
+	if err != nil {
+		return err
 	}
+
+	h.Set("Content-Type", "text/html")
+	_, err = b.Write(fdsnEventIndex)
+
+	return err
 }

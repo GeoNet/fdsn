@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/metrics"
 	"github.com/golang/groupcache"
 	"strings"
 	"time"
-	"github.com/GeoNet/kit/metrics"
 )
 
 var errNoData = errors.New("no data")

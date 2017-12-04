@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/holdings"
-	wt "github.com/GeoNet/fdsn/internal/weft/wefttest"
+	wt "github.com/GeoNet/kit/weft/wefttest"
 	"net/http"
 	"testing"
 	"time"
@@ -43,12 +43,12 @@ var routes = wt.Requests{
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.123", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.123456", Content: "application/xml"},
-	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.1234567", Content: "text/plain", Status: http.StatusBadRequest},
-	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:0", Content: "text/plain", Status: http.StatusBadRequest},
-	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-0", Content: "text/plain", Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.1234567", Content: "text/plain; charset=utf-8", Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:0", Content: "text/plain; charset=utf-8", Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-0", Content: "text/plain; charset=utf-8", Status: http.StatusBadRequest},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?minlat=-41&maxlon=177", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00&format=text", Content: "text/plain"},
-	{ID: wt.L(), URL: "/fdsnws/station/1/query?format=y", Content: "text/plain", Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?format=y", Content: "text/plain; charset=utf-8", Status: http.StatusBadRequest},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?lat=-38.6&lon=176.1", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?lat=-38.6&lon=176.1&maxradius=1.0", Content: "application/xml"},
@@ -56,7 +56,7 @@ var routes = wt.Requests{
 	// supporting the includeavailability parameter is optional.  Some clients send the value `false` which is the default.
 	// allow for this by ignoring includeavailability=false
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml&includeavailability=false", Content: "application/xml"},
-	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml&includeavailability=true", Content: "text/plain", Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?net=*&level=network&format=xml&includeavailability=true", Content: "text/plain; charset=utf-8", Status: http.StatusBadRequest},
 
 	{ID: wt.L(), URL: "/metrics/fdsnws/dataselect/1/query?starttime=2016-01-09T00:00:00&endtime=2016-01-09T23:00:00&network=INVALID_NETWORK&station=CHST&location=01&channel=LOG", Content: "text/plain; charset=utf-8",
 		Status: http.StatusNoContent},
@@ -64,7 +64,7 @@ var routes = wt.Requests{
 }
 
 // Test all routes give the expected response.  Also check with
-// cache busters and extra query paramters.
+// cache busters and extra query parameters.
 func TestRoutes(t *testing.T) {
 	setup(t)
 	setup(t)
@@ -81,12 +81,12 @@ func TestRoutes(t *testing.T) {
 		}
 	}
 
-	if err := routes.DoCheckQuery(ts.URL); err != nil {
+	if err := routes.DoAll(ts.URL); err != nil {
 		t.Error(err)
 	}
 }
 
-// populateDb inserts a thwack of holdings that exist in the bucket so we can run our integration tests against them
+// populateHoldings inserts a thwack of holdings that exist in the bucket so we can run our integration tests against them
 func populateHoldings(t *testing.T) {
 	stations := []string{"ALRD", "ALRZ", "CHST"}
 	locations := []string{"01", "10"}
