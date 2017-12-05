@@ -128,7 +128,7 @@ func dogHttp(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStat
 			Host:   hostName,
 		},
 		{
-			Metric: appName + "http.written",
+			Metric: appName + ".http.written",
 			Points: []point{[2]float32{now, float32(c.Written)}},
 			Type:   "counter",
 			Host:   hostName,

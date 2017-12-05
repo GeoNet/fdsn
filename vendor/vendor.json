@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "aCXJ0oNeObUdRDgGrW4ucbCbJVs=",
+			"checksumSHA1": "dgHEZ+TL2wQtH5ZR+eGWz7SZZSs=",
 			"path": "github.com/GeoNet/kit/metrics",
-			"revision": "616e70e29bac064b533932f9a0b309992af85b9f",
-			"revisionTime": "2017-12-04T19:41:45Z"
+			"revision": "deb4f7f2da399e05d0083fa14f9420c9c8477248",
+			"revisionTime": "2017-12-05T02:44:31Z"
 		},
 		{
 			"checksumSHA1": "kd7ow9jrUio4gc74DV38kl2cMPA=",
