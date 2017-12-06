@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
 	"github.com/GeoNet/kit/weft"
 	"github.com/golang/groupcache"
@@ -92,6 +93,10 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 				return 0, err
 			}
 		}
+	}
+
+	if written == 0 {
+		return 0, weft.StatusError{Code: params[0].NoData, Err: fmt.Errorf("%s", "no results for specified query")}
 	}
 
 	return int64(written), nil
