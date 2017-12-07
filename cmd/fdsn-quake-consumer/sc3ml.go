@@ -170,7 +170,6 @@ func unmarshal(seisComPML []byte, e *event) error {
 	e.Sc3ml = string(seisComPML)
 
 	if e.Quakeml12Event, err = toQuakeMLEvent(seisComPML); err != nil {
-		return errors.Wrapf(err, "")
 		return fmt.Errorf("XSLT transform %s: %s", s.EventParameters.Events[0].PublicID, err.Error())
 	}
 

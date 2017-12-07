@@ -33,8 +33,8 @@ NZ ABCD 10 E*? 2017-01-02T00:00:00 2017-01-03T00:00:00
 
 	dsqExpected := []fdsn.DataSelect{
 		{
-			StartTime: fdsn.Time{t1},
-			EndTime:   fdsn.Time{t2},
+			StartTime: fdsn.Time{Time: t1},
+			EndTime:   fdsn.Time{Time: t2},
 			Network:   []string{"NZ"},
 			Station:   []string{"ALRZ"},
 			Location:  []string{"10"},
@@ -43,8 +43,8 @@ NZ ABCD 10 E*? 2017-01-02T00:00:00 2017-01-03T00:00:00
 			NoData:    204,
 		},
 		{
-			StartTime: fdsn.Time{t3},
-			EndTime:   fdsn.Time{t4},
+			StartTime: fdsn.Time{Time: t3},
+			EndTime:   fdsn.Time{Time: t4},
 			Network:   []string{"NZ"},
 			Station:   []string{"ABCD"},
 			Location:  []string{"10"},

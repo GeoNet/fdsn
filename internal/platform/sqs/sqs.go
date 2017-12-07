@@ -100,8 +100,8 @@ func (s *SQS) Delete(queueURL, receiptHandle string) error {
 
 func (s *SQS) Send(queueURL string, msg Raw) error {
 	params := sqs.SendMessageInput{
-		QueueUrl:aws.String(queueURL),
-		MessageBody:aws.String(msg.Body),
+		QueueUrl:    aws.String(queueURL),
+		MessageBody: aws.String(msg.Body),
 	}
 
 	_, err := s.client.SendMessage(&params)

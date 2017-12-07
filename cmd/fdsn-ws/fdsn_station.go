@@ -65,7 +65,7 @@ type fdsnStationV1Parm struct {
 	IncludeAvailability bool     `schema:"includeavailability"`
 	IncludeRestricted   bool     `schema:"includerestricted"`
 	MatchTimeSeries     bool     `schema:"matchtimeseries"`
-	Latitude            float64  `schema:"latitude`
+	Latitude            float64  `schema:"latitude"`
 	Longitude           float64  `schema:"longitude"`
 	MinRadius           float64  `schema:"minradius"`
 	MaxRadius           float64  `schema:"maxradius"`
@@ -577,7 +577,7 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
 		}
 	}
 
-	if len(ss) ==0 {
+	if len(ss) == 0 {
 		// Special case: when requested level is deeper than this level,
 		// but no child node from this node, then we should skip this node.
 		if params[0].LevelValue > STATION_LEVEL_NETWORK {
@@ -595,9 +595,9 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
 		// In short:
 		//   when there's no child node and there's query parameter for station, channel or location,
 		//   this network is excluded.
-		for _, p:=range params {
-			if p.StationReg!=nil ||  p.ChannelReg!=nil || p.LocationReg!=nil {
-				return false;
+		for _, p := range params {
+			if p.StationReg != nil || p.ChannelReg != nil || p.LocationReg != nil {
+				return false
 			}
 		}
 	}
@@ -641,7 +641,7 @@ func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
 		}
 	}
 
-	if len(cs) ==0 {
+	if len(cs) == 0 {
 		// Special case: when requested level is deeper than this level,
 		//   but no child node from this node, then we should skip this node.
 		if params[0].LevelValue > STATION_LEVEL_STATION {
@@ -656,9 +656,9 @@ func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
 		// In conclusion:
 		//   when there's no sub child and there's query parameter for channel or location,
 		//   this station is excluded.
-		for _, p:=range params {
-			if p.ChannelReg!=nil || p.LocationReg!=nil {
-				return false;
+		for _, p := range params {
+			if p.ChannelReg != nil || p.LocationReg != nil {
+				return false
 			}
 		}
 	}
