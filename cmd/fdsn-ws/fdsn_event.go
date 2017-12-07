@@ -50,7 +50,7 @@ type fdsnEventV1 struct {
 	IncludeAllMagnitudes bool    `schema:"includeallmagnitudes"`
 	IncludeArrivals      bool    `schema:"includearrivals"`
 	Format               string  `schema:"format"`
-	Latitude             float64 `schema:"latitude`
+	Latitude             float64 `schema:"latitude"`
 	Longitude            float64 `schema:"longitude"`
 	MinRadius            float64 `schema:"minradius"`
 	MaxRadius            float64 `schema:"maxradius"`
