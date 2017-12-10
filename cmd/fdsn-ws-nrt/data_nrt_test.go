@@ -97,6 +97,67 @@ func TestGetRecord(t *testing.T) {
 	}
 }
 
+func TestStartEnd(t *testing.T) {
+	ts := "2017-03-18T00:00:00.0Z"
+	testSetUp(t)
+	defer func() { // clean up
+		_, err := db.Exec("DELETE FROM fdsn.record WHERE start_time>=$1", ts)
+		if err != nil {
+			t.Error(err)
+		}
+		testTearDown()
+	}()
+
+	var err error
+
+	tm, err := time.Parse(time.RFC3339Nano, ts)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Create 10 records with each record is 10 seconds long.
+	for i := 0; i < 10; i++ {
+		_, err = db.Exec(`INSERT INTO fdsn.record (streamPK, start_time, latency_data, latency_tx, raw)
+							SELECT streamPK, $1, 0, 0, '' FROM fdsn.stream WHERE network='NZ' AND station='ABAZ' AND channel='ACE' AND location='01'`, tm.Format(time.RFC3339Nano))
+		if err != nil {
+			t.Error(err)
+		}
+		tm = tm.Add(time.Second * 10)
+	}
+
+	// Now we set start time at '2017-03-18T00:00:15.0Z' which is between 00:00:10 and 00:00:20
+	// And end time at '2017-03-18T00:01:15.0Z' which is between 00:01:10 and 00:01:20
+	// The search result should start with 00:00:10 and till 00:01:10
+	s, _ := time.Parse(time.RFC3339Nano, "2017-03-18T00:00:15.0Z")
+	e, _ := time.Parse(time.RFC3339Nano, "2017-03-18T00:01:15.0Z")
+	d := fdsn.DataSearch{
+		Network:  "^NZ$",
+		Station:  "^ABAZ$",
+		Channel:  "^ACE$",
+		Location: "^01$",
+		Start:    s,
+		End:      e,
+	}
+
+	k, err := holdingsSearchNrt(d)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(k) != 7 {
+		t.Errorf("expected 7 result got %d", len(k))
+	}
+
+	if k[0] != "NZ_ABAZ_ACE_01_2017-03-18T00:00:10Z" {
+		t.Errorf("expect 'NZ_ABAZ_ACE_01_2017-03-18T00:00:10Z' but got '%s'", k[0])
+	}
+
+	if k[6] != "NZ_ABAZ_ACE_01_2017-03-18T00:01:10Z" {
+		t.Errorf("expect 'NZ_ABAZ_ACE_01_2017-03-18T00:01:10Z' but got '%s'", k[6])
+	}
+
+}
+
 func BenchmarkHoldingsSearch(b *testing.B) {
 	testSetUp(b)
 	defer testTearDown()
