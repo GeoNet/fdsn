@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/url"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -227,27 +228,81 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 
 // regexp returns DataSearch with regexp strings that represents the search parameters.  It converts
 // the '*', '?', ' ' and '--' characters to their regular expression equivalents for pattern matching with Postgres POSIX regexp.
-func (d *DataSelect) Regexp() DataSearch {
+func (d *DataSelect) Regexp() (DataSearch, error) {
+	ne, err := toPattern(d.Network, false)
+	if err != nil {
+		return DataSearch{}, err
+	}
+
+	st, err := toPattern(d.Station, false)
+	if err != nil {
+		return DataSearch{}, err
+	}
+
+	ch, err := toPattern(d.Channel, false)
+	if err != nil {
+		return DataSearch{}, err
+	}
+
+	lo, err := toPattern(d.Location, true)
+	if err != nil {
+		return DataSearch{}, err
+	}
+
 	return DataSearch{
 		Start:    d.StartTime.Time,
 		End:      d.EndTime.Time,
-		Network:  toPattern(d.Network),
-		Station:  toPattern(d.Station),
-		Location: toPattern(d.Location),
-		Channel:  toPattern(d.Channel),
-	}
+		Network:  ne,
+		Station:  st,
+		Location: lo,
+		Channel:  ch,
+	}, nil
 }
 
-func toPattern(params []string) (out string) {
-	var newParams []string
-	for _, param := range params {
-		newParam := strings.Replace(param, `*`, `\w*`, -1)
-		newParam = strings.Replace(newParam, `?`, `\w{1}`, -1)
-		// blank or missing locations, we convert spaces and two dashes to wildcards for the regexp
-		newParam = strings.Replace(newParam, `--`, `\w{2}`, -1)
-		newParam = strings.Replace(newParam, ` `, `\w{1}`, -1)
-		newParams = append(newParams, `(^`+newParam+`$)`)
+func toPattern(params []string, emptyDash bool) (string, error) {
+	newParams, err := GenRegex(params, emptyDash)
+	if err != nil {
+		return "", err
+	}
+	return strings.Join(newParams, `|`), nil
+}
+
+func GenRegex(input []string, emptyDash bool) ([]string, error) {
+	if len(input) == 0 {
+		return nil, nil
 	}
 
-	return strings.Join(newParams, `|`)
+	// FDSN spec: all ASCII chars are allowed, and only ? and * has special meaning.
+	ascii := "^[\\x00-\\x7F]*$"
+	result := make([]string, 0)
+	for _, s := range input {
+		if s == "" {
+			continue
+		}
+
+		b, err := regexp.MatchString(ascii, s)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid parameter:'%s':%s", s, err.Error())
+		}
+		if !b {
+			return nil, fmt.Errorf("Invalid parameter:'%s'", s)
+		}
+		var r string
+
+		if emptyDash && s == "--" {
+			// "--" represents blank location which should be saved as 2 white spaces.
+			r = "^\\s{2}$"
+		} else {
+			// now escape all regex chars
+			s = regexp.QuoteMeta(s)
+			// Since * and ? has been escaped by QuoteMeta, we'll have to change them back
+			s = strings.Replace(s, "\\*", ".*", -1)
+			s = strings.Replace(s, "\\?", ".", -1)
+			r = "^" + s + "$"
+		}
+
+		result = append(result, r)
+	}
+
+	return result, nil
 }

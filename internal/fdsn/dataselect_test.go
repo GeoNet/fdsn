@@ -2,6 +2,7 @@ package fdsn_test
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
 	"reflect"
 	"testing"
@@ -56,5 +57,52 @@ NZ ABCD 10 E*? 2017-01-02T00:00:00 2017-01-03T00:00:00
 
 	if !reflect.DeepEqual(dsq, dsqExpected) {
 		t.Errorf("structs do not match, expected: %v, observed: %v", dsqExpected, dsq)
+	}
+}
+
+func TestGenRegex(t *testing.T) {
+	// normal case
+	r, err := fdsn.GenRegex([]string{"ABA0"}, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(r) != 1 || r[0] != "^ABA0$" {
+		t.Error(fmt.Sprintf("expect ^ABA0$ got %+v", r[0]))
+	}
+
+	// "--" empty location
+	r, err = fdsn.GenRegex([]string{"--"}, true)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(r) != 1 || r[0] != "^\\s{2}$" {
+		t.Error(fmt.Sprintf("expect ^\\s{2}$ got %+v", r[0]))
+	}
+
+	// "?" and "*" special
+	r, err = fdsn.GenRegex([]string{"A?Z*"}, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(r) != 1 || r[0] != "^A.Z.*$" {
+		t.Error(fmt.Sprintf("expect ^A.Z.*$ got %+v", r[0]))
+	}
+
+	// other regex special chars escaped
+	// (only test some regex chars to make sure it does quote)
+	r, err = fdsn.GenRegex([]string{"*\\^{]"}, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(r) != 1 || r[0] != "^.*\\\\\\^\\{\\]$" {
+		t.Error(fmt.Sprintf("expect ^.*\\\\\\^\\{\\]$ got %+v", r[0]))
+	}
+
+	r, err = fdsn.GenRegex([]string{"[E,H]H?"}, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(r) != 1 || r[0] != "^\\[E,H\\]H.$" {
+		t.Error(fmt.Sprintf("expect ^\\[E,H\\]H.$ got %+v", r[0]))
 	}
 }
