@@ -104,8 +104,10 @@ func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) e
 	var metrics []metric
 
 	for _, v := range params {
-		d := v.Regexp()
-
+		d, err := v.Regexp()
+		if err != nil {
+			return err
+		}
 		m, err := metricsSearch(d)
 		if err != nil {
 			return err
@@ -169,8 +171,10 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 	var files int
 
 	for _, v := range params {
-		d := v.Regexp()
-
+		d, err := v.Regexp()
+		if err != nil {
+			return 0, err
+		}
 		keys, err := holdingsSearch(d)
 		if err != nil {
 			return 0, err

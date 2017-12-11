@@ -61,7 +61,6 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 		return 0, weft.StatusError{Code: http.StatusMethodNotAllowed}
 	}
 
-	var err error
 	var keys []string
 	var rec []byte
 
@@ -71,9 +70,12 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
 	var n int
 	var written int
-
 	for _, v := range params {
-		keys, err = holdingsSearchNrt(v.Regexp())
+		s, err := v.Regexp()
+		if err != nil {
+			return 0, err
+		}
+		keys, err = holdingsSearchNrt(s)
 		if err != nil {
 			return 0, err
 		}

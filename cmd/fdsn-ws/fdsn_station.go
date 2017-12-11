@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/GeoNet/fdsn/internal/fdsn"
 	"github.com/GeoNet/fdsn/internal/platform/s3"
 	"github.com/GeoNet/kit/weft"
 	"github.com/GeoNet/kit/wgs84"
@@ -326,12 +327,28 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		return fdsnStationV1Search{}, errors.New("nodata must be 204 or 404.")
 	}
 
+	ne, err := fdsn.GenRegex(p.Network, false)
+	if err != nil {
+		return fdsnStationV1Search{}, err
+	}
+	st, err := fdsn.GenRegex(p.Station, false)
+	if err != nil {
+		return fdsnStationV1Search{}, err
+	}
+	ch, err := fdsn.GenRegex(p.Channel, false)
+	if err != nil {
+		return fdsnStationV1Search{}, err
+	}
+	lo, err := fdsn.GenRegex(p.Location, true)
+	if err != nil {
+		return fdsnStationV1Search{}, err
+	}
 	s := fdsnStationV1Search{
 		fdsnStationV1Parm: p,
-		NetworkReg:        genRegex(p.Network, false),
-		StationReg:        genRegex(p.Station, false),
-		ChannelReg:        genRegex(p.Channel, true),
-		LocationReg:       genRegex(p.Location, false),
+		NetworkReg:        ne,
+		StationReg:        st,
+		ChannelReg:        ch,
+		LocationReg:       lo,
 	}
 
 	s.LevelValue, err = levelValue(p.Level)
@@ -928,28 +945,6 @@ func levelValue(level string) (int, error) {
 	default:
 		return -1, fmt.Errorf("Invalid level value.")
 	}
-}
-
-func genRegex(input []string, emptyDash bool) []string {
-	if len(input) == 0 {
-		return nil
-	}
-
-	result := make([]string, len(input))
-
-	for i, s := range input {
-		// turn "EH*" into "^EH.*$"
-		if emptyDash && s == "--" {
-			// "--" represents empty
-			result[i] = "^\\s\\s$"
-		} else {
-			s = strings.Replace(s, "*", ".*", -1)
-			s = strings.Replace(s, "?", ".?", -1)
-			result[i] = "^" + s + "$"
-		}
-	}
-
-	return result
 }
 
 func matchAnyRegex(input string, regexs []string) bool {
