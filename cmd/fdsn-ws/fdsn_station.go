@@ -31,6 +31,11 @@ const (
 	STATION_LEVEL_RESPONSE  = 3
 	DEFAULT_RELOAD_INTERVAL = 300
 	NZ_KM_DEGREE            = 111.0
+
+	BEFORE   = -1
+	ONAFTER  = 0
+	ONBEFORE = 0
+	AFTER    = 1
 )
 
 var stationAbbreviations = map[string]string{
@@ -69,7 +74,13 @@ type fdsnStationV1Parm struct {
 	Longitude           float64  `schema:"longitude"`
 	MinRadius           float64  `schema:"minradius"`
 	MaxRadius           float64  `schema:"maxradius"`
+	StartBefore         Time     `schema:"startbefore"`
+	StartAfter          Time     `schema:"startafter"`
+	EndBefore           Time     `schema:"endbefore"`
+	EndAfter            Time     `schema:"endafter"`
 	NoData              int      `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
+	startMode           int      // BEFORE, ONAFTER, AFTER
+	endMode             int      // BEFORE, ONBEFORE, AFTER
 }
 
 type fdsnStationV1Search struct {
@@ -96,12 +107,6 @@ var (
 	s3Bucket            string
 	s3Meta              string
 )
-var stationNotSupported = map[string]bool{
-	"startafter":  true,
-	"startbefore": true,
-	"endafter":    true,
-	"endbefore":   true,
-}
 
 func init() {
 	var err error
@@ -218,6 +223,10 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		IncludeRestricted: true,
 		StartTime:         Time{zeroDateTime},  // 0001-01-01T00:00:00
 		EndTime:           Time{emptyDateTime}, // 9999-01-01T00:00:00
+		StartBefore:       Time{emptyDateTime}, // 9999-01-01T00:00:00
+		EndBefore:         Time{emptyDateTime}, // 9999-01-01T00:00:00
+		StartAfter:        Time{emptyDateTime}, // 9999-01-01T00:00:00
+		EndAfter:          Time{emptyDateTime}, // 9999-01-01T00:00:00
 		Latitude:          math.MaxFloat64,
 		Longitude:         math.MaxFloat64,
 		MinRadius:         0.0,
@@ -238,9 +247,6 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	// (According to spec 1.1 Page 10 top section)
 
 	for key, val := range v {
-		if _, ok := stationNotSupported[key]; ok {
-			return fdsnStationV1Search{}, fmt.Errorf("\"%s\" is not supported", key)
-		}
 		if len(val[0]) == 0 {
 			return fdsnStationV1Search{}, fmt.Errorf("Invalid %s value", key)
 		}
@@ -258,6 +264,46 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 
 	if p.Level == "response" && p.Format == "text" {
 		return fdsnStationV1Search{}, fmt.Errorf("Text formats are only supported when level is net|sta|cha.")
+	}
+
+	count := 0
+	if p.StartTime.Time != zeroDateTime {
+		count++
+		p.startMode = ONAFTER
+	}
+	if p.StartAfter.Time != emptyDateTime {
+		count++
+		p.startMode = AFTER
+		p.StartTime = p.StartAfter
+	}
+	if p.StartBefore.Time != emptyDateTime {
+		count++
+		p.startMode = BEFORE
+		p.StartTime = p.StartBefore
+	}
+	if count > 1 {
+		return fdsnStationV1Search{}, fmt.Errorf("Only one of 'starttime', 'startafter', and 'startbefore' is allowed.")
+	}
+
+	count = 0
+	if p.EndTime.Time != emptyDateTime {
+		count++
+		p.endMode = ONBEFORE
+	}
+
+	if p.EndAfter.Time != emptyDateTime {
+		count++
+		p.endMode = AFTER
+		p.EndTime = p.EndAfter
+	}
+
+	if p.EndBefore.Time != emptyDateTime {
+		count++
+		p.endMode = BEFORE
+		p.EndTime = p.EndBefore
+	}
+	if count > 1 {
+		return fdsnStationV1Search{}, fmt.Errorf("Only one of 'endtime', 'endafter', and 'endbefore' is allowed.")
 	}
 
 	if p.StartTime.Time.After(p.EndTime.Time) {
@@ -701,6 +747,45 @@ func (v fdsnStationV1Search) validStartEnd(start, end time.Time, level int) bool
 
 	if !start.Equal(emptyDateTime) && v.EndTime.Time.Before(start) {
 		return false
+	}
+
+	if v.LevelValue != level {
+		// Not validating furthur for different level
+		return true
+	}
+
+	if !start.Equal(emptyDateTime) && v.StartTime.Time != zeroDateTime {
+		switch v.startMode {
+		case BEFORE:
+			if !start.Before(v.StartTime.Time) {
+				return false
+			}
+		case ONAFTER:
+			if start.Before(v.StartTime.Time) {
+				return false
+			}
+		case AFTER:
+			if !start.After(v.StartTime.Time) {
+				return false
+			}
+		}
+	}
+
+	if !end.IsZero() && v.EndTime.Time != emptyDateTime {
+		switch v.endMode {
+		case BEFORE:
+			if !end.Before(v.EndTime.Time) {
+				return false
+			}
+		case ONBEFORE:
+			if end.After(v.EndTime.Time) {
+				return false
+			}
+		case AFTER:
+			if !end.After(v.EndTime.Time) {
+				return false
+			}
+		}
 	}
 	return true
 }
