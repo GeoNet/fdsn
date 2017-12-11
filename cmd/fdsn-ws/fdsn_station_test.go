@@ -185,6 +185,125 @@ func TestStationFilter(t *testing.T) {
 
 }
 
+func TestStartEnd(t *testing.T) {
+	var e fdsnStationV1Search
+	var err error
+	var v url.Values = make(map[string][]string)
+
+	c := *fdsnStations.fdsn
+
+	// Test startDate against 3 channels' startDate="2007-05-20T23:00:00"
+	v.Set("startTime", "2007-05-20T23:00:00")
+	v.Set("level", "channel")
+
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+
+	if len(c.Network) != 1 {
+		t.Errorf("Incorrect filter result. No valid record.")
+	}
+
+	if len(c.Network[0].Station) != 2 {
+		t.Errorf("Incorrect filter result. Expect 2 got %d", len(c.Network[0].Station))
+	}
+
+	if len(c.Network[0].Station) != 2 {
+		t.Errorf("Incorrect filter result. Expect 2 got %d", len(c.Network[0].Station))
+	}
+
+	if len(c.Network[0].Station[0].Channel) != 9 {
+		t.Errorf("Incorrect filter result. Expect 9 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+	// startAfter, should be 3 less
+	v = make(map[string][]string)
+	v.Set("startAfter", "2007-05-20T23:00:00")
+	v.Set("level", "channel")
+
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+	if len(c.Network[0].Station[0].Channel) != 6 {
+		t.Errorf("Incorrect filter result. Expect 6 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+	c = *fdsnStations.fdsn // reset data
+	v = make(map[string][]string)
+	v.Set("startBefore", "2007-05-20T23:00:01")
+	v.Set("level", "channel")
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+	if len(c.Network[0].Station[0].Channel) != 3 {
+		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+	// Test endDate against 3 channels' endDate="2011-06-20T04:00:00"
+	c = *fdsnStations.fdsn // reset data
+	v = make(map[string][]string)
+	v.Set("startBefore", "2011-06-20T04:00:00")
+	v.Set("endTime", "2011-06-20T04:00:00") // This will include all 3 channels.
+	v.Set("level", "channel")
+
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+
+	if len(c.Network) != 1 {
+		t.Errorf("Incorrect filter result. No valid record.")
+	}
+
+	if len(c.Network[0].Station) != 1 {
+		t.Errorf("Incorrect filter result. Expect 1 got %d", len(c.Network[0].Station))
+	}
+
+	if len(c.Network[0].Station) != 1 {
+		t.Errorf("Incorrect filter result. Expect 1 got %d", len(c.Network[0].Station))
+	}
+
+	if len(c.Network[0].Station[0].Channel) != 3 {
+		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+	v = make(map[string][]string)
+	v.Set("startTime", "2011-06-20T03:00:00")
+	v.Set("endAfter", "2011-06-20T04:00:00") // This will exclude all 3 channels.
+	v.Set("level", "channel")
+
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+	if len(c.Network) != 0 {
+		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+	c = *fdsnStations.fdsn // reset data
+	v = make(map[string][]string)
+	v.Set("startTime", "2011-06-20T03:00:00")
+	v.Set("endBefore", "2011-06-20T04:00:01") // This will include all 3 channels.
+	v.Set("level", "channel")
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+	if len(c.Network[0].Station[0].Channel) != 3 {
+		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+}
+
 // To profiling, you'll have to use full fdsn-station xml as data source:
 // 1. Put full fdsn-station.xml in etc/.
 // 2. export FDSN_STATION_XML_META_KEY=fdsn-station.xml
