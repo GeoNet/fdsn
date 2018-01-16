@@ -61,12 +61,13 @@ var routes = wt.Requests{
 	{ID: wt.L(), URL: "/metrics/fdsnws/dataselect/1/query?starttime=2016-01-09T00:00:00&endtime=2016-01-09T23:00:00&network=INVALID_NETWORK&station=CHST&location=01&channel=LOG", Content: "text/plain; charset=utf-8",
 		Status: http.StatusNoContent},
 	{ID: wt.L(), URL: "/metrics/fdsnws/dataselect/1/query?starttime=2016-01-09T00:00:00&endtime=2016-01-09T23:00:00&network=NZ&station=CHST&location=01&channel=LOG"},
+
+	{ID: wt.L(), URL: "/soh"},
 }
 
 // Test all routes give the expected response.  Also check with
 // cache busters and extra query parameters.
 func TestRoutes(t *testing.T) {
-	setup(t)
 	setup(t)
 	defer teardown()
 

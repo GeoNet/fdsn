@@ -2,8 +2,6 @@ package main
 
 import (
 	"bytes"
-	"database/sql"
-	"fmt"
 	"github.com/GeoNet/kit/weft"
 	"net/http"
 )
@@ -42,29 +40,20 @@ func init() {
 	mux.HandleFunc("/sc3ml", weft.MakeHandler(s3ml, weft.TextError))
 }
 
-// soh is for external service probes.
-// writes a service unavailable error to w if the service is not working.
 func soh(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	err := weft.CheckQuery(r, []string{"GET"}, []string{}, []string{})
 	if err != nil {
 		return err
 	}
 
-	// miniSEED is loaded into the archive 7 days behind real time.  There should be data in the
-	// holdings DB within the last 10 days.
-	var numSamples sql.NullInt64
-	err = db.QueryRow(`SELECT sum(numsamples) FROM fdsn.holdings WHERE start_time > now() - interval '10 days'`).Scan(&numSamples)
+	var i int
+
+	err = db.QueryRow(`SELECT 1`).Scan(&i)
 	if err != nil {
-		b.Write([]byte("<html><head></head><body>service error</body></html>"))
-		return weft.StatusError{Code: http.StatusServiceUnavailable}
+		return err
 	}
 
-	if numSamples.Int64 == 0 {
-		b.Write([]byte("<html><head></head><body>holdings database has zero samples for the last ten days.</body></html>"))
-		return weft.StatusError{Code: http.StatusServiceUnavailable}
-	}
+	b.WriteString("<html><head></head><body>ok</body></html>")
 
-	_, err = b.Write([]byte(fmt.Sprintf("<html><head></head><body>holdings database has %d samples for the last ten days.</body></html>", numSamples.Int64)))
-
-	return err
+	return nil
 }
