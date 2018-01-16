@@ -2,8 +2,6 @@ package main
 
 import (
 	"bytes"
-	"database/sql"
-	"fmt"
 	"github.com/GeoNet/kit/weft"
 	"net/http"
 	"net/http/httputil"
@@ -47,18 +45,14 @@ func soh(r *http.Request, h http.Header, b *bytes.Buffer) error {
 		return err
 	}
 
-	// miniSEED records arrive continuously.  There should be records in the DB in the last hour.
-	var numRecords sql.NullInt64
+	var i int
+
+	err = db.QueryRow(`SELECT 1`).Scan(&i)
 	if err != nil {
 		return err
 	}
 
-	if numRecords.Int64 == 0 {
-		b.Write([]byte("<html><head></head><body>have zero miniSEED records for the last hour.</body></html>"))
-		return weft.StatusError{Code: http.StatusServiceUnavailable}
-	}
-
-	b.Write([]byte(fmt.Sprintf("<html><head></head><body>have %d miniSEED records for the last hour.</body></html>", numRecords.Int64)))
+	b.WriteString("<html><head></head><body>ok</body></html>")
 
 	return nil
 }
