@@ -10,7 +10,7 @@ before_deploy:
   - docker --version
   - pip install --user awscli
   - export PATH=$PATH:$HOME/.local/bin
-  - eval $(aws ecr get-login --region ap-southeast-2) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
+  - eval $(aws ecr get-login --no-include-email --region ap-southeast-2) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
 
 # trying to fix postgis bug which comes on the travis infrastructure that has sudo.
 before_install:
