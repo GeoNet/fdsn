@@ -185,6 +185,19 @@ func TestStationFilter(t *testing.T) {
 
 }
 
+/*
+Testdata timeline
+
+Station 1:
+2007-05-20T23   2011-03-06T22   2011-06-20T04
+     |------3 cha----|
+                      |-----3 cha----|
+                                      |-----3 cha----------->
+Station 2:
+                     2010-03-11T21   2012-01-19T22
+                          |-----3 cha----|
+                                          |-----3 cha------->
+*/
 func TestStartEnd(t *testing.T) {
 	var e fdsnStationV1Search
 	var err error
@@ -192,8 +205,8 @@ func TestStartEnd(t *testing.T) {
 
 	c := *fdsnStations.fdsn
 
-	// Test startDate against 3 channels' startDate="2007-05-20T23:00:00"
-	v.Set("startTime", "2007-05-20T23:00:00")
+	// This should filter out 3 channels end at 2011-03-06T22:00:00
+	v.Set("startTime", "2011-03-06T22:00:01")
 	v.Set("level", "channel")
 
 	if e, err = parseStationV1(v); err != nil {
@@ -210,17 +223,19 @@ func TestStartEnd(t *testing.T) {
 		t.Errorf("Incorrect filter result. Expect 2 got %d", len(c.Network[0].Station))
 	}
 
-	if len(c.Network[0].Station) != 2 {
-		t.Errorf("Incorrect filter result. Expect 2 got %d", len(c.Network[0].Station))
+	// 1st channel, 6
+	if len(c.Network[0].Station[0].Channel) != 6 {
+		t.Errorf("Incorrect filter result. Expect 6 got %d", len(c.Network[0].Station[0].Channel))
 	}
 
-	if len(c.Network[0].Station[0].Channel) != 9 {
-		t.Errorf("Incorrect filter result. Expect 9 got %d", len(c.Network[0].Station[0].Channel))
+	// 2nd channel, 6
+	if len(c.Network[0].Station[1].Channel) != 6 {
+		t.Errorf("Incorrect filter result. Expect 6 got %d", len(c.Network[0].Station[1].Channel))
 	}
 
-	// startAfter, should be 3 less
+	c = *fdsnStations.fdsn // reset data
 	v = make(map[string][]string)
-	v.Set("startAfter", "2007-05-20T23:00:00")
+	v.Set("startAfter", "2007-05-20T23:00:00") // station1's latter 6 channels (skip check station2)
 	v.Set("level", "channel")
 
 	if e, err = parseStationV1(v); err != nil {
@@ -228,28 +243,30 @@ func TestStartEnd(t *testing.T) {
 	}
 
 	c.doFilter([]fdsnStationV1Search{e})
+
 	if len(c.Network[0].Station[0].Channel) != 6 {
 		t.Errorf("Incorrect filter result. Expect 6 got %d", len(c.Network[0].Station[0].Channel))
 	}
 
 	c = *fdsnStations.fdsn // reset data
 	v = make(map[string][]string)
-	v.Set("startBefore", "2007-05-20T23:00:01")
+	v.Set("startBefore", "2007-05-20T23:00:01") // only station1's first 3 channels
 	v.Set("level", "channel")
 	if e, err = parseStationV1(v); err != nil {
 		t.Error(err)
 	}
 
 	c.doFilter([]fdsnStationV1Search{e})
+
 	if len(c.Network[0].Station[0].Channel) != 3 {
 		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
 	}
 
-	// Test endDate against 3 channels' endDate="2011-06-20T04:00:00"
 	c = *fdsnStations.fdsn // reset data
 	v = make(map[string][]string)
-	v.Set("startBefore", "2011-06-20T04:00:00")
-	v.Set("endTime", "2011-06-20T04:00:00") // This will include all 3 channels.
+	// This sould only include left 6 channels of station1.
+	v.Set("startBefore", "2011-06-20T04:00:00") // station1=6, station2=3
+	v.Set("endTime", "2010-03-11T00:00:00")     // station1=3
 	v.Set("level", "channel")
 
 	if e, err = parseStationV1(v); err != nil {
@@ -263,8 +280,51 @@ func TestStartEnd(t *testing.T) {
 	}
 
 	if len(c.Network[0].Station) != 1 {
-		t.Errorf("Incorrect filter result. Expect 1 got %d", len(c.Network[0].Station))
+		t.Errorf("Incorrect filter result. Expect 2 got %d", len(c.Network[0].Station))
 	}
+
+	if len(c.Network[0].Station[0].Channel) != 3 {
+		t.Errorf("Incorrect filter result. Expect 6 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+	c = *fdsnStations.fdsn // reset data
+	v = make(map[string][]string)
+	v.Set("startTime", "2011-06-20T03:00:00") // station1= latter 6, station2=6
+	v.Set("endAfter", "2011-06-20T05:00:00")  // station1=3, station2=6
+	v.Set("level", "channel")
+
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+
+	if len(c.Network) != 1 {
+		t.Errorf("Incorrect filter result. No valid record.")
+	}
+
+	if len(c.Network[0].Station) != 2 {
+		t.Errorf("Incorrect filter result. Expect 2 got %d", len(c.Network[0].Station))
+	}
+
+	if len(c.Network[0].Station[0].Channel) != 3 {
+		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
+	}
+
+	if len(c.Network[0].Station[1].Channel) != 6 {
+		t.Errorf("Incorrect filter result. Expect 6 got %d", len(c.Network[0].Station[1].Channel))
+	}
+
+	c = *fdsnStations.fdsn // reset data
+	v = make(map[string][]string)
+	v.Set("startTime", "2011-06-20T03:00:00") // station1= latter 6, station2=6
+	v.Set("endBefore", "2011-06-20T04:00:01") // station1=6, station2=0
+	v.Set("level", "channel")
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
 
 	if len(c.Network[0].Station) != 1 {
 		t.Errorf("Incorrect filter result. Expect 1 got %d", len(c.Network[0].Station))
@@ -273,35 +333,6 @@ func TestStartEnd(t *testing.T) {
 	if len(c.Network[0].Station[0].Channel) != 3 {
 		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
 	}
-
-	v = make(map[string][]string)
-	v.Set("startTime", "2011-06-20T03:00:00")
-	v.Set("endAfter", "2011-06-20T04:00:00") // This will exclude all 3 channels.
-	v.Set("level", "channel")
-
-	if e, err = parseStationV1(v); err != nil {
-		t.Error(err)
-	}
-
-	c.doFilter([]fdsnStationV1Search{e})
-	if len(c.Network) != 0 {
-		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
-	}
-
-	c = *fdsnStations.fdsn // reset data
-	v = make(map[string][]string)
-	v.Set("startTime", "2011-06-20T03:00:00")
-	v.Set("endBefore", "2011-06-20T04:00:01") // This will include all 3 channels.
-	v.Set("level", "channel")
-	if e, err = parseStationV1(v); err != nil {
-		t.Error(err)
-	}
-
-	c.doFilter([]fdsnStationV1Search{e})
-	if len(c.Network[0].Station[0].Channel) != 3 {
-		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
-	}
-
 }
 
 // To profiling, you'll have to use full fdsn-station xml as data source:

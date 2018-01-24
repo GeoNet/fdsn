@@ -32,10 +32,10 @@ const (
 	DEFAULT_RELOAD_INTERVAL = 300
 	NZ_KM_DEGREE            = 111.0
 
-	BEFORE   = -1
-	ONAFTER  = 0
-	ONBEFORE = 0
-	AFTER    = 1
+	BEFORE       = -1
+	ONBEFOREEND  = 0
+	ONAFTERSTART = 0
+	AFTER        = 1
 )
 
 var stationAbbreviations = map[string]string{
@@ -79,8 +79,8 @@ type fdsnStationV1Parm struct {
 	EndBefore           Time     `schema:"endbefore"`
 	EndAfter            Time     `schema:"endafter"`
 	NoData              int      `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
-	startMode           int      // BEFORE, ONAFTER, AFTER
-	endMode             int      // BEFORE, ONBEFORE, AFTER
+	startMode           int      // BEFORE, ONBEFOREEND, AFTER
+	endMode             int      // BEFORE, ONAFTERSTART, AFTER
 }
 
 type fdsnStationV1Search struct {
@@ -269,7 +269,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	count := 0
 	if p.StartTime.Time != zeroDateTime {
 		count++
-		p.startMode = ONAFTER
+		p.startMode = ONBEFOREEND
 	}
 	if p.StartAfter.Time != emptyDateTime {
 		count++
@@ -288,7 +288,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	count = 0
 	if p.EndTime.Time != emptyDateTime {
 		count++
-		p.endMode = ONBEFORE
+		p.endMode = ONAFTERSTART
 	}
 
 	if p.EndAfter.Time != emptyDateTime {
@@ -302,12 +302,9 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		p.endMode = BEFORE
 		p.EndTime = p.EndBefore
 	}
+
 	if count > 1 {
 		return fdsnStationV1Search{}, fmt.Errorf("Only one of 'endtime', 'endafter', and 'endbefore' is allowed.")
-	}
-
-	if p.StartTime.Time.After(p.EndTime.Time) {
-		return fdsnStationV1Search{}, errors.New("Invalid time range.")
 	}
 
 	if p.IncludeAvailability {
@@ -741,48 +738,40 @@ func (c *ChannelType) doFilter(params []fdsnStationV1Search) bool {
 
 func (v fdsnStationV1Search) validStartEnd(start, end time.Time, level int) bool {
 	// For start/end, the "no-value" could be "0001-01-01T00:00:00" or "9999-01-01T00:00:00"
-	if !end.IsZero() && v.StartTime.Time.After(end) {
-		return false
-	}
-
-	if !start.Equal(emptyDateTime) && v.EndTime.Time.Before(start) {
-		return false
-	}
-
 	if v.LevelValue != level {
 		// Not validating furthur for different level
 		return true
 	}
 
-	if !start.Equal(emptyDateTime) && v.StartTime.Time != zeroDateTime {
+	if v.StartTime.Time != zeroDateTime {
 		switch v.startMode {
-		case BEFORE:
-			if !start.Before(v.StartTime.Time) {
+		case ONBEFOREEND: // startTime
+			if !end.IsZero() && end.Before(v.StartTime.Time) {
 				return false
 			}
-		case ONAFTER:
-			if start.Before(v.StartTime.Time) {
+		case BEFORE: // startBefore
+			if !start.Equal(emptyDateTime) && !start.Before(v.StartTime.Time) {
 				return false
 			}
-		case AFTER:
-			if !start.After(v.StartTime.Time) {
+		case AFTER: // startAfter
+			if start.Equal(emptyDateTime) || !start.After(v.StartTime.Time) {
 				return false
 			}
 		}
 	}
 
-	if !end.IsZero() && v.EndTime.Time != emptyDateTime {
+	if v.EndTime.Time != emptyDateTime {
 		switch v.endMode {
-		case BEFORE:
-			if !end.Before(v.EndTime.Time) {
+		case ONAFTERSTART: // endTime
+			if !start.Equal(emptyDateTime) && start.After(v.EndTime.Time) {
 				return false
 			}
-		case ONBEFORE:
-			if end.After(v.EndTime.Time) {
+		case BEFORE: // endBefore
+			if end.IsZero() || !end.Before(v.EndTime.Time) {
 				return false
 			}
-		case AFTER:
-			if !end.After(v.EndTime.Time) {
+		case AFTER: // endAfter
+			if !end.IsZero() && !end.After(v.EndTime.Time) {
 				return false
 			}
 		}
