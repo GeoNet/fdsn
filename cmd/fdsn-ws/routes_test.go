@@ -36,6 +36,7 @@ var routes = wt.Requests{
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/application.wadl", Content: "application/xml"},
 
 	// fdsn-ws-station
+	{ID: wt.L(), URL: "/fdsnws/station/1", Content: "text/html"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/version", Content: "text/plain"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/application.wadl", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query", Content: "application/xml"},
