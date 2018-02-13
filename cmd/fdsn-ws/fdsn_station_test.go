@@ -183,6 +183,19 @@ func TestStationFilter(t *testing.T) {
 		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
 	}
 
+	// Test special case
+	c = *fdsnStations.fdsn
+	v = make(map[string][]string)
+	v.Set("level", "network")
+	v.Set("station", "ABCD")
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+	c.doFilter([]fdsnStationV1Search{e})
+	if len(c.Network) != 0 {
+		t.Errorf("Incorrect filter result. Expected no record got %d", len(c.Network))
+	}
+
 }
 
 /*
@@ -332,6 +345,61 @@ func TestStartEnd(t *testing.T) {
 
 	if len(c.Network[0].Station[0].Channel) != 3 {
 		t.Errorf("Incorrect filter result. Expect 3 got %d", len(c.Network[0].Station[0].Channel))
+	}
+}
+
+func TestFormatText(t *testing.T) {
+	var e fdsnStationV1Search
+	var err error
+	var v url.Values = make(map[string][]string)
+
+	c := *fdsnStations.fdsn
+
+	v.Set("startTime", "2012-01-19T22:00:00")
+	v.Set("station", "ARAZ")
+	v.Set("channel", "EHZ")
+	v.Set("level", "channel")
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+	b := c.marshalText(STATION_LEVEL_CHANNEL)
+	exp := `#Network | Station | Location | Channel | Latitude | Longitude | Elevation | Depth | Azimuth | Dip | SensorDescription | Scale | ScaleFreq | ScaleUnits | SampleRate | StartTime | EndTime
+NZ|ARAZ|10|EHZ|-38.627690|176.120060|420.000000|0.000000|0.000000|-90.000000|Short Period Seismometer|74574725.120000|15.000000|m/s|100.000000|2011-06-20T04:00:01|
+`
+	if b.String() != exp {
+		t.Errorf("Incorrect text result.")
+	}
+
+	c = *fdsnStations.fdsn
+	v.Set("level", "network")
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+	b = c.marshalText(STATION_LEVEL_NETWORK)
+	exp = `#Network | Description | StartTime | EndTime | TotalStations
+NZ|New Zealand National Seismograph Network|1884-02-01T00:00:00||2
+`
+	if b.String() != exp {
+		t.Errorf("Incorrect text result.")
+	}
+
+	c = *fdsnStations.fdsn
+	v.Set("level", "station")
+	if e, err = parseStationV1(v); err != nil {
+		t.Error(err)
+	}
+
+	c.doFilter([]fdsnStationV1Search{e})
+	b = c.marshalText(STATION_LEVEL_STATION)
+	exp = `#Network | Station | Latitude | Longitude | Elevation | SiteName | StartTime | EndTime
+NZ|ARAZ|-38.627690|176.120060|420.000000|Aratiatia Landcorp Farm|2007-05-20T23:00:00|
+`
+	if b.String() != exp {
+		t.Errorf("Incorrect text result.")
 	}
 }
 
