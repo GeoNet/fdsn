@@ -19,6 +19,9 @@ fi
 # code will be compiled in this container
 BUILD_CONTAINER=golang:1.9.1-alpine
 
+# dependent resources will be gathered from this container
+RESOURCE_CONTAINER=alpine:3.7
+
 DOCKER_TMP=docker-build-tmp
 
 mkdir -p $DOCKER_TMP
@@ -35,7 +38,7 @@ mkdir -p ${DOCKER_TMP}/etc/ssl/certs
 mkdir -p ${DOCKER_TMP}/usr/share
 
 # Assemble common resource for ssl and timezones from the build container
-docker run --rm -v ${PWD}:${PWD} ${BUILD_CONTAINER} \
+docker run --rm -v ${PWD}:${PWD} ${RESOURCE_CONTAINER} \
     /bin/ash -c "apk add --update ca-certificates tzdata && \
     cp /etc/ssl/certs/ca-certificates.crt ${PWD}/${DOCKER_TMP}/etc/ssl/certs && \
     cp -Ra /usr/share/zoneinfo ${PWD}/${DOCKER_TMP}/usr/share"
