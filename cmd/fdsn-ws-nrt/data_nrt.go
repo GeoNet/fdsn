@@ -21,6 +21,7 @@ func holdingsSearchNrt(d fdsn.DataSearch) ([]string, error) {
 	timer := metrics.Start()
 	defer timer.Track("holdingsSearchNrt")
 
+	// With each record is about 10s long, we query for records for 1 minute prior to start_time and 1 minute after end_time, then filter them afterwards.
 	rows, err := db.Query(`WITH s AS (SELECT DISTINCT ON (streamPK) network, station, channel, location, streamPK
 	FROM fdsn.stream WHERE network ~ $1
 	AND station ~ $2
@@ -28,7 +29,7 @@ func holdingsSearchNrt(d fdsn.DataSearch) ([]string, error) {
 	AND location ~ $4)
 	SELECT network, station, channel, location, start_time FROM s JOIN fdsn.record USING (streamPK) WHERE start_time >= $5 AND start_time <= $6
 	ORDER BY network, station, channel, location, start_time ASC`,
-		d.Network, d.Station, d.Channel, d.Location, d.Start, d.End)
+		d.Network, d.Station, d.Channel, d.Location, d.Start.Add(time.Minute*-1), d.End.Add(time.Minute*1))
 	if err != nil {
 		return []string{}, err
 	}
@@ -39,12 +40,33 @@ func holdingsSearchNrt(d fdsn.DataSearch) ([]string, error) {
 	var n, s, c, l string
 	var t time.Time
 
+	crossedStart := false
+	prevKey := ""
 	for rows.Next() {
 		err = rows.Scan(&n, &s, &c, &l, &t)
 		if err != nil {
 			return []string{}, err
 		}
-		keys = append(keys, fmt.Sprintf("%s_%s_%s_%s_%s", n, s, c, l, t.Format(time.RFC3339Nano)))
+
+		if t.After(d.End) {
+			break
+		}
+
+		key := fmt.Sprintf("%s_%s_%s_%s_%s", n, s, c, l, t.Format(time.RFC3339Nano))
+		if !crossedStart {
+			if t.After(d.Start) {
+				// Previous record is the record which crossed (or on) the start time
+				crossedStart = true
+				if prevKey != "" {
+					keys = append(keys, prevKey)
+				}
+				keys = append(keys, key)
+			} else {
+				prevKey = key
+			}
+		} else {
+			keys = append(keys, key)
+		}
 	}
 
 	return keys, nil
