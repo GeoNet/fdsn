@@ -1,6 +1,6 @@
-# FDSN Exmaples
+# FDSN Examples
 
-The files in this folders are python notebooks that will demonstrate some simple ways to use the GeoNet FDSN webservices in python and with the python module, obspy. Please note these examples use Python 3, so the syntax may differ slightly to Python 2.7. We recommend you use Python 3 as it has some important bug fixes. For non-python examples, please see the FDSN page on the [GeoNet websites](https://geonet.org.nz/data/tools/FDSN)
+The files in this folders are Python notebooks that will demonstrate some simple ways to use the GeoNet FDSN webservices in Python and with the Python module, ObsPy. Please note these examples use Python 3, so the syntax may differ slightly to Python 2.7. We recommend you use Python 3 as it has some important bug fixes. For non-python examples, please see the FDSN page on the [GeoNet websites](https://geonet.org.nz/data/tools/FDSN)
 
 ## Summary of examples
 
