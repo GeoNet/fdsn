@@ -2,6 +2,7 @@
 fdsn.iml
 docker-build-tmp/
 cmd/fdsn-quake-consumer/fdsn-quake-consumer
+cmd/fdsn-quake-consumer/fdsn-quake-consumer.test
 cmd/fdsn-ws/fdsn-ws
 cmd/fdsn-ws-nrt/fdsn-ws-nrt
 cmd/fdsn-ws-event-loader/fdsn-ws-event-loader
