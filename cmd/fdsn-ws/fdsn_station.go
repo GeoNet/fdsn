@@ -167,6 +167,8 @@ func init() {
 func parseStationV1Post(body string) ([]fdsnStationV1Search, error) {
 	ret := []fdsnStationV1Search{}
 	level := "station"
+	format := "xml"
+
 	scanner := bufio.NewScanner(strings.NewReader(body))
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -179,6 +181,11 @@ func parseStationV1Post(body string) ([]fdsnStationV1Search, error) {
 				level = strings.TrimSpace(tokens[1])
 				if _, err := levelValue(level); err != nil {
 					return ret, err
+				}
+			case "format":
+				format = strings.TrimSpace(tokens[1])
+				if format != "xml" && format != "text" {
+					return ret, errors.New("Invalid format")
 				}
 			}
 		} else if tokens := strings.Fields(line); len(tokens) == 6 {
@@ -197,6 +204,7 @@ func parseStationV1Post(body string) ([]fdsnStationV1Search, error) {
 				v.Add("EndTime", tokens[5])
 			}
 			v.Add("Level", level)
+			v.Add("format", format)
 
 			p, err := parseStationV1(v)
 			if err != nil {
@@ -206,6 +214,10 @@ func parseStationV1Post(body string) ([]fdsnStationV1Search, error) {
 		} else {
 			return ret, fmt.Errorf("Invalid query format (POST).")
 		}
+	}
+
+	if level == "response" && format == "text" {
+		return []fdsnStationV1Search{}, fmt.Errorf("Text formats are only supported when level is net|sta|cha.")
 	}
 
 	return ret, nil
@@ -899,7 +911,7 @@ func setupStationXMLUpdater() {
 			by, s3Modified, err := downloadStationXML(fdsnStations.modified)
 			switch err {
 			case errNotModified:
-				// Do nothing
+			// Do nothing
 			case nil:
 				newStations, err := loadStationXML(by, s3Modified)
 				if err != nil {

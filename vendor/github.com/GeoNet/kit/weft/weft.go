@@ -5,8 +5,12 @@ import (
 	"errors"
 	"github.com/GeoNet/kit/metrics"
 	"net/http"
+	"net/url"
 	"strings"
 )
+
+// QueryValidator returns an error for any invalid query parameter values.
+type QueryValidator func(url.Values) error
 
 // Logger defines an interface for logging.
 type Logger interface {
@@ -138,4 +142,26 @@ func CheckQuery(r *http.Request, method, required, optional []string) error {
 	}
 
 	return nil
+}
+
+// CheckQueryValid calls CheckQuery and then validates the query parameters using f.
+// It is an error for f to be nil.
+func CheckQueryValid(r *http.Request, method, required, optional []string, f QueryValidator) (url.Values, error) {
+	if f == nil {
+		return nil, StatusError{Code: http.StatusInternalServerError, Err: errors.New("nil QueryValidator")}
+	}
+
+	err := CheckQuery(r, method, required, optional)
+	if err != nil {
+		return nil, err
+	}
+
+	q := r.URL.Query()
+
+	err = f(q)
+	if err != nil {
+		return nil, err
+	}
+
+	return q, nil
 }
