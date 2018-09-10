@@ -19,6 +19,7 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
+	"time"
 )
 
 const (
@@ -208,6 +209,9 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 	for _, v := range request {
 		for _, k := range v.keys {
+
+			log.Printf("files=%d request_length=%f", len(v.keys), v.d.End.Sub(v.d.Start).Seconds())
+
 			result, err := s3Client.GetObject(&s3.GetObjectInput{
 				Key:    aws.String(k),
 				Bucket: aws.String(S3_BUCKET),
