@@ -15,10 +15,10 @@
 			"revisionTime": "2017-06-28T22:00:05Z"
 		},
 		{
-			"checksumSHA1": "3JsW/vlMhZWOm9tAS+ZoOYUy8aQ=",
+			"checksumSHA1": "FLtbTe3nJ93SKANsjAuRwtwXE9E=",
 			"path": "github.com/GeoNet/kit/sc3ml",
-			"revision": "5203fd0a601edb389818488f5d2ee5fb4ee9d477",
-			"revisionTime": "2017-06-28T22:00:05Z"
+			"revision": "3cd46a8914e4757cd876a0ceb031c381e0050d00",
+			"revisionTime": "2018-08-23T01:16:37Z"
 		},
 		{
 			"checksumSHA1": "2+qgbnzd5tfpcwZols7hyOQjzu8=",
@@ -27,16 +27,16 @@
 			"revisionTime": "2017-06-28T22:00:05Z"
 		},
 		{
-			"checksumSHA1": "a76e/nc7tPp7BKCUHsvU9Gwo0P0=",
+			"checksumSHA1": "XPkS3GkflTTTAmbezSNyB26kxqI=",
 			"path": "github.com/GeoNet/kit/weft",
-			"revision": "e6dc93bfd6ddc3c8d2cc8b0ebba0868887139b2f",
-			"revisionTime": "2017-12-04T00:45:51Z"
+			"revision": "dd35f757d69c4cfdf5792998d861d48e61eeb9b3",
+			"revisionTime": "2018-08-28T23:31:05Z"
 		},
 		{
-			"checksumSHA1": "VfZW/VMIr3nOYonihw55nN089wA=",
+			"checksumSHA1": "TiYsUqAFwPnXJ5jILtDvkwZudPQ=",
 			"path": "github.com/GeoNet/kit/weft/wefttest",
-			"revision": "e6dc93bfd6ddc3c8d2cc8b0ebba0868887139b2f",
-			"revisionTime": "2017-12-04T00:45:51Z"
+			"revision": "dd35f757d69c4cfdf5792998d861d48e61eeb9b3",
+			"revisionTime": "2018-08-28T23:31:05Z"
 		},
 		{
 			"checksumSHA1": "ZaRt2zcEiskONBekq+WjpJDPyHI=",

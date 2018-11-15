@@ -13,67 +13,62 @@ import (
 	"time"
 )
 
+var versions = []string{"2015p768477_0.7.xml", "2015p768477_0.8.xml", "2015p768477_0.9.xml", "2015p768477_0.10.xml"}
+
 func TestEventUnmarshal(t *testing.T) {
-	var err error
-	var f *os.File
-	var b []byte
+	for _, input := range versions {
+		b, err := ioutil.ReadFile("etc/" + input)
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	// sc3ml 0.7
-	if f, err = os.Open("etc/2015p768477.xml"); err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
+		var e event
 
-	if b, err = ioutil.ReadAll(f); err != nil {
-		t.Fatal(err)
-	}
+		if err = unmarshal(b, &e); err != nil {
+			t.Error(err)
+		}
 
-	var e event
+		if !strings.HasPrefix(e.Quakeml12Event, `<event publicID="smi:nz.org.geonet/2015p768477">`) {
+			t.Error("quakeml fragment should start with <event...")
+		}
 
-	if err = unmarshal(b, &e); err != nil {
-		t.Error(err)
-	}
+		if !strings.HasSuffix(e.Quakeml12Event, `</event>`) {
+			t.Error("quakeml fragment should end with </event>")
+		}
 
-	if !strings.HasPrefix(e.Quakeml12Event, `<event publicID="smi:nz.org.geonet/2015p768477">`) {
-		t.Error("quakeml fragment should start with <event...")
-	}
+		c := event{
+			PublicID:              "2015p768477",
+			EventType:             "earthquake",
+			Longitude:             176.3257242,
+			Latitude:              -40.57806609,
+			Depth:                 23.28125,
+			EvaluationMethod:      "NonLinLoc",
+			EarthModel:            "nz3drx",
+			EvaluationMode:        "manual",
+			EvaluationStatus:      "confirmed",
+			UsedPhaseCount:        44,
+			UsedStationCount:      32,
+			OriginError:           0.5592857863,
+			AzimuthalGap:          166.4674465,
+			MinimumDistance:       0.1217162272,
+			Magnitude:             5.691131913,
+			MagnitudeUncertainty:  0,
+			MagnitudeType:         "M",
+			MagnitudeStationCount: 171,
+			Deleted:               false,
+			Sc3ml:                 string(b),
+		}
 
-	if !strings.HasSuffix(e.Quakeml12Event, `</event>`) {
-		t.Error("quakeml fragment should end with </event>")
-	}
+		c.ModificationTime, _ = time.Parse(time.RFC3339Nano, "2015-10-12T22:46:41.228824Z")
+		c.OriginTime, _ = time.Parse(time.RFC3339Nano, "2015-10-12T08:05:01.717692Z")
 
-	c := event{
-		PublicID:              "2015p768477",
-		EventType:             "earthquake",
-		Longitude:             176.3257242,
-		Latitude:              -40.57806609,
-		Depth:                 23.28125,
-		EvaluationMethod:      "NonLinLoc",
-		EarthModel:            "nz3drx",
-		EvaluationMode:        "manual",
-		EvaluationStatus:      "confirmed",
-		UsedPhaseCount:        44,
-		UsedStationCount:      32,
-		OriginError:           0.5592857863,
-		AzimuthalGap:          166.4674465,
-		MinimumDistance:       0.1217162272,
-		Magnitude:             5.691131913,
-		MagnitudeUncertainty:  0,
-		MagnitudeType:         "M",
-		MagnitudeStationCount: 171,
-		Deleted:               false,
-		Sc3ml:                 string(b),
-	}
+		if c.Quakeml12Event, err = toQuakeMLEvent(b); err != nil {
+			t.Error(err)
+		}
 
-	c.ModificationTime, _ = time.Parse(time.RFC3339Nano, "2015-10-12T22:46:41.228824Z")
-	c.OriginTime, _ = time.Parse(time.RFC3339Nano, "2015-10-12T08:05:01.717692Z")
-
-	if c.Quakeml12Event, err = toQuakeMLEvent(b); err != nil {
-		t.Error(err)
-	}
-
-	if !reflect.DeepEqual(e, c) {
-		t.Errorf("c not equal to e, expected: %+v", e)
+		if !reflect.DeepEqual(e, c) {
+			t.Errorf("c not equal to e, expected: %+v", e)
+		}
 	}
 }
 
@@ -99,42 +94,56 @@ func TestEventType(t *testing.T) {
 
 	for _, v := range testCases {
 
-		var err error
-		var f *os.File
-		var b []byte
-
 		// input test file is sc3ml 0.7 change the version string below to test each
 		// sc3ml version that is supported.
-		if f, err = os.Open("etc/2015p768477.xml"); err != nil {
-			t.Fatal(err)
-		}
+		for _, input := range versions {
+			b, err := ioutil.ReadFile("etc/" + input)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		if b, err = ioutil.ReadAll(f); err != nil {
-			t.Fatal(err)
-		}
-		f.Close()
+			b = bytes.Replace(b, sc3ml07, v.version, -1)
+			b = bytes.Replace(b, []byte("<type>earthquake</type>"), v.eventType, -1)
 
-		b = bytes.Replace(b, sc3ml07, v.version, -1)
-		b = bytes.Replace(b, []byte("<type>earthquake</type>"), v.eventType, -1)
+			var e string
+			if e, err = toQuakeMLEvent(b); err != nil {
+				t.Errorf("%s %s", v.id, err.Error())
+			}
 
-		var e string
-		if e, err = toQuakeMLEvent(b); err != nil {
-			t.Errorf("%s %s", v.id, err.Error())
-		}
-
-		if !strings.Contains(e, "<type>other event</type>") {
-			t.Errorf("%s expected event type <type>other event</type>", v.id)
+			if !strings.Contains(e, "<type>other event</type>") {
+				t.Errorf("%s expected event type <type>other event</type>", v.id)
+			}
 		}
 	}
 }
 
 func TestToQuakeMLEvent(t *testing.T) {
+	for _, input := range versions {
+		b, err := ioutil.ReadFile("etc/" + input)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var e string
+		if e, err = toQuakeMLEvent(b); err != nil {
+			t.Error(err)
+		}
+
+		if !strings.HasPrefix(e, `<event publicID="smi:nz.org.geonet/2015p768477">`) {
+			t.Error("quakeml fragment should start with <event...")
+		}
+
+		if !strings.HasSuffix(e, `</event>`) {
+			t.Error("quakeml fragment should end with </event>")
+		}
+	}
+
 	var err error
 	var f *os.File
 	var b []byte
 
 	// sc3ml 0.7
-	if f, err = os.Open("etc/2015p768477.xml"); err != nil {
+	if f, err = os.Open("etc/2015p768477_0.7.xml"); err != nil {
 		t.Fatal(err)
 	}
 	defer f.Close()
@@ -143,22 +152,9 @@ func TestToQuakeMLEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var e string
-	if e, err = toQuakeMLEvent(b); err != nil {
-		t.Error(err)
-	}
-
-	if !strings.HasPrefix(e, `<event publicID="smi:nz.org.geonet/2015p768477">`) {
-		t.Error("quakeml fragment should start with <event...")
-	}
-
-	if !strings.HasSuffix(e, `</event>`) {
-		t.Error("quakeml fragment should end with </event>")
-	}
-
 	b = bytes.Replace(b, sc3ml07, []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.5" version="0.5">`), -1)
 
-	if e, err = toQuakeMLEvent(b); err == nil {
+	if _, err := toQuakeMLEvent(b); err == nil {
 		t.Error("expected error for version of sc3ml with no XSLT")
 	}
 }
@@ -172,7 +168,7 @@ func TestEventSave(t *testing.T) {
 	var b []byte
 
 	// sc3ml 0.7
-	if f, err = os.Open("etc/2015p768477.xml"); err != nil {
+	if f, err = os.Open("etc/2015p768477_0.7.xml"); err != nil {
 		t.Fatal(err)
 	}
 	defer f.Close()

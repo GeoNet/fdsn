@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/xml"
+	wt "github.com/GeoNet/kit/weft/wefttest"
 	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -435,5 +438,98 @@ func BenchmarkStationQuery(b *testing.B) {
 				c.doFilter(bm.params)
 			}
 		})
+	}
+}
+
+func TestPost(t *testing.T) {
+	setup(t)
+	defer teardown()
+
+	// text format test
+	body := `level=station
+format=text
+NZ ARA* * EHE*  2001-01-01T00:00:00 *
+NZ ARH? * EHN*  2001-01-01T00:00:00 *`
+	expected := strings.TrimSpace(`
+#Network | Station | Latitude | Longitude | Elevation | SiteName | StartTime | EndTime
+NZ|ARAZ|-38.627690|176.120060|420.000000|Aratiatia Landcorp Farm|2007-05-20T23:00:00|
+NZ|ARHZ|-39.263100|176.995900|270.000000|Aropaoanui|2010-03-11T00:00:00|`)
+
+	route := wt.Request{ID: wt.L(), URL: "/fdsnws/station/1/query", Method: "POST", PostBody: []byte(body), Content: "text/plain"}
+
+	b, err := route.Do(ts.URL)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if strings.TrimSpace(string(b)) != expected {
+		t.Errorf("Unexpected query result.")
+	}
+
+	// xml format test
+	body = `level=station
+format=xml
+NZ ARA* * EHE*  2001-01-01T00:00:00 *
+NZ ARH? * EHN*  2001-01-01T00:00:00 *`
+	testXml := `<?xml version="1.0" encoding="UTF-8"?><FDSNStationXML schemaVersion="1" xmlns="http://www.fdsn.org/xml/station/1"><Source>GeoNet</Source><Sender>WEL(GNS_Test)</Sender><Module>Delta</Module><Created>2017-09-26T02:37:17</Created><Network code="NZ" startDate="1884-02-01T00:00:00" restrictedStatus="open"><Description>New Zealand National Seismograph Network</Description><TotalNumberStations>2</TotalNumberStations><SelectedNumberStations>2</SelectedNumberStations><Station code="ARAZ" startDate="2007-05-20T23:00:00" restrictedStatus="closed"><Description>Private seismograph sites</Description><Comment><Value>Location is given in NZGD2000</Value></Comment><Latitude datum="NZGD2000">-38.62769</Latitude><Longitude datum="NZGD2000">176.12006</Longitude><Elevation>420</Elevation><Site><Name>Aratiatia Landcorp Farm</Name><Description>9 km north of Taupo</Description></Site><CreationDate>2007-05-20T23:00:00</CreationDate><TotalNumberChannels>9</TotalNumberChannels><SelectedNumberChannels>3</SelectedNumberChannels></Station><Station code="ARHZ" startDate="2010-03-11T00:00:00" restrictedStatus="open"><Description>Hawke&#39;s Bay regional seismic network</Description><Comment><Value>Location is given in WGS84</Value></Comment><Latitude datum="WGS84">-39.2631</Latitude><Longitude datum="WGS84">176.9959</Longitude><Elevation>270</Elevation><Site><Name>Aropaoanui</Name><Description>28 km north of Napier</Description></Site><CreationDate>2010-03-11T00:00:00</CreationDate><TotalNumberChannels>6</TotalNumberChannels><SelectedNumberChannels>2</SelectedNumberChannels></Station></Network></FDSNStationXML>`
+	var src FDSNStationXML
+
+	err = xml.Unmarshal([]byte(testXml), &src)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	route = wt.Request{ID: wt.L(), URL: "/fdsnws/station/1/query", Method: "POST", PostBody: []byte(body), Content: "application/xml"}
+
+	b, err = route.Do(ts.URL)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var resp FDSNStationXML
+	err = xml.Unmarshal(b, &resp)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(src.Network) != len(resp.Network) {
+		t.Errorf("expected Network length %d got %d", len(src.Network), len(resp.Network))
+	}
+
+	// Only check for some important values.
+	for i := range src.Network {
+		sn := src.Network[i]
+		rn := resp.Network[i]
+
+		if len(sn.Station) != len(rn.Station) {
+			t.Errorf("expected Station length %d got %d", len(sn.Station), len(rn.Station))
+		}
+
+		for j := range sn.Station {
+			ss := sn.Station[j]
+			rs := rn.Station[j]
+
+			if ss.Code != rs.Code {
+				t.Errorf("station %d are not equal in Code", j)
+			}
+			if ss.StartDate != rs.StartDate {
+				t.Errorf("station %d are not equal in StartData", j)
+			}
+			if ss.Longitude.Value != rs.Longitude.Value {
+				t.Errorf("station %d are not equal in Longitude", j)
+			}
+			if ss.Latitude.Value != rs.Latitude.Value {
+				t.Errorf("station %d are not equal in Latitude", j)
+			}
+			if ss.Elevation.Value != rs.Elevation.Value {
+				t.Errorf("station %d are not equal in Elevation", j)
+			}
+			if ss.TotalNumberChannels != rs.TotalNumberChannels {
+				t.Errorf("station %d are not equal in TotalNumberChannels", j)
+			}
+			if ss.SelectedNumberChannels != rs.SelectedNumberChannels {
+				t.Errorf("station %d are not equal in SelectedNumberChannels", j)
+			}
+		}
 	}
 }
