@@ -19,15 +19,16 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
+	"time"
 )
 
 const (
 	// miniSEED record length
 	RECORDLEN int = 512
 	// the maximum number of queries in a POST request
-	MAX_QUERIES int = 1000
+	MAX_QUERIES int = 60
 	// Limit the number of input files (each file is max ~10 MB).
-	MAX_FILES int = 20000
+	MAX_FILES int = 60
 )
 
 var (
@@ -170,7 +171,12 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 	var request []dataSelect
 	var files int
 
+	gtHalfHour := false //tracks whether any requests are for data longer than 30mins
+
 	for _, v := range params {
+		//flick gtHalfHour to true if the request is longer than half an hour
+		gtHalfHour = gtHalfHour || v.EndTime.Sub(time.Time(v.StartTime.Time)) > time.Minute*30
+
 		d, err := v.Regexp()
 		if err != nil {
 			return 0, err
@@ -182,7 +188,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 		files += len(keys)
 
-		if files > MAX_FILES {
+		if files > MAX_FILES && gtHalfHour {
 			return 0, weft.StatusError{Code: http.StatusRequestEntityTooLarge,
 				Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
 		}
