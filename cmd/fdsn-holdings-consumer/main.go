@@ -164,7 +164,7 @@ func (e *event) Process(msg []byte) error {
 
 			err = h.save()
 			if err != nil {
-				return errors.Wrapf(err, "error saving holding for % %", v.S3.Bucket.Name, v.S3.Object.Key)
+				return errors.Wrapf(err, "error saving holding for %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
 			}
 
 		case strings.HasPrefix(v.EventName, "ObjectRemoved"):
