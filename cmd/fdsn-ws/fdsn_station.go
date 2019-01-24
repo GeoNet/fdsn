@@ -528,8 +528,8 @@ func (r *FDSNStationXML) trimLevel(level int) {
 				if level < STATION_LEVEL_RESPONSE {
 					// ch.Response is a pointer to source struct so we want to keep the source intact
 					res := &ResponseType{
-						ResourceId: ch.Response.ResourceId,
-						Items:      ch.Response.Items,
+						ResourceId:            ch.Response.ResourceId,
+						Items:                 ch.Response.Items,
 						InstrumentSensitivity: ch.Response.InstrumentSensitivity,
 						InstrumentPolynomial:  ch.Response.InstrumentPolynomial,
 						Stage:                 nil,
