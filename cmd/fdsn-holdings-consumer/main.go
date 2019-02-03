@@ -12,9 +12,9 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	nf "github.com/GeoNet/fdsn/internal/platform/s3"
 	"github.com/GeoNet/fdsn/internal/platform/sqs"
+	"github.com/GeoNet/kit/cfg"
 	"github.com/GeoNet/kit/metrics"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"

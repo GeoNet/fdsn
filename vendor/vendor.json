@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "x6ZFRLaItjUEsjw57W/82xQVXRs=",
+			"path": "github.com/GeoNet/kit/cfg",
+			"revision": "5b386985937ca772587e76cdf7305f126d4e0f54",
+			"revisionTime": "2019-01-25T01:45:24Z"
+		},
+		{
 			"checksumSHA1": "dgHEZ+TL2wQtH5ZR+eGWz7SZZSs=",
 			"path": "github.com/GeoNet/kit/metrics",
 			"revision": "deb4f7f2da399e05d0083fa14f9420c9c8477248",
@@ -29,14 +35,14 @@
 		{
 			"checksumSHA1": "XPkS3GkflTTTAmbezSNyB26kxqI=",
 			"path": "github.com/GeoNet/kit/weft",
-			"revision": "dd35f757d69c4cfdf5792998d861d48e61eeb9b3",
-			"revisionTime": "2018-08-28T23:31:05Z"
+			"revision": "5b386985937ca772587e76cdf7305f126d4e0f54",
+			"revisionTime": "2019-01-25T01:45:24Z"
 		},
 		{
-			"checksumSHA1": "TiYsUqAFwPnXJ5jILtDvkwZudPQ=",
+			"checksumSHA1": "pU/d6drynCq6CQn4wJSh6Nmt7yI=",
 			"path": "github.com/GeoNet/kit/weft/wefttest",
-			"revision": "dd35f757d69c4cfdf5792998d861d48e61eeb9b3",
-			"revisionTime": "2018-08-28T23:31:05Z"
+			"revision": "5b386985937ca772587e76cdf7305f126d4e0f54",
+			"revisionTime": "2019-01-25T01:45:24Z"
 		},
 		{
 			"checksumSHA1": "ZaRt2zcEiskONBekq+WjpJDPyHI=",
