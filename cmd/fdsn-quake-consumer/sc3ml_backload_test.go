@@ -4,7 +4,7 @@ package main
 
 import (
 	"database/sql"
-	"github.com/GeoNet/fdsn/internal/platform/cfg"
+	"github.com/GeoNet/kit/cfg"
 	"io/ioutil"
 	"log"
 	"os"

@@ -45,7 +45,6 @@ var nz = []struct {
 	{name: `Tokoroa`, longitude: 175.87, latitude: -38.23},
 	{name: `Turangi`, longitude: 175.8, latitude: -39},
 	{name: `Whakatane`, longitude: 176.98, latitude: -37.97},
-	{name: `White Island`, longitude: 177.18, latitude: -37.52},
 	{name: `Gisborne`, longitude: 178.02, latitude: -38.67},
 	{name: `Matawai`, longitude: 177.53, latitude: -38.35},
 	{name: `Ruatoria`, longitude: 178.32, latitude: -37.88},

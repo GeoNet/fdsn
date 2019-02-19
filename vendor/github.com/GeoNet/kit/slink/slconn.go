@@ -4,12 +4,19 @@ package slink
 //#cgo CFLAGS: -I${SRCDIR}/../cvendor/libslink
 //#cgo LDFLAGS: ${SRCDIR}/../cvendor/libslink/libslink.a
 //#include <libslink.h>
+//typedef void (*log_func)(const char *message);
+//void logPrint(const char *message);
+//void errPrint(const char *message);
+//void log_print(const char *message) {logPrint(message);}
+//void err_print(const char *message) {errPrint(message);}
 import "C"
 
 import (
 	"errors"
 	"unsafe"
 )
+
+const TimeFormat = "2006,01,02,15,04,05"
 
 type SLCD _Ctype_SLCD
 
@@ -18,6 +25,10 @@ func NewSLCD() *SLCD {
 }
 func FreeSLCD(s *SLCD) {
 	C.sl_freeslcd((*_Ctype_struct_slcd_s)(s))
+}
+func LogInit(level int, lf, ef func(string)) {
+	logFunc, errFunc = lf, ef
+	C.sl_loginit((C.int)(level), C.log_func(C.log_print), C.CString(""), C.log_func(C.err_print), C.CString(""))
 }
 
 func (s *SLCD) NetDly() int {
@@ -38,9 +49,25 @@ func (s *SLCD) KeepAlive() int {
 func (s *SLCD) SetKeepAlive(keepalive int) {
 	(((*_Ctype_SLCD)(s)).keepalive) = (C.int)(keepalive)
 }
+func (s *SLCD) BeginTime() string {
+	return C.GoString(((*_Ctype_SLCD)(s)).begin_time)
+}
+func (s *SLCD) SetBeginTime(begtime string) {
+	(((*_Ctype_SLCD)(s)).begin_time) = C.CString(begtime)
+}
+func (s *SLCD) EndTime() string {
+	return C.GoString(((*_Ctype_SLCD)(s)).end_time)
+}
+func (s *SLCD) SetEndTime(endtime string) {
+	(((*_Ctype_SLCD)(s)).end_time) = C.CString(endtime)
+}
+func (s *SLCD) SLAddr() string {
+	return C.GoString(((*_Ctype_SLCD)(s)).sladdr)
+}
 func (s *SLCD) SetSLAddr(sladdr string) {
 	(((*_Ctype_SLCD)(s)).sladdr) = C.CString(sladdr)
 }
+
 func (s *SLCD) Collect() (*SLPacket, int) {
 	var slpack *C.struct_slpacket_s
 	err := (int)(C.sl_collect((*C.struct_slcd_s)(s), &slpack))

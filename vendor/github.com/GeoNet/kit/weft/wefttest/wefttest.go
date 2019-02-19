@@ -211,7 +211,7 @@ func (r Request) FuzzPath(server string, fuzz []string) (int, error) {
 			r.Status = http.StatusBadRequest
 			_, err = r.Do(server)
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("%s for URL %s", err.Error(), r.URL)
 			}
 		}
 
@@ -253,7 +253,7 @@ func (r Request) FuzzQuery(server string, fuzz []string) (int, error) {
 
 			_, err = r.Do(server)
 			if err != nil {
-				return 0, err
+				return 0, fmt.Errorf("%s for URL %s", err.Error(), r.URL)
 			}
 
 			i++

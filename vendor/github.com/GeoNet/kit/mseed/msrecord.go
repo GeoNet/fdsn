@@ -9,8 +9,8 @@ import (
 	"errors"
 	"strings"
 	"time"
-	"unsafe"
 	"unicode/utf8"
+	"unsafe"
 )
 
 type MSRecord _Ctype_struct_MSRecord_s

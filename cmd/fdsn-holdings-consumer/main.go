@@ -12,9 +12,9 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/GeoNet/fdsn/internal/platform/cfg"
 	nf "github.com/GeoNet/fdsn/internal/platform/s3"
 	"github.com/GeoNet/fdsn/internal/platform/sqs"
+	"github.com/GeoNet/kit/cfg"
 	"github.com/GeoNet/kit/metrics"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -164,7 +164,7 @@ func (e *event) Process(msg []byte) error {
 
 			err = h.save()
 			if err != nil {
-				return errors.Wrapf(err, "error saving holding for % %", v.S3.Bucket.Name, v.S3.Object.Key)
+				return errors.Wrapf(err, "error saving holding for %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
 			}
 
 		case strings.HasPrefix(v.EventName, "ObjectRemoved"):

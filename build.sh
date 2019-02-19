@@ -17,10 +17,10 @@ if [ $# -eq 0 ]; then
 fi
 
 # code will be compiled in this container
-BUILD_CONTAINER=golang:1.9.1-alpine
+BUILD_CONTAINER=golang:1.11.5-alpine
 
 # dependent resources will be gathered from this container
-RESOURCE_CONTAINER=alpine:3.7
+RESOURCE_CONTAINER=alpine:3.8
 
 DOCKER_TMP=docker-build-tmp
 
