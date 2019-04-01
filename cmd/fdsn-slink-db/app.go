@@ -62,44 +62,41 @@ func (a *app) save(inbound chan []byte) {
 
 	var err error
 
-	for {
-		select {
-		case b := <-inbound:
+	for b := range inbound {
+		t := metrics.Start()
 
-			t := metrics.Start()
+		err = msr.Unpack(b, 512, 0, 0)
+		if err != nil {
+			metrics.MsgErr()
+			log.Printf("unpacking miniSEED record: %s", err.Error())
+			continue
+		}
 
-			err = msr.Unpack(b, 512, 0, 0)
+		for {
+			err = a.saveRecord(record{
+				network:      msr.Network(),
+				station:      msr.Station(),
+				channel:      msr.Channel(),
+				location:     msr.Location(),
+				start:        msr.Starttime(),
+				latency_tx:   time.Now().UTC().Sub(msr.Endtime()).Seconds(),
+				latency_data: time.Now().UTC().Sub(msr.Starttime()).Seconds(),
+				raw:          b,
+			})
 			if err != nil {
 				metrics.MsgErr()
-				log.Printf("unpacking miniSEED record: %s", err.Error())
+				log.Printf("error saving record sleeping and trying again: %s", err)
+				time.Sleep(time.Second * 10)
 				continue
 			}
-
-			for {
-				err = a.saveRecord(record{
-					network:      msr.Network(),
-					station:      msr.Station(),
-					channel:      msr.Channel(),
-					location:     msr.Location(),
-					start:        msr.Starttime(),
-					latency_tx:   time.Now().UTC().Sub(msr.Endtime()).Seconds(),
-					latency_data: time.Now().UTC().Sub(msr.Starttime()).Seconds(),
-					raw:          b,
-				})
-				if err != nil {
-					metrics.MsgErr()
-					log.Printf("error saving record sleeping and trying again: %s", err)
-					time.Sleep(time.Second * 10)
-					continue
-				}
-				break
-			}
-
-			if err := t.Track("save"); err != nil {
-				log.Print(err)
-			}
-			metrics.MsgProc()
+			break
 		}
+
+		if err := t.Track("save"); err != nil {
+			log.Print(err)
+		}
+		metrics.MsgProc()
+
 	}
 }
 
@@ -108,13 +105,10 @@ func (a *app) save(inbound chan []byte) {
 func (a *app) expire() {
 	ticker := time.NewTicker(time.Minute).C
 	var err error
-	for {
-		select {
-		case <-ticker:
-			_, err = a.db.Exec(`DELETE FROM fdsn.record WHERE start_time < now() - interval '8 days'`)
-			if err != nil {
-				log.Printf("deleting old records: %s", err.Error())
-			}
+	for range ticker {
+		_, err = a.db.Exec(`DELETE FROM fdsn.record WHERE start_time < now() - interval '8 days'`)
+		if err != nil {
+			log.Printf("deleting old records: %s", err.Error())
 		}
 	}
 }

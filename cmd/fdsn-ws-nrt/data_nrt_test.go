@@ -181,7 +181,7 @@ func BenchmarkGetRecordDB(b *testing.B) {
 	var r []byte
 
 	for n := 0; n < b.N; n++ {
-		db.QueryRow(`SELECT raw FROM fdsn.record WHERE streampk =
+		err = db.QueryRow(`SELECT raw FROM fdsn.record WHERE streampk =
         (SELECT streampk FROM fdsn.stream WHERE network = $1 AND station = $2 AND channel = $3 AND location = $4)
 	AND start_time = $5`, "NZ", "ABAZ", "EHE", "10", start).Scan(&r)
 		if err != nil {
@@ -194,7 +194,6 @@ func BenchmarkGetRecordDB(b *testing.B) {
 }
 
 // funcs for setting up test data.
-
 func testSetUp(t testing.TB) {
 	var err error
 	db, err = sql.Open("postgres", "host=localhost connect_timeout=5 user=fdsn_w password=test dbname=fdsn sslmode=disable")
@@ -205,7 +204,7 @@ func testSetUp(t testing.TB) {
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(10)
 
-	recordStmt, err = db.Prepare(`SELECT raw FROM fdsn.record WHERE streampk =
+	recordStmt, _ = db.Prepare(`SELECT raw FROM fdsn.record WHERE streampk =
                                   (SELECT streampk FROM fdsn.stream WHERE network = $1 AND station = $2 AND channel = $3 AND location = $4)
 	                          AND start_time = $5`)
 
@@ -220,6 +219,7 @@ func testTearDown() {
 
 // testLoad inserts all the records in file.
 // Existing data for the stream in file are deleted first.
+//nolint:unused,deadcode // for benchmarking on more records
 func testLoad(file string, t testing.TB) {
 	in, err := os.Open(file)
 	if err != nil {

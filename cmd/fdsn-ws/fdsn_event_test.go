@@ -224,8 +224,7 @@ func TestEventBoundingRadius(t *testing.T) {
 	setup(t)
 	defer teardown()
 
-	var v url.Values
-	v = make(map[string][]string)
+	v := url.Values{}
 
 	// test against record: (-40.57806609, 176.3257242)
 	v.Set("latitude", "-41.57806609") // 1 degree diff in lat
@@ -299,9 +298,7 @@ func TestEventAbbreviations(t *testing.T) {
 	}
 
 	// remake v in the loop to test each entry in vals independently.
-	var v url.Values
-
-	v = make(map[string][]string)
+	v := url.Values{}
 	for _, q := range vals {
 		v.Set(q.k, q.v)
 	}
@@ -350,10 +347,9 @@ func TestEventAbbreviations(t *testing.T) {
 func TestLongitudeWrap180(t *testing.T) {
 	setup(t)
 	defer teardown()
-	var v url.Values
 
 	// test data: one at 176.3257242 and another at -176.3257242
-	v = make(map[string][]string)
+	v := url.Values{}
 	v.Set("minlon", "177.0")
 	e, err := parseEventV1(v)
 	if err != nil {

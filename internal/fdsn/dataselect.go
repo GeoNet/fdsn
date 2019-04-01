@@ -32,6 +32,8 @@ var dataSelectNotSupported = map[string]bool{
 	"minuimumlength": true,
 }
 
+var asciiReg *regexp.Regexp
+
 type DataSelect struct {
 	StartTime   Time     `schema:"starttime"` // limit to data on or after the specified start time.
 	EndTime     Time     `schema:"endtime"`   // limit to data on or before the specified end time.
@@ -58,6 +60,8 @@ func init() {
 	decoder.RegisterConverter([]string{}, func(input string) reflect.Value {
 		return reflect.ValueOf(strings.Split(input, ","))
 	})
+
+	asciiReg = regexp.MustCompile(`^[\x00-\x7F]*$`)
 }
 
 /*
@@ -273,18 +277,13 @@ func GenRegex(input []string, emptyDash bool) ([]string, error) {
 	}
 
 	// FDSN spec: all ASCII chars are allowed, and only ? and * has special meaning.
-	ascii := "^[\\x00-\\x7F]*$"
 	result := make([]string, 0)
 	for _, s := range input {
 		if s == "" {
 			continue
 		}
 
-		b, err := regexp.MatchString(ascii, s)
-		if err != nil {
-			return nil, fmt.Errorf("Invalid parameter:'%s':%s", s, err.Error())
-		}
-		if !b {
+		if !asciiReg.MatchString(s) {
 			return nil, fmt.Errorf("Invalid parameter:'%s'", s)
 		}
 		var r string

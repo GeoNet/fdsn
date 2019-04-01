@@ -7,6 +7,7 @@ import (
 	"github.com/GeoNet/fdsn/internal/fdsn"
 	"github.com/GeoNet/kit/metrics"
 	"github.com/golang/groupcache"
+	"log"
 	"strings"
 	"time"
 )
@@ -19,7 +20,11 @@ var errNoData = errors.New("no data")
 // start and end should be set for all queries.
 func holdingsSearchNrt(d fdsn.DataSearch) ([]string, error) {
 	timer := metrics.Start()
-	defer timer.Track("holdingsSearchNrt")
+	defer func() {
+		if err := timer.Track("holdingsSearchNrt"); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	rows, err := db.Query(`WITH s AS (SELECT DISTINCT ON (streamPK) network, station, channel, location, streamPK
 	FROM fdsn.stream WHERE network ~ $1
@@ -112,6 +117,5 @@ func recordGetter(ctx groupcache.Context, key string, dest groupcache.Sink) erro
 		return err
 	}
 
-	dest.SetBytes(b)
-	return nil
+	return dest.SetBytes(b)
 }
