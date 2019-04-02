@@ -23,8 +23,9 @@ func TestSaveHoldings(t *testing.T) {
 		},
 	}
 
-	err := h.delete()
+	_ = h.delete()
 
+	var err error
 	var count int
 
 	if err = db.QueryRow(`select count(*) from fdsn.holdings where key = 'NZ.ABAZ.01.ACE.D.2016.097'`).Scan(&count); err != nil {

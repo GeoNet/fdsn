@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/GeoNet/kit/sc3ml"
-	"github.com/fatih/structs"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"io"
+	"log"
 	"os/exec"
-	"strings"
 	"time"
 )
 
@@ -184,18 +183,6 @@ func unmarshal(seisComPML []byte, e *event) error {
 // save or update event information in the DB to be the latest (most recent) information.
 func (e *event) save() error {
 	// convert e to a map[string]interface{} and use that to build the DB insert statement.
-	var insert string
-	var params string
-	var values []interface{}
-	var i int = 1
-
-	for k, v := range structs.Map(e) {
-		insert = insert + k + `, `
-		params = params + fmt.Sprintf("$%d, ", i)
-		values = append(values, v)
-		i = i + 1
-	}
-
 	txn, err := db.Begin()
 	if err != nil {
 		return err
@@ -203,11 +190,21 @@ func (e *event) save() error {
 
 	_, err = txn.Exec(`DELETE FROM fdsn.event WHERE PublicID = $1 AND ModificationTime <= $2`, e.PublicID, e.ModificationTime)
 	if err != nil {
-		txn.Rollback()
+		if e := txn.Rollback(); e != nil {
+			log.Printf("Rollback Failed: %v", e)
+		}
 		return err
 	}
 
-	_, err = txn.Exec(`INSERT INTO fdsn.event(`+strings.TrimSuffix(insert, ", ")+`) VALUES( `+strings.TrimSuffix(params, ", ")+` )`, values...)
+	_, err = txn.Exec(`INSERT INTO fdsn.event(PublicID, EventType, ModificationTime, OriginTime, Longitude, Latitude,
+			Depth, DepthType, EvaluationMethod, EarthModel, EvaluationMode, EvaluationStatus, UsedPhaseCount,
+			UsedStationCount, OriginError, AzimuthalGap, MinimumDistance, Magnitude, MagnitudeUncertainty, MagnitudeType,
+			MagnitudeStationCount, Deleted, Sc3ml, Quakeml12Event) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+			$12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)`,
+		e.PublicID, e.EventType, e.ModificationTime, e.OriginTime, e.Longitude, e.Latitude, e.Depth, e.DepthType,
+		e.EvaluationMethod, e.EarthModel, e.EvaluationMode, e.EvaluationStatus, e.UsedPhaseCount, e.UsedStationCount,
+		e.OriginError, e.AzimuthalGap, e.MinimumDistance, e.Magnitude, e.MagnitudeUncertainty, e.MagnitudeType,
+		e.MagnitudeStationCount, e.Deleted, e.Sc3ml, e.Quakeml12Event)
 	switch err {
 	case nil:
 		err = txn.Commit()
@@ -222,14 +219,17 @@ func (e *event) save() error {
 		// http://www.postgresql.org/docs/9.3/static/errcodes-appendix.html
 		if errorUnique, ok := err.(*pq.Error); ok {
 			if errorUnique.Code == `23505` {
-				txn.Rollback()
-				return nil
-			} else {
-				txn.Rollback()
-				return err
+				err = nil
 			}
+			if e := txn.Rollback(); e != nil {
+				log.Printf("Rollback Failed: %v", e)
+			}
+			return err
 		} else {
-			txn.Rollback()
+			// non-pq error
+			if e := txn.Rollback(); e != nil {
+				log.Printf("Rollback Failed: %v", e)
+			}
 			return err
 		}
 	}

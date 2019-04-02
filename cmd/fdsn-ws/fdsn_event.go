@@ -393,7 +393,6 @@ func (e *fdsnEventV1) filter() (q string, args []interface{}) {
 	if e.MinRadius != 0.0 {
 		q = fmt.Sprintf("%s ST_Distance(origin_geom::GEOMETRY, ST_SetSRID(ST_Makepoint($%d, $%d), 4326)) >= $%d AND", q, i, i+1, i+2)
 		args = append(args, e.Longitude, e.Latitude, e.MinRadius)
-		i += 3
 	}
 
 	q = strings.TrimSuffix(q, " AND")

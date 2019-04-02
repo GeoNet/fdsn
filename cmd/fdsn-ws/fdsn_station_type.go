@@ -216,6 +216,7 @@ type LatitudeType struct {
 	Datum string `xml:"datum,attr,omitempty"`
 }
 
+//nolint:deadcode,unused	// Struct based on FDSN spec so keep it
 type LogType struct {
 	Entry []CommentType `xml:"Entry,omitempty"`
 }
@@ -246,6 +247,7 @@ type NetworkType struct {
 }
 
 // May be one of NOMINAL, CALCULATED
+//nolint:deadcode,unused	// Struct based on FDSN spec so keep it
 type NominalType string
 
 type NumeratorCoefficient struct {
@@ -362,6 +364,7 @@ type SampleRateType struct {
 }
 
 // A time value in seconds.
+//nolint:deadcode,unused	// Struct based on FDSN spec so keep it
 type SecondType struct {
 	Value      float64  `xml:",chardata"`
 	Unit       string   `xml:"unit,attr,omitempty"`
@@ -427,6 +430,7 @@ type UnitsType struct {
 	Description string `xml:"Description,omitempty"`
 }
 
+//nolint:deadcode,unused	// Struct based on FDSN spec so keep it
 type VoltageType struct {
 	Value      float64  `xml:",chardata"`
 	Unit       string   `xml:"unit,attr,omitempty"`
