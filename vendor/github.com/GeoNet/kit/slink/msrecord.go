@@ -33,6 +33,7 @@ func (r *SLMSRecord) DNomSampRate() float64 {
 	return float64(C.sl_msr_dnomsamprate((*_Ctype_struct_SLMSrecord_s)(r)))
 }
 
+//nolint:unused // reserved for future use
 func (r *SLMSRecord) sl_DEpochSTime() float64 {
 	return float64(C.sl_msr_depochstime((*_Ctype_struct_SLMSrecord_s)(r)))
 }

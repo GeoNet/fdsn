@@ -9,7 +9,9 @@ type Processor interface {
 func DoProcess(m Processor, b []byte) error {
 	MsgRx()
 	t := Start()
-	defer t.Track("process")
+	defer func() {
+		_ = t.Track("process") // we keep this package simple thus not reporting this error
+	}()
 
 	err := m.Process(b)
 

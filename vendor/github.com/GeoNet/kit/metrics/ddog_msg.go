@@ -61,23 +61,20 @@ func DataDogMsg(apiKey, hostName, appName string, logger Logger) {
 		ticker := time.NewTicker(time.Second * 60).C
 		var err error
 
-		for {
-			select {
-			case <-ticker:
-				ReadMsgCounters(&c)
-				runtime.ReadMemStats(&m)
+		for range ticker {
+			ReadMsgCounters(&c)
+			runtime.ReadMemStats(&m)
 
-				if apiKey != "" {
-					err = dogMsg(apiKey, hostName, appName, m, ReadTimers(), c)
-					if err != nil {
-						logger.Printf("error sending metrics to datadog for %s %s %s", hostName, appName, err.Error())
-					}
-				} else {
-					logger.Printf("%s %s", hostName, appName)
-					logger.Printf("%+v", m)
-					logger.Printf("%+v", ReadTimers())
-					logger.Printf("%+v", c)
+			if apiKey != "" {
+				err = dogMsg(apiKey, hostName, appName, m, ReadTimers(), c)
+				if err != nil {
+					logger.Printf("error sending metrics to datadog for %s %s %s", hostName, appName, err.Error())
 				}
+			} else {
+				logger.Printf("%s %s", hostName, appName)
+				logger.Printf("%+v", m)
+				logger.Printf("%+v", ReadTimers())
+				logger.Printf("%+v", c)
 			}
 		}
 	}()
