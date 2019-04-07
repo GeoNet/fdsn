@@ -1,3 +1,4 @@
+//nolint //cgo generates code that doesn't pass linting
 // Package slink provides a go wrapper for the libslink C library.
 package slink
 
@@ -18,13 +19,13 @@ import (
 
 const TimeFormat = "2006,01,02,15,04,05"
 
-type SLCD _Ctype_SLCD
+type SLCD C.SLCD
 
 func NewSLCD() *SLCD {
 	return (*SLCD)(C.sl_newslcd())
 }
 func FreeSLCD(s *SLCD) {
-	C.sl_freeslcd((*_Ctype_struct_slcd_s)(s))
+	C.sl_freeslcd((*C.struct_slcd_s)(s))
 }
 func LogInit(level int, lf, ef func(string)) {
 	logFunc, errFunc = lf, ef
@@ -32,40 +33,40 @@ func LogInit(level int, lf, ef func(string)) {
 }
 
 func (s *SLCD) NetDly() int {
-	return (int)(((*_Ctype_struct_slcd_s)(s)).netdly)
+	return (int)(((*C.struct_slcd_s)(s)).netdly)
 }
 func (s *SLCD) SetNetDly(netdly int) {
-	(((*_Ctype_struct_slcd_s)(s)).netdly) = (C.int)(netdly)
+	(((*C.struct_slcd_s)(s)).netdly) = (C.int)(netdly)
 }
 func (s *SLCD) NetTo() int {
-	return (int)(((*_Ctype_struct_slcd_s)(s)).netto)
+	return (int)(((*C.struct_slcd_s)(s)).netto)
 }
 func (s *SLCD) SetNetTo(netto int) {
-	(((*_Ctype_SLCD)(s)).netto) = (C.int)(netto)
+	(((*C.SLCD)(s)).netto) = (C.int)(netto)
 }
 func (s *SLCD) KeepAlive() int {
-	return (int)(((*_Ctype_SLCD)(s)).keepalive)
+	return (int)(((*C.SLCD)(s)).keepalive)
 }
 func (s *SLCD) SetKeepAlive(keepalive int) {
-	(((*_Ctype_SLCD)(s)).keepalive) = (C.int)(keepalive)
+	(((*C.SLCD)(s)).keepalive) = (C.int)(keepalive)
 }
 func (s *SLCD) BeginTime() string {
-	return C.GoString(((*_Ctype_SLCD)(s)).begin_time)
+	return C.GoString(((*C.SLCD)(s)).begin_time)
 }
 func (s *SLCD) SetBeginTime(begtime string) {
-	(((*_Ctype_SLCD)(s)).begin_time) = C.CString(begtime)
+	(((*C.SLCD)(s)).begin_time) = C.CString(begtime)
 }
 func (s *SLCD) EndTime() string {
-	return C.GoString(((*_Ctype_SLCD)(s)).end_time)
+	return C.GoString(((*C.SLCD)(s)).end_time)
 }
 func (s *SLCD) SetEndTime(endtime string) {
-	(((*_Ctype_SLCD)(s)).end_time) = C.CString(endtime)
+	(((*C.SLCD)(s)).end_time) = C.CString(endtime)
 }
 func (s *SLCD) SLAddr() string {
-	return C.GoString(((*_Ctype_SLCD)(s)).sladdr)
+	return C.GoString(((*C.SLCD)(s)).sladdr)
 }
 func (s *SLCD) SetSLAddr(sladdr string) {
-	(((*_Ctype_SLCD)(s)).sladdr) = C.CString(sladdr)
+	(((*C.SLCD)(s)).sladdr) = C.CString(sladdr)
 }
 
 func (s *SLCD) Collect() (*SLPacket, int) {
@@ -172,7 +173,7 @@ func (s *SLCD) Connect(sayhello int) int {
 }
 
 func (s *SLCD) Disconnect() int {
-	if (*_Ctype_SLCD)(s).link != -1 {
+	if (*SLCD)(s).link != -1 {
 		return (int)(C.sl_disconnect((*C.struct_slcd_s)(s)))
 	}
 	return 0
@@ -195,7 +196,7 @@ func (s *SLCD) SendData(buffer []byte, ident string, resplen int) ([]byte, int) 
 	cident := C.CString(ident)
 	defer C.free(unsafe.Pointer(cident))
 	resp := make([]byte, resplen)
-	err := (int)(C.sl_senddata((*C.struct_slcd_s)(s), (unsafe.Pointer)(&buffer), (C.size_t)(len(buffer)), cident, (unsafe.Pointer)(&resp), (C.int)(resplen)))
+	err := (int)(C.sl_senddata((*C.struct_slcd_s)(s), unsafe.Pointer(&buffer[0]), (C.size_t)(len(buffer)), cident, unsafe.Pointer(&resp[0]), (C.int)(resplen)))
 	return resp, err
 }
 
@@ -203,7 +204,7 @@ func (s *SLCD) RecvData(maxbytes int, ident string) ([]byte, int) {
 	cident := C.CString(ident)
 	defer C.free(unsafe.Pointer(cident))
 	buffer := make([]byte, maxbytes)
-	err := (int)(C.sl_recvdata((*C.struct_slcd_s)(s), (unsafe.Pointer)(&buffer), (C.size_t)(len(buffer)), cident))
+	err := (int)(C.sl_recvdata((*C.struct_slcd_s)(s), unsafe.Pointer(&buffer[0]), (C.size_t)(len(buffer)), cident))
 	return buffer, err
 }
 
@@ -213,7 +214,7 @@ func (s *SLCD) RecvResp(maxbytes int, command, ident string) ([]byte, int) {
 	cident := C.CString(ident)
 	defer C.free(unsafe.Pointer(cident))
 	buffer := make([]byte, maxbytes)
-	err := (int)(C.sl_recvresp((*C.struct_slcd_s)(s), (unsafe.Pointer)(&buffer), (C.size_t)(len(buffer)), ccommand, cident))
+	err := (int)(C.sl_recvresp((*C.struct_slcd_s)(s), unsafe.Pointer(&buffer[0]), (C.size_t)(len(buffer)), ccommand, cident))
 	return buffer, err
 }
 

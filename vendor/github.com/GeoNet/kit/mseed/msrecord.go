@@ -1,3 +1,4 @@
+//nolint //cgo generates code that doesn't pass linting
 package mseed
 
 //#cgo CFLAGS: -I${SRCDIR}/../cvendor/libmseed
@@ -13,13 +14,13 @@ import (
 	"unsafe"
 )
 
-type MSRecord _Ctype_struct_MSRecord_s
+type MSRecord C.struct_MSRecord_s
 
 func NewMSRecord() *MSRecord {
 	return (*MSRecord)(C.msr_init(nil))
 }
 func FreeMSRecord(m *MSRecord) {
-	C.msr_free((**_Ctype_struct_MSRecord_s)(unsafe.Pointer(&m)))
+	C.msr_free((**C.struct_MSRecord_s)(unsafe.Pointer(&m)))
 }
 func (m *MSRecord) SequenceNumber() int32 {
 	return int32(m.sequence_number)
@@ -66,7 +67,7 @@ func (m *MSRecord) MsgSamples() (string, error) {
 	if m.sampletype != 'a' {
 		return "", errors.New("not an ascii formatted record")
 	}
-	return C.GoStringN((*_Ctype_char)(m.datasamples), C.int(m.numsamples)), nil
+	return C.GoStringN((*C.char)(m.datasamples), C.int(m.numsamples)), nil
 }
 func (m *MSRecord) DataSamples() ([]int32, error) {
 	if m.sampletype == 'a' {
@@ -98,18 +99,18 @@ func (m *MSRecord) DataSamples() ([]int32, error) {
 }
 
 func (m *MSRecord) Endtime() time.Time {
-	endtime := C.msr_endtime((*_Ctype_struct_MSRecord_s)(m))
+	endtime := C.msr_endtime((*C.struct_MSRecord_s)(m))
 	sec := int64(endtime) / 1000000
 	nsec := 1000 * (int64(endtime) % 1000000)
 	return time.Unix(sec, nsec).UTC()
 }
 
 func (m *MSRecord) Print(details int8) {
-	C.msr_print((*_Ctype_struct_MSRecord_s)(m), C.flag(details))
+	C.msr_print((*C.struct_MSRecord_s)(m), C.flag(details))
 }
 
 func (m *MSRecord) Unpack(buf []byte, maxlen int, dataflag int, verbose int) error {
-	cErr := (int)(C.msr_unpack(((*C.char)(unsafe.Pointer(&buf[0]))), C.int(maxlen), (**_Ctype_struct_MSRecord_s)((unsafe.Pointer)(&m)), C.flag(dataflag), C.flag(verbose)))
+	cErr := (int)(C.msr_unpack(((*C.char)(unsafe.Pointer(&buf[0]))), C.int(maxlen), (**C.struct_MSRecord_s)((unsafe.Pointer)(&m)), C.flag(dataflag), C.flag(verbose)))
 
 	switch cErr {
 	case C.MS_NOERROR:
@@ -131,7 +132,7 @@ func (m *MSRecord) Unpack(buf []byte, maxlen int, dataflag int, verbose int) err
 func (m *MSRecord) SrcName(quality int8) string {
 	csrcname := C.CString("NN_SSSSS_LL_CHA_Q_0")
 	defer C.free(unsafe.Pointer(csrcname))
-	C.msr_srcname((*_Ctype_struct_MSRecord_s)(m), csrcname, C.flag(quality))
+	C.msr_srcname((*C.struct_MSRecord_s)(m), csrcname, C.flag(quality))
 	return C.GoString(csrcname)
 }
 
