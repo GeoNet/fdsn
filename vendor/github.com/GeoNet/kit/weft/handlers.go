@@ -232,7 +232,9 @@ func MakeHandler(rh RequestHandler, eh ErrorHandler) http.HandlerFunc {
 		metrics.Written(n)
 		name := name(rh)
 
-		t.Track(name + "." + r.Method)
+		if e := t.Track(name + "." + r.Method); e != nil {
+			logger.Printf("Track error: %s", e.Error())
+		}
 
 		metrics.Request()
 
@@ -284,7 +286,6 @@ func TextError(e error, h http.Header, b *bytes.Buffer) error {
 		h.Set("Surrogate-Control", "max-age=86400")
 		_, err = b.WriteString("this resource no longer exists")
 		h.Set("Content-Type", "text/plain; charset=utf-8")
-		return nil
 	case http.StatusNotFound:
 		b.Reset()
 		h.Set("Surrogate-Control", "max-age=10")
@@ -367,7 +368,6 @@ func HTMLError(e error, h http.Header, b *bytes.Buffer) error {
 		h.Set("Surrogate-Control", "max-age=86400")
 		_, err = b.Write([]byte(ErrGone))
 		h.Set("Content-Type", "text/html; charset=utf-8")
-		return nil
 	case http.StatusNotFound:
 		b.Reset()
 		h.Set("Surrogate-Control", "max-age=10")

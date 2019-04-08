@@ -41,15 +41,12 @@ func init() {
 	timers = make(chan Timer, 300)
 
 	go func() {
-		for {
-			select {
-			case m := <-timers:
-				agg.m.Lock()
-				agg.count[m.id]++
-				agg.sum[m.id] += m.taken
-				agg.taken[m.id] = append(agg.taken[m.id], m.taken)
-				agg.m.Unlock()
-			}
+		for m := range timers {
+			agg.m.Lock()
+			agg.count[m.id]++
+			agg.sum[m.id] += m.taken
+			agg.taken[m.id] = append(agg.taken[m.id], m.taken)
+			agg.m.Unlock()
 		}
 	}()
 }

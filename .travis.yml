@@ -2,7 +2,7 @@ sudo: required
 
 language: go
 go:
-- 1.11.5
+- 1.12.1
 services:
   - docker
 
@@ -27,7 +27,7 @@ addons:
 before_script:
 - psql -U postgres -c "create extension postgis"
 - ./etc/scripts/initdb.sh
-- curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.15.0
+- curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.16.0
 
 script:
   - make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
