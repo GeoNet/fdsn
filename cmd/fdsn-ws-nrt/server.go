@@ -5,7 +5,6 @@ import (
 	"github.com/GeoNet/kit/cfg"
 	"github.com/GeoNet/kit/metrics"
 	"github.com/golang/groupcache"
-	"github.com/gorilla/schema"
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
@@ -16,7 +15,6 @@ import (
 
 var (
 	db          *sql.DB
-	decoder     = schema.NewDecoder() // decoder for URL queries.
 	recordStmt  *sql.Stmt
 	recordCache *groupcache.Group
 )
@@ -69,17 +67,17 @@ func main() {
 	go func() {
 		ticker := time.Tick(time.Second * 30)
 
-		for {
-			select {
-			case <-ticker:
-				t := metrics.Start()
-				err := primeCache(time.Now().UTC().Add(time.Second * -40))
-				if err != nil {
-					log.Printf("priming cache %s", err.Error())
-				}
-				t.Track("primeCache")
-				log.Printf("record cache: %+v", recordCache.CacheStats(groupcache.MainCache))
+		for range ticker {
+			t := metrics.Start()
+			err := primeCache(time.Now().UTC().Add(time.Second * -40))
+			if err != nil {
+				log.Printf("priming cache %s", err.Error())
 			}
+			err = t.Track("primeCache")
+			if err != nil {
+				log.Printf("Tracking prime cache %s", err.Error())
+			}
+			log.Printf("record cache: %+v", recordCache.CacheStats(groupcache.MainCache))
 		}
 	}()
 

@@ -142,8 +142,13 @@ func init() {
 		log.Println("Loading fdsn station xml file ", "etc/"+s3Meta)
 		var f *os.File
 		if f, err = os.Open("etc/" + s3Meta); err == nil {
-			io.Copy(by, f)
-			f.Close()
+
+			if _, err = io.Copy(by, f); err != nil {
+				log.Println("Error copying station xml file", err)
+			}
+			if err = f.Close(); err != nil {
+				log.Println("Error closing station xml file", err)
+			}
 			modified = s.ModTime()
 		}
 	}
@@ -950,7 +955,7 @@ func levelValue(level string) (int, error) {
 
 func matchAnyRegex(input string, regexs []string) bool {
 	for _, r := range regexs {
-		if m, _ := regexp.MatchString(r, input); m == true {
+		if m, _ := regexp.MatchString(r, input); m {
 			return true
 		}
 		// error here will be treated as non-matching

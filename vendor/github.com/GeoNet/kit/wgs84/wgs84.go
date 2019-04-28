@@ -61,7 +61,7 @@ func DistanceBearing(lat1, lon1, lat2, lon2 float64) (distance, bearing float64,
 
 	var c2a, c, cx, cy, cz, d, del, e, sx, sy, y float64
 
-	for true {
+	for {
 		sx = math.Sin(x)
 		cx = math.Cos(x)
 		tu1 = cu2 * sx
@@ -100,7 +100,6 @@ func DistanceBearing(lat1, lon1, lat2, lon2 float64) (distance, bearing float64,
 	}
 
 	faz = math.Atan2(tu1, tu2)
-	baz = math.Atan2(cu1*sx, (baz*cx-su1*cu2)) + pi
 	x = math.Sqrt(((1.0/(r*r))-1.0)*c2a+1.0) + 1.0
 	x = (x - 2.0) / x
 	c = 1.0 - x

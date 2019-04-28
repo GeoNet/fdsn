@@ -45,7 +45,10 @@ func main() {
 	slconn.SetSLAddr(os.Getenv("SLINK_HOST"))
 	defer slconn.Disconnect()
 
-	slconn.ParseStreamList("*_*", "")
+	_, err = slconn.ParseStreamList("*_*", "")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Println("listening for packets from seedlink")
 
@@ -56,7 +59,7 @@ func main() {
 	// cases the program exits and the service should restart it.
 recv:
 	for {
-		if time.Now().Sub(last) > 300.0*time.Second {
+		if time.Since(last) > 300.0*time.Second {
 			log.Print("ERROR: no packets for 300s connection may be hung, exiting")
 			break recv
 		}

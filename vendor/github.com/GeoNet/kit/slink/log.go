@@ -1,3 +1,4 @@
+//nolint //cgo generates code that doesn't pass linting
 // Package slink provides a go wrapper for the libslink C library.
 package slink
 

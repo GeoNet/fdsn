@@ -1,3 +1,4 @@
+//nolint //cgo generates code that doesn't pass linting
 package slink
 
 //#cgo CFLAGS: -I${SRCDIR}/../cvendor/libslink
@@ -37,7 +38,7 @@ const (
 	SLKEEP             // an XML formatted message in a miniSEED log record, used for keepalive/heartbeat responses
 )
 
-type SLPacket _Ctype_SLpacket
+type SLPacket C.SLpacket
 
 func (p *SLPacket) Sequence() int {
 	return (int)(C.sl_sequence((*C.struct_slpacket_s)(p)))
@@ -56,6 +57,6 @@ func (p *SLPacket) GetSLHead() []byte {
 
 func (p *SLPacket) ParseRecord(blktflag, unpackflag int8) *SLMSRecord {
 	msr := C.sl_msr_new()
-	C.sl_msr_parse((*C.struct_SLlog_s)(nil), (*_Ctype_char)(unsafe.Pointer(&p.msrecord[0])), &msr, (C.int8_t)(blktflag), (C.int8_t)(unpackflag))
+	C.sl_msr_parse((*C.struct_SLlog_s)(nil), (*C.char)(unsafe.Pointer(&p.msrecord[0])), &msr, (C.int8_t)(blktflag), (C.int8_t)(unpackflag))
 	return (*SLMSRecord)(msr)
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/GeoNet/fdsn/internal/fdsn"
 	"github.com/GeoNet/fdsn/internal/holdings"
 	"github.com/lib/pq"
+	"log"
 	"testing"
 	"time"
 )
@@ -81,8 +82,9 @@ func TestSaveHoldings(t *testing.T) {
 		},
 	}
 
-	err := h.delete()
+	_ = h.delete()
 
+	var err error
 	var count int
 
 	if err = db.QueryRow(`select count(*) from fdsn.holdings where key = 'NZ.ABAZ.01.ACE.D.2016.097'`).Scan(&count); err != nil {
@@ -179,11 +181,13 @@ func (h *holding) save() error {
 }
 
 func (h *holding) saveHoldings() (int64, error) {
-	txn, err := db.Begin()
+	txn, _ := db.Begin()
 
-	_, err = txn.Exec(`DELETE FROM fdsn.holdings WHERE key=$1`, h.key)
+	_, err := txn.Exec(`DELETE FROM fdsn.holdings WHERE key=$1`, h.key)
 	if err != nil {
-		txn.Rollback()
+		if e := txn.Rollback(); e != nil {
+			log.Printf("Rollback failed: %v", e)
+		}
 		return 0, err
 	}
 
@@ -196,7 +200,9 @@ func (h *holding) saveHoldings() (int64, error) {
 	AND location = $4`, h.Network, h.Station, h.Channel, h.Location, h.Start,
 		h.NumSamples, h.key, h.errorData, h.errorMsg)
 	if err != nil {
-		txn.Rollback()
+		if e := txn.Rollback(); e != nil {
+			log.Printf("Rollback failed: %v", e)
+		}
 		return 0, err
 	}
 
