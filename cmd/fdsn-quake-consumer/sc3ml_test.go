@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var versions = []string{"2015p768477_0.7.xml", "2015p768477_0.8.xml", "2015p768477_0.9.xml", "2015p768477_0.10.xml"}
+var versions = []string{"2015p768477_0.7.xml", "2015p768477_0.8.xml", "2015p768477_0.9.xml", "2015p768477_0.10.xml", "2015p768477_0.11.xml"}
 
 func TestEventUnmarshal(t *testing.T) {
 	for _, input := range versions {
