@@ -18,6 +18,7 @@ var sc3ml07 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3
 var sc3ml08 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.8" version="0.8">`)
 var sc3ml09 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.9" version="0.9">`)
 var sc3ml10 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.10" version="0.10">`)
+var sc3ml11 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.11" version="0.11">`)
 
 // event is for saving information to the db.
 // field names must match the column names in fdsn.event and the field names must be exported.
@@ -58,6 +59,7 @@ Supported versions of SC3ML are
    * 0.8
    * 0.9
    * 0.10
+   * 0.11
 
 The xslt source is from http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.7/sc3ml_0.7__quakeml_1.2.xsl
 It has been edited to output only an Event fragment without the parent elements and namespaces.  e.g.,
@@ -94,6 +96,8 @@ func toQuakeMLEvent(seisComPML []byte) (string, error) {
 		cmd.Args = append(cmd.Args, "assets/sc3ml_0.9__quakeml_1.2.xsl")
 	case bytes.Contains(seisComPML, sc3ml10):
 		cmd.Args = append(cmd.Args, "assets/sc3ml_0.10__quakeml_1.2.xsl")
+	case bytes.Contains(seisComPML, sc3ml11):
+		cmd.Args = append(cmd.Args, "assets/sc3ml_0.11__quakeml_1.2.xsl")
 
 	default:
 		return "", fmt.Errorf("found no %s", "XSLT")
