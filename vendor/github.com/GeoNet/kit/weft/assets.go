@@ -3,7 +3,10 @@ package weft
 import (
 	"bytes"
 	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/base64"
 	"fmt"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -17,15 +20,64 @@ type asset struct {
 	hashedPath string
 	mime       string
 	b          []byte
+	sri        string
 }
 
-// assets and assetPath is populated during init and then is only used for reading.
+// assets is populated during init and then is only used for reading.
 var assets = make(map[string]*asset)
-var assetPath = make(map[string]string)
 var assetError error
 
 func init() {
 	assetError = initAssets("assets/assets", "assets")
+}
+
+/*
+	As part of Subresource Integrity we need to calculate the hash of the asset, we do this when the asset is loaded into memory
+	This should only be used for files that are stored alongside the server, as remote files could be tampered with and we'd still
+	just calculate the hash.
+	Externally hosted files should have a precalculated SRI
+*/
+func calcSRIhash(b []byte) (string, error) {
+	var buf bytes.Buffer
+
+	dgst := sha512.Sum384(b)
+
+	enc := base64.NewEncoder(base64.StdEncoding, &buf)
+	_, err := enc.Write(dgst[:])
+	if err != nil {
+		return "", fmt.Errorf("failed to encode SRI hash: %v", err)
+	}
+
+	return "sha384-" + buf.String(), nil
+}
+
+/*
+	Wrapped by the following function to allow testing
+*/
+func createSubResourceTag(a *asset) (string, error) {
+	switch a.mime {
+	case "text/javascript":
+		return fmt.Sprintf(`<script src="%s" type="text/javascript" integrity="%s"></script>`, a.hashedPath, a.sri), nil
+	case "text/css":
+		return fmt.Sprintf(`<link rel="stylesheet" href="%s" integrity="%s">`, a.hashedPath, a.sri), nil
+	default:
+		return "", fmt.Errorf("cannot create an embedded resource tag for mime: '%v'", a.mime)
+	}
+}
+
+/*
+	Generates a tag for a resource with the hashed path and SRI hash.
+	Returns a template.HTML so it won't throw warnings with golangci-lint
+*/
+func CreateSubResourceTag(path string) (template.HTML, error) {
+	a, ok := assets[path]
+	if !ok {
+		return template.HTML(""), fmt.Errorf("asset does not exist at path '%v'", path)
+	}
+
+	s, err := createSubResourceTag(a)
+
+	return template.HTML(s), err //nolint:gosec //We're writing these ourselves, any changes will be reviewd, acceptable risk. (Could add URLencoding if there's any concern)
 }
 
 // AssetHandler serves assets from the local directory `assets/assets`.  Assets are loaded from this
@@ -64,7 +116,11 @@ func AssetHandler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 // AssetPath returns the finger printed path for path e.g., `/assets/bootstrap/hello.css`
 // returns `/assets/bootstrap/1fdd2266-hello.css`.
 func AssetPath(path string) string {
-	return assetPath[path]
+	return assets[path].path
+}
+
+func SRIforPath(path string) string {
+	return assets[path].path
 }
 
 // loadAsset loads file and finger prints it with a sha256 hash.  prefix is stripped
@@ -129,6 +185,11 @@ func loadAsset(file, prefix string) (*asset, error) {
 		return nil, err
 	}
 
+	a.sri, err = calcSRIhash(a.b)
+	if err != nil {
+		return nil, err
+	}
+
 	return &a, nil
 }
 
@@ -159,7 +220,6 @@ func initAssets(dir, prefix string) error {
 
 			assets[a.path] = a
 			assets[a.hashedPath] = a
-			assetPath[a.path] = a.hashedPath
 		}
 	}
 
