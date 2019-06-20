@@ -80,6 +80,8 @@ func MakeDirectHandler(rh DirectRequestHandler, eh ErrorHandler) http.HandlerFun
 		defer bufferPool.Put(b)
 		b.Reset()
 
+		setBestPracticeHeaders(w, r)
+
 		e := eh(err, w.Header(), b)
 		if e != nil {
 			logger.Printf("setting error: %s", e.Error())
@@ -172,6 +174,8 @@ func MakeHandler(rh RequestHandler, eh ErrorHandler) http.HandlerFunc {
 
 		t := metrics.Start()
 
+		setBestPracticeHeaders(w, r)
+
 		err := rh(r, w.Header(), b)
 
 		if err != nil {
@@ -258,6 +262,28 @@ func MakeHandler(rh RequestHandler, eh ErrorHandler) http.HandlerFunc {
 			logger.Printf("%d %s %s %s %s", status, r.Method, r.RequestURI, name, err.Error())
 		}
 	}
+}
+
+/*
+	These are recommended by Mozilla as part of the Observatory scan.
+*/
+func setBestPracticeHeaders(w http.ResponseWriter, r *http.Request) {
+	//Content Security Policy: allow inline styles, but no inline scripts, prevent from clickjacking
+	w.Header().Set("Content-Security-Policy", "default-src 'none'; "+
+		"img-src 'self' *.geonet.org.nz data:; "+
+		"font-src 'self' https://fonts.gstatic.com; "+
+		"style-src 'self' 'unsafe-inline' https://*.googleapis.com; "+
+		"script-src 'self' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com; "+
+		"connect-src 'self' https://*.geonet.org.nz; "+
+		"frame-src 'self' https://www.youtube.com https://www.google.com; "+
+		"form-action 'self'; "+
+		"base-uri 'none'; "+
+		"frame-ancestors 'self'; "+
+		"object-src 'self';")
+	w.Header().Set("X-Frame-Options", "DENY")
+	w.Header().Set("X-XSS-Protection", "1; mode=block")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Strict-Transport-Security", "max-age=63072000")
 }
 
 // TextError writes text errors to b for non nil error.
