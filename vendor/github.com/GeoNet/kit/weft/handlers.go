@@ -284,6 +284,7 @@ func setBestPracticeHeaders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-XSS-Protection", "1; mode=block")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Strict-Transport-Security", "max-age=63072000")
+	w.Header().Set("Referrer-Policy", "no-referrer")
 }
 
 // TextError writes text errors to b for non nil error.
