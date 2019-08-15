@@ -18,6 +18,8 @@ func init() {
 	}
 
 	weft.SetLogger(logger)
+	weft.EnableLogRequest(true)
+	weft.EnableLogPostBody(true)
 
 	// find the hostname and appname for use with metrics.
 	h, _ := os.Hostname()

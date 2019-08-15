@@ -150,6 +150,9 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 		if err := fdsn.ParseDataSelectPost(r.Body, &params); err != nil {
 			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
+		if len(params) == 0 {
+			return 0, weft.StatusError{Code: NO_DATA, Err: fmt.Errorf("%s", "unable to parse post request")}
+		}
 	case "GET":
 		d, err := fdsn.ParseDataSelectGet(r.URL.Query())
 		if err != nil {

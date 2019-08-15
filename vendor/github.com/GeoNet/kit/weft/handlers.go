@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"errors"
 	"github.com/GeoNet/kit/metrics"
+	"io/ioutil"
 	"net/http"
 	"reflect"
 	"runtime"
@@ -20,6 +21,8 @@ var bufferPool = sync.Pool{
 }
 
 var logger Logger = discarder{}
+var logPostBody = false
+var logReq = false
 
 const (
 	GZIP = "gzip"
@@ -81,6 +84,7 @@ func MakeDirectHandler(rh DirectRequestHandler, eh ErrorHandler) http.HandlerFun
 		b.Reset()
 
 		setBestPracticeHeaders(w, r)
+		logRequest(r)
 
 		e := eh(err, w.Header(), b)
 		if e != nil {
@@ -175,6 +179,7 @@ func MakeHandler(rh RequestHandler, eh ErrorHandler) http.HandlerFunc {
 		t := metrics.Start()
 
 		setBestPracticeHeaders(w, r)
+		logRequest(r)
 
 		err := rh(r, w.Header(), b)
 
@@ -270,11 +275,11 @@ func MakeHandler(rh RequestHandler, eh ErrorHandler) http.HandlerFunc {
 func setBestPracticeHeaders(w http.ResponseWriter, r *http.Request) {
 	//Content Security Policy: allow inline styles, but no inline scripts, prevent from clickjacking
 	w.Header().Set("Content-Security-Policy", "default-src 'none'; "+
-		"img-src 'self' *.geonet.org.nz data:; "+
-		"font-src 'self' https://fonts.gstatic.com; "+
+		"img-src 'self' *.geonet.org.nz data: https://www.google-analytics.com;"+
+		"font-src 'self' https://fonts.gstatic.com https://surveys-static.survicate.com; "+
 		"style-src 'self' 'unsafe-inline' https://*.googleapis.com; "+
-		"script-src 'self' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com; "+
-		"connect-src 'self' https://*.geonet.org.nz; "+
+		"script-src 'self' https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com https://*.survicate.com https://www.google-analytics.com;"+
+		"connect-src 'self' https://*.geonet.org.nz https://*.survicate.com;"+
 		"frame-src 'self' https://www.youtube.com https://www.google.com; "+
 		"form-action 'self'; "+
 		"base-uri 'none'; "+
@@ -285,6 +290,25 @@ func setBestPracticeHeaders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Strict-Transport-Security", "max-age=63072000")
 	w.Header().Set("Referrer-Policy", "no-referrer")
+}
+
+func logRequest(r *http.Request) {
+	if logReq {
+		logger.Printf("%s - %s - %s\n", r.RemoteAddr, r.Method, r.RequestURI)
+	}
+	if logPostBody {
+		switch r.Method {
+		case http.MethodPost, http.MethodPut:
+			body, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				logger.Printf("Error reading request body") // This error doesn't affect we processing requests
+			} else {
+				logger.Printf("Body:%s", string(body))
+				// put read bytes back so the real handler can use it
+				r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+			}
+		}
+	}
 }
 
 // TextError writes text errors to b for non nil error.

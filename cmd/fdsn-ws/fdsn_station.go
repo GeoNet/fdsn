@@ -32,6 +32,7 @@ const (
 	STATION_LEVEL_RESPONSE  = 3
 	DEFAULT_RELOAD_INTERVAL = 300
 	NZ_KM_DEGREE            = 111.0
+	NO_DATA                 = 204
 
 	BEFORE       = -1
 	ONBEFOREEND  = 0
@@ -249,7 +250,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		Longitude:         math.MaxFloat64,
 		MinRadius:         0.0,
 		MaxRadius:         180.0,
-		NoData:            204,
+		NoData:            NO_DATA,
 	}
 
 	for abbrev, expanded := range stationAbbreviations {
@@ -483,6 +484,9 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error
 		params, err = parseStationV1Post(string(body))
 		if err != nil {
 			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
+		}
+		if len(params) == 0 {
+			return weft.StatusError{Code: NO_DATA, Err: fmt.Errorf("%s", "unable to parse post request")}
 		}
 	default:
 		return weft.StatusError{Code: http.StatusMethodNotAllowed}
