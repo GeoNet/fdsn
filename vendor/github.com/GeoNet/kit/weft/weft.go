@@ -44,6 +44,16 @@ func SetLogger(l Logger) {
 	}
 }
 
+// EnableLogRequest makes logger to log all requests
+func EnableLogRequest(b bool) {
+	logReq = b
+}
+
+// EnableLogPostBody makes logger to log post body
+func EnableLogPostBody(b bool) {
+	logPostBody = b
+}
+
 // DataDog initialises sending metrics to DataDog.
 func DataDog(apiKey, hostName, appName string, logger Logger) {
 	metrics.DataDogHttp(apiKey, hostName, appName, logger)
