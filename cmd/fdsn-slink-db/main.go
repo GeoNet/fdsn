@@ -39,8 +39,8 @@ func main() {
 	defer slink.FreeSLCD(slconn)
 
 	slconn.SetNetDly(30)
-	slconn.SetNetTo(300)
-	slconn.SetKeepAlive(0)
+	slconn.SetNetTo(60)
+	slconn.SetKeepAlive(1)
 
 	slconn.SetSLAddr(os.Getenv("SLINK_HOST"))
 	defer slconn.Disconnect()
