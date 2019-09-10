@@ -32,6 +32,7 @@ const (
 	STATION_LEVEL_RESPONSE  = 3
 	DEFAULT_RELOAD_INTERVAL = 300
 	NZ_KM_DEGREE            = 111.0
+	NO_DATA                 = 204
 
 	BEFORE       = -1
 	ONBEFOREEND  = 0
@@ -249,7 +250,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		Longitude:         math.MaxFloat64,
 		MinRadius:         0.0,
 		MaxRadius:         180.0,
-		NoData:            204,
+		NoData:            NO_DATA,
 	}
 
 	for abbrev, expanded := range stationAbbreviations {
@@ -483,6 +484,9 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error
 		params, err = parseStationV1Post(string(body))
 		if err != nil {
 			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
+		}
+		if len(params) == 0 {
+			return weft.StatusError{Code: NO_DATA, Err: fmt.Errorf("%s", "unable to parse post request")}
 		}
 	default:
 		return weft.StatusError{Code: http.StatusMethodNotAllowed}
@@ -771,12 +775,19 @@ func (c *ChannelType) doFilter(params []fdsnStationV1Search) bool {
 }
 
 func (v fdsnStationV1Search) validStartEnd(start, end time.Time, level int) bool {
-	// For start/end, the "no-value" could be "0001-01-01T00:00:00" or "9999-01-01T00:00:00"
-	if v.LevelValue != level {
-		// Not validating furthur for different level
+	/**
+	 * #GeoNet/tickets/issues/4793
+	 * basically apply time filter for the intended level only, because
+	 * 1. network, stations and channels have different time scope, a time filter intended for station/channel/response
+	 *    is not supposed to apply on network/stations,
+	 * 2. while chanel and response have the same time scope (response doesn't have time attributes at all)
+	 *    a time filter specified for response level need to apply on the parent channel element
+	 */
+	if v.LevelValue != level && (level == STATION_LEVEL_NETWORK || level == STATION_LEVEL_STATION) {
+		// skip time filter
 		return true
 	}
-
+	// For start/end, the "no-value" could be "0001-01-01T00:00:00" or "9999-01-01T00:00:00"
 	if v.StartTime.Time != zeroDateTime {
 		switch v.startMode {
 		case ONBEFOREEND: // startTime
