@@ -80,6 +80,36 @@ func DataDogMsg(apiKey, hostName, appName string, logger Logger) {
 	}()
 }
 
+// Sends current metrics immediately
+func DataDogMsgSync(apiKey, hostName, appName string, logger Logger) {
+	var err error
+	if logger == nil {
+		logger = discarder{}
+	}
+
+	if apiKey == "" {
+		logger.Printf("empty apiKey metrics will be logged")
+	}
+
+	var c MsgCounters
+	var m runtime.MemStats
+	ReadMsgCounters(&c)
+	runtime.ReadMemStats(&m)
+
+	if apiKey != "" {
+		err = dogMsg(apiKey, hostName, appName, m, ReadTimers(), c)
+		if err != nil {
+			logger.Printf("error sending metrics to datadog for %s %s %s", hostName, appName, err.Error())
+		}
+	} else {
+		logger.Printf("%s %s", hostName, appName)
+		logger.Printf("%+v", m)
+		logger.Printf("%+v", ReadTimers())
+		logger.Printf("%+v", c)
+	}
+
+}
+
 func dogMsg(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStats, c MsgCounters) error {
 	now := float32(time.Now().Unix())
 

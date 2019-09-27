@@ -2,7 +2,7 @@ sudo: required
 
 language: go
 go:
-- 1.12.1
+- 1.13
 services:
   - docker
 
@@ -20,6 +20,7 @@ before_install:
  - sudo apt-get install -y xsltproc
  
 install: true
+- export GOFLAGS=-mod=vendor
 
 addons:
   postgresql: '9.5'
@@ -30,6 +31,7 @@ before_script:
 - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.16.0
 
 script:
+  - cp -r cvendor vendor/github.com/GeoNet/kit
   - make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
   - make -C vendor/github.com/GeoNet/kit/cvendor/libslink
   - test -z "$(gofmt -s -l `find . -name "*.go" | egrep -v vendor` | tee /dev/stderr)"
