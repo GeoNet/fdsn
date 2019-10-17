@@ -56,7 +56,7 @@ do
     fi
 
     # install dependencies to compile libmseed and libslink, and compile/install with the -static flag to statically link with C libs (if applicable)
-	docker run -e "GOBIN=/usr/src/go/src/github.com/GeoNet/${CWD}/${DOCKER_TMP}" -e "CGO_ENABLED=${enable_cgo}" -e "GOPATH=/usr/src/go" -e "GOOS=linux" -e "BUILD=$BUILD" --rm \
+	docker run -e "GOBIN=/usr/src/go/src/github.com/GeoNet/${CWD}/${DOCKER_TMP}" -e "CGO_ENABLED=${enable_cgo}" -e "GOPATH=/usr/src/go" -e "GOFLAGS=-mod=vendor" -e "GOOS=linux" -e "BUILD=$BUILD" --rm \
 		-v "$PWD":/usr/src/go/src/github.com/GeoNet/${CWD} \
 		-w /usr/src/go/src/github.com/GeoNet/${CWD} ${BUILD_CONTAINER} \
 		/bin/ash -c "apk add --update ca-certificates tzdata gcc make musl-dev && \

@@ -16,14 +16,14 @@ before_deploy:
 before_install:
  - export DEBIAN_FRONTEND=noninteractive;
    sudo -E apt-get -yq update &>> ~/apt-get-update.log;
-   sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install postgresql-9.5-postgis-2.3
+   sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install postgresql-9.6-postgis-2.4
  - sudo apt-get install -y xsltproc
  
 install:
   - export GOFLAGS=-mod=vendor
 
 addons:
-  postgresql: '9.5'
+  postgresql: '9.6'
 
 before_script:
 - psql -U postgres -c "create extension postgis"
