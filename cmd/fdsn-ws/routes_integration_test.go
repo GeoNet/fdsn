@@ -3,7 +3,7 @@
 package main
 
 import (
-	wt "github.com/GeoNet/fdsn/internal/weft/wefttest"
+	wt "github.com/GeoNet/kit/weft/wefttest"
 	"testing"
 )
 
