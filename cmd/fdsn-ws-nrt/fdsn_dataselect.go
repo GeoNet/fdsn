@@ -115,7 +115,7 @@ func fdsnDataselectV1Index(r *http.Request, h http.Header, b *bytes.Buffer) erro
 		return err
 	}
 
-	h.Set("Content-Type", "text/html; charset=utf-8")
+	h.Set("Content-Type", "text/html")
 
 	_, err = b.Write(fdsnDataselectIndex)
 
