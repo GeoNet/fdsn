@@ -113,6 +113,18 @@ func (a *app) expire() {
 	}
 }
 
+// returns the latest records's time
+func (a *app) latestTS() (t time.Time, err error) {
+	var ts string
+	err = a.db.QueryRow(`SELECT start_time FROM fdsn.record ORDER BY start_time DESC LIMIT 1`).Scan(&ts)
+	if err != nil {
+		return
+	}
+
+	err = t.UnmarshalText([]byte(ts))
+	return
+}
+
 func (a *app) close() {
 	a.saveRecordStmt.Close()
 	a.db.Close()
