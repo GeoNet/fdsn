@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+const maxPatchBefore = 10 * time.Minute
+
 func main() {
 	var a app
 
@@ -33,14 +35,25 @@ func main() {
 
 	go a.expire()
 
-	// TODO request old data?
-
 	slconn := slink.NewSLCD()
 	defer slink.FreeSLCD(slconn)
 
 	slconn.SetNetDly(30)
 	slconn.SetNetTo(60)
 	slconn.SetKeepAlive(1)
+
+	// Request old data
+	latest, err := a.latestTS()
+	if err == nil { // NOTICE: On error we do nothing
+		// Limit number of missing data to start from "maxPatchBefore ago" if we've missed too much
+		if time.Since(latest) > maxPatchBefore {
+			latest = time.Now().UTC().Add(-1 * maxPatchBefore)
+		}
+
+		begin := latest.Format("2006,01,02,15,04,05")
+		slconn.SetBeginTime(begin)
+		log.Println("Requesting data from", begin)
+	}
 
 	slconn.SetSLAddr(os.Getenv("SLINK_HOST"))
 	defer slconn.Disconnect()
