@@ -46,3 +46,12 @@ deploy:
      script: ./build-push.sh fdsn-quake-consumer fdsn-ws fdsn-holdings-consumer fdsn-ws-nrt fdsn-slink-db
      on: 
        branch: master 
+
+notifications:
+  email: false
+  slack:
+    if: branch in (master, staging, production)
+    on_success: never
+    on_failure: always
+    on_pull_requests: false
+    secure: ORAvJSxRCtRUhc6oca4LaWg1ZDoau1ylBawVNRCj5aN2sTc6SYTDgQmk1vguyuRMZqg2OUVinpNxBtxpol0mhzqcnuR6hg74syWL1CJaLR6zzZQZrdMq5PhzudeJ/ScoJeMF4puExD7oh03NyY76xSDjP1PSOTE1XetGlXE/OSmr7bATiwgVQn9Qo+lxJWRgVNOUUcCPxjaXbKMrMMQupuFR1pvViI7U8ShQETQ1Vq9dqQxlStG2KpijGmQtYgSdJw2zFSS5XPnba2ju7HBMq6IBP5zOhXmUSl1NRsDnP0Tj91ndPkUJeG2toIF15I5Ajxp+JbfIBLkuUNXd0Qp+DpGmfMKWPFf4gsKDtaqN78WR9eMqHbXxNFhbPMIFSaD7gYAhcEYSVq5CbaOtQflU6Sg0tADLIws91Vsdh+KzQifmKOgkf7YBiCUCm3zbO665lDSUl7UjVl8XDb/pf4Nrl6C3pvxaNVCeq+Xcf3s3BwknfvL7MB8wQTkn6Nkhim8JuQGsT69TzDkvzr12skBcPo+zlnYsqQ4Hc5bzM5Sq+BzQMq6dnQpUazstaaPQhbcttyacIWWzlvD4iGOhCUqtfFNkk2AYNgO4DuR6chojbdrwhoRFrFmR1a4rXjDNyYT3EPxTVOZ6QrpgYyx0xNvaUWRI8bkfYNiheT/rNEiCpxo=
