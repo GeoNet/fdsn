@@ -45,13 +45,6 @@ func soh(r *http.Request, h http.Header, b *bytes.Buffer) error {
 		return err
 	}
 
-	var i int
-
-	err = db.QueryRow(`SELECT 1`).Scan(&i)
-	if err != nil {
-		return err
-	}
-
 	b.WriteString("<html><head></head><body>ok</body></html>")
 
 	return nil

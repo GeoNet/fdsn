@@ -1,2 +1,0 @@
-#!/bin/sh
-./lmtestparse data/Float64-encoded.mseed -D

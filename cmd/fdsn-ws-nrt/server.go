@@ -1,11 +1,7 @@
 package main
 
 import (
-	"database/sql"
-	"github.com/GeoNet/kit/cfg"
-	"github.com/GeoNet/kit/metrics"
-	"github.com/golang/groupcache"
-	_ "github.com/lib/pq"
+	"github.com/GeoNet/fdsn/internal/mseednrt"
 	"log"
 	"net/http"
 	"os"
@@ -14,15 +10,17 @@ import (
 )
 
 var (
-	db          *sql.DB
-	recordStmt  *sql.Stmt
-	recordCache *groupcache.Group
+	cacheDir = os.Getenv("CACHE_DIR")
+	cache    mseednrt.Cache
 )
 
 func main() {
-	p, err := cfg.PostgresEnv()
-	if err != nil {
-		log.Fatalf("error reading DB config from the environment vars: %s", err)
+	if cacheDir == "" {
+		log.Fatal("CACHE_DIR is not set")
+	}
+
+	if _, err := os.Stat(cacheDir); os.IsNotExist(err) {
+		log.Fatal("cache dir", cacheDir, "doesn't exists")
 	}
 
 	size := os.Getenv("CACHE_SIZE")
@@ -37,49 +35,9 @@ func main() {
 
 	cacheSize = cacheSize * 1000000000
 
-	// set a statement timeout to cancel any very long running DB queries.
-	// Value is int milliseconds.
-	// https://www.postgresql.org/docs/9.5/static/runtime-config-client.html
-	db, err = sql.Open("postgres", p.Connection()+" statement_timeout=600000")
-	if err != nil {
-		log.Fatalf("error with DB config: %s", err)
-	}
-	defer db.Close()
-
-	db.SetMaxIdleConns(p.MaxIdle)
-	db.SetMaxOpenConns(p.MaxOpen)
-
-	recordStmt, err = db.Prepare(`SELECT raw FROM fdsn.record WHERE streampk =
-                                  (SELECT streampk FROM fdsn.stream WHERE network = $1 AND station = $2 AND channel = $3 AND location = $4)
-	                          AND start_time = $5`)
-	if err != nil {
-		log.Printf("error preparing record statement %s", err.Error())
-	}
-
-	if err = db.Ping(); err != nil {
-		log.Println("ERROR: problem pinging DB - is it up and contactable? 500s will be served")
-	}
-
 	log.Printf("creating record cache size %d bytes", cacheSize)
 
-	recordCache = groupcache.NewGroup("record", cacheSize, groupcache.GetterFunc(recordGetter))
-
-	go func() {
-		ticker := time.Tick(time.Second * 30)
-
-		for range ticker {
-			t := metrics.Start()
-			err := primeCache(time.Now().UTC().Add(time.Second * -40))
-			if err != nil {
-				log.Printf("priming cache %s", err.Error())
-			}
-			err = t.Track("primeCache")
-			if err != nil {
-				log.Printf("Tracking prime cache %s", err.Error())
-			}
-			log.Printf("record cache: %+v", recordCache.CacheStats(groupcache.MainCache))
-		}
-	}()
+	cache = mseednrt.InitCache("TestCache_List", 1000000, 10000, time.Second*10, cacheDir)
 
 	log.Println("starting server")
 	log.Fatal(http.ListenAndServe(":8080", mux))

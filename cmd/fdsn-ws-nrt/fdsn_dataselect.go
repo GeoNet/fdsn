@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
+	fs "github.com/GeoNet/fdsn/internal/mseednrt/fs"
 	"github.com/GeoNet/kit/weft"
-	"github.com/golang/groupcache"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -66,40 +66,30 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 		return 0, weft.StatusError{Code: http.StatusMethodNotAllowed}
 	}
 
-	var keys []string
-	var rec []byte
-
-	// TODO - possibly limit request/response size and use a buffer for the response.  This
-	// would make http response codes to the client more accurate.
-
 	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
-	var n int
 	var written int
 	for _, v := range params {
 		s, err := v.Regexp()
 		if err != nil {
 			return 0, err
 		}
-		keys, err = holdingsSearchNrt(s)
+
+		nslc := fs.NSLC{Network: s.Network, Station: s.Station, Location: s.Location, Channel: s.Channel}
+		log.Printf("Listing %+v", nslc)
+		nslcs, err := cache.List(nslc)
 		if err != nil {
 			return 0, err
 		}
-		for _, k := range keys {
-			err = recordCache.Get(nil, k, groupcache.AllocatingByteSliceSink(&rec))
-			switch err {
-			case nil:
-				n, err = w.Write(rec)
-				if err != nil {
-					return 0, err
-				}
-				written += n
-			case errNoData:
-			// do nothing for no data, it could be deleted from the db
-			// before we get a chance to request it.
-			default:
+
+		log.Println("Total records", len(nslcs))
+		for _, c := range nslcs {
+			n, err := cache.Get(c, v.StartTime.Time, v.EndTime.Time, w)
+			if err != nil {
 				return 0, err
 			}
+			written += n
 		}
+
 	}
 
 	if written == 0 {
