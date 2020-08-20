@@ -32,7 +32,7 @@ var dataSelectNotSupported = map[string]bool{
 	"minuimumlength": true,
 }
 
-var asciiReg *regexp.Regexp
+var nslcReg *regexp.Regexp
 
 type DataSelect struct {
 	StartTime   Time     `schema:"starttime"` // limit to data on or after the specified start time.
@@ -61,7 +61,7 @@ func init() {
 		return reflect.ValueOf(strings.Split(input, ","))
 	})
 
-	asciiReg = regexp.MustCompile(`^[\x00-\x7F]*$`)
+	nslcReg = regexp.MustCompile(`^([\w*?,]+|--)$`) // FDSN spec allows all ascii, but we'll only allow alpha, number, _, ?, *, "," and "--" (exactly 2 hyphens only)
 }
 
 /*
@@ -235,22 +235,22 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 func (d *DataSelect) Regexp() (DataSearch, error) {
 	ne, err := toPattern(d.Network, false)
 	if err != nil {
-		return DataSearch{}, err
+		return DataSearch{}, fmt.Errorf("Invalid network parameter: %s", err.Error())
 	}
 
 	st, err := toPattern(d.Station, false)
 	if err != nil {
-		return DataSearch{}, err
+		return DataSearch{}, fmt.Errorf("Invalid station parameter: %s", err.Error())
 	}
 
 	ch, err := toPattern(d.Channel, false)
 	if err != nil {
-		return DataSearch{}, err
+		return DataSearch{}, fmt.Errorf("Invalid channel parameter: %s", err.Error())
 	}
 
 	lo, err := toPattern(d.Location, true)
 	if err != nil {
-		return DataSearch{}, err
+		return DataSearch{}, fmt.Errorf("Invalid location parameter: %s", err.Error())
 	}
 
 	return DataSearch{
@@ -283,7 +283,7 @@ func GenRegex(input []string, emptyDash bool) ([]string, error) {
 			continue
 		}
 
-		if !asciiReg.MatchString(s) {
+		if !nslcReg.MatchString(s) {
 			return nil, fmt.Errorf("Invalid parameter:'%s'", s)
 		}
 		var r string
@@ -292,11 +292,8 @@ func GenRegex(input []string, emptyDash bool) ([]string, error) {
 			// "--" represents blank location which should be saved as 2 white spaces.
 			r = "^\\s{2}$"
 		} else {
-			// now escape all regex chars
-			s = regexp.QuoteMeta(s)
-			// Since * and ? has been escaped by QuoteMeta, we'll have to change them back
-			s = strings.Replace(s, "\\*", ".*", -1)
-			s = strings.Replace(s, "\\?", ".", -1)
+			s = strings.Replace(s, "*", ".*", -1)
+			s = strings.Replace(s, "?", ".", -1)
 			r = "^" + s + "$"
 		}
 
