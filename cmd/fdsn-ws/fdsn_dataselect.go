@@ -182,7 +182,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 		d, err := v.Regexp()
 		if err != nil {
-			return 0, err
+			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 		keys, err := holdingsSearch(d)
 		if err != nil {

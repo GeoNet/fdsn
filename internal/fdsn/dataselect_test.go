@@ -88,21 +88,25 @@ func TestGenRegex(t *testing.T) {
 		t.Error(fmt.Sprintf("expect ^A.Z.*$ got %+v", r[0]))
 	}
 
-	// other regex special chars escaped
-	// (only test some regex chars to make sure it does quote)
-	r, err = fdsn.GenRegex([]string{"*\\^{]"}, false)
+	// "--" (exactly 2 hyphens) means empty in FDSN
+	_, err = fdsn.GenRegex([]string{"--"}, false)
 	if err != nil {
-		t.Error(err)
-	}
-	if len(r) != 1 || r[0] != "^.*\\\\\\^\\{\\]$" {
-		t.Error(fmt.Sprintf("expect ^.*\\\\\\^\\{\\]$ got %+v", r[0]))
+		t.Error(fmt.Sprintf("expect to passed but rejected"))
 	}
 
-	r, err = fdsn.GenRegex([]string{"[E,H]H?"}, false)
-	if err != nil {
-		t.Error(err)
+	_, err = fdsn.GenRegex([]string{"---"}, false)
+	if err == nil {
+		t.Error(fmt.Sprintf("expect to rejected but passed"))
 	}
-	if len(r) != 1 || r[0] != "^\\[E,H\\]H.$" {
-		t.Error(fmt.Sprintf("expect ^\\[E,H\\]H.$ got %+v", r[0]))
+
+	// block all other chars, including valid regex since we're not supporting regex
+	_, err = fdsn.GenRegex([]string{"*\\^{]"}, false)
+	if err == nil {
+		t.Error(fmt.Sprintf("expect to rejected but passed."))
+	}
+
+	_, err = fdsn.GenRegex([]string{"[E,H]H?"}, false)
+	if err == nil {
+		t.Error(fmt.Sprintf("expect to rejected but passed."))
 	}
 }

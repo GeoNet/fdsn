@@ -30,6 +30,17 @@ var routes = wt.Requests{
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?starttime=1900-01-09T00:00:00&endtime=1900-01-09T01:00:00&network=NZ&station=CHST&location=01&channel=LOG",
 		Content: "application/vnd.fdsn.mseed",
 		Status:  http.StatusNoContent},
+	// spam
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?channel=LOG&endtime=1900-01-09T01:00:00&location=01&network=c:/Windows/system.ini&starttime=1900-01-09T00:00:00&station=CHST",
+		Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?channel=LOG&endtime=1900-01-09T01%3A00%3A00&location=01&network=NZ&starttime=1900-01-09T00%3A00%3A00&station=c%3A%2FWindows%2Fsystem.ini",
+		Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?channel=LOG&endtime=1900-01-09T01%3A00%3A00&location=01&network=c%3A%2FWindows%2Fsystem.ini&starttime=1900-01-09T00%3A00%3A00&station=CHST",
+		Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?channel=LOG&endtime=c%3A%2FWindows%2Fsystem.ini&location=01&network=*&starttime=1900-01-09T00%3A00%3A00&station=CHST",
+		Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?unknownparam=1",
+		Status: http.StatusBadRequest},
 	// post
 	{ID: wt.L(), Method: "POST", URL: "/fdsnws/dataselect/1/query", PostBody: []byte("NZ ABAZ 10 EHE 2016-03-19T00:00:00 2016-03-19T01:00:00"),
 		Content: "application/vnd.fdsn.mseed"},

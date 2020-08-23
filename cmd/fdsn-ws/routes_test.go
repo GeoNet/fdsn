@@ -63,6 +63,14 @@ var routes = wt.Requests{
 		Status: http.StatusNoContent},
 	{ID: wt.L(), URL: "/metrics/fdsnws/dataselect/1/query?starttime=2016-01-09T00:00:00&endtime=2016-01-09T23:00:00&network=NZ&station=CHST&location=01&channel=LOG"},
 
+	// spam
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?channel=LOG&endtime=1900-01-09T01:00:00&location=01&network=c:/Windows/system.ini&starttime=1900-01-09T00:00:00&station=CHST",
+		Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?channel=LOG&endtime=1900-01-09T01%3A00%3A00&location=01&network=NZ&starttime=1900-01-09T00%3A00%3A00&station=c%3A%2FWindows%2Fsystem.ini",
+		Status: http.StatusBadRequest},
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?channel=LOG&endtime=1900-01-09T01%3A00%3A00&location=01&network=c%3A%2FWindows%2Fsystem.ini&starttime=1900-01-09T00%3A00%3A00&station=CHST",
+		Status: http.StatusBadRequest},
+
 	{ID: wt.L(), URL: "/soh"},
 }
 
