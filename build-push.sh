@@ -6,10 +6,12 @@
 
 ./build.sh $@
 
+ACCOUNT=$(aws sts get-caller-identity --output text --query 'Account')
 VERSION='git-'`git rev-parse --short HEAD`
+eval $(aws ecr get-login --no-include-email --region ap-southeast-2)
 
 for i in "$@"
 do
-		docker push 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION 
-		docker push 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:latest
+		docker push ${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION 
+		docker push ${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:latest
 done
