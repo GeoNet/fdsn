@@ -85,7 +85,7 @@ do
 
 		docker build -t ${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION -f docker-build-tmp/Dockerfile docker-build-tmp
 		# tag latest.  Makes it easier to test with compose. 
-		docker tag ${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:latest
+		docker tag ${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION ${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:latest
 
 		rm -f $DOCKER_TMP/$i
 done
