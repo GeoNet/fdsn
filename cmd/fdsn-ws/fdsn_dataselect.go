@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/metrics"
 	"github.com/GeoNet/kit/mseed"
 	"github.com/GeoNet/kit/weft"
 	"github.com/aws/aws-sdk-go/aws"
@@ -17,6 +18,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"regexp"
 	"strings"
 	"text/template"
 	"time"
@@ -184,6 +186,18 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 		if err != nil {
 			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
+		if !d.End.After(d.Start) {
+			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: fmt.Errorf("endtime must be after starttime")}
+		}
+		// we only do "NZ"
+		if m, err := regexp.MatchString(d.Network, "NZ"); err != nil || !m {
+			continue
+		}
+		// only run query when the pattern contains only uppercase alphabetic, numbers, wildcard chars
+		// if the pattern string is out of this range, we knew it won't produce results
+		if fdsn.WillBeEmpty(d.Station) || fdsn.WillBeEmpty(d.Location) || fdsn.WillBeEmpty(d.Channel) {
+			continue
+		}
 		keys, err := holdingsSearch(d)
 		if err != nil {
 			return 0, err
@@ -250,6 +264,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 					if err != nil {
 						return 0, err
 					}
+					metrics.MsgTx()
 					written += n
 				}
 			}

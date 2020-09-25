@@ -29,6 +29,7 @@ chmod +s $DOCKER_TMP
 
 sudo rm -rf $DOCKER_TMP/*
 
+ACCOUNT=$(aws sts get-caller-identity --output text --query 'Account')
 VERSION='git-'`git rev-parse --short HEAD`
 
 # The current working dir to use in GOBIN etc e.g., geonet-web
@@ -82,9 +83,9 @@ do
 
         rsync --ignore-missing-args cmd/${i}/Dockerfile docker-build-tmp/
 
-		docker build -t 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION -f docker-build-tmp/Dockerfile docker-build-tmp
+		docker build -t ${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION -f docker-build-tmp/Dockerfile docker-build-tmp
 		# tag latest.  Makes it easier to test with compose. 
-		docker tag 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:latest
+		docker tag ${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION ${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:latest
 
 		rm -f $DOCKER_TMP/$i
 done

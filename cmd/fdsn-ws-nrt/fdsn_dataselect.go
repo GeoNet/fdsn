@@ -4,13 +4,16 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/metrics"
 	"github.com/GeoNet/kit/weft"
 	"github.com/golang/groupcache"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"text/template"
+	"time"
 )
 
 const NO_DATA = 204
@@ -80,7 +83,21 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 		if err != nil {
 			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
-
+		if !s.End.After(s.Start) {
+			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: fmt.Errorf("endtime must be after starttime")}
+		}
+		// we only do "NZ"
+		if m, err := regexp.MatchString(s.Network, "NZ"); err != nil || !m {
+			continue
+		}
+		// only run query when the pattern contains only uppercase alphabetic, numbers, wildcard chars
+		// if the pattern string is out of this range, we knew it won't produce results
+		if fdsn.WillBeEmpty(s.Station) || fdsn.WillBeEmpty(s.Location) || fdsn.WillBeEmpty(s.Channel) {
+			continue
+		}
+		if s.End.Before(time.Now().Add(-7*24*time.Hour)) || s.Start.After(time.Now()) {
+			continue // Our NRT service only keep 7 days, so no query required
+		}
 		keys, err = holdingsSearchNrt(s)
 		if err != nil {
 			return 0, err
@@ -93,6 +110,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 				if err != nil {
 					return 0, err
 				}
+				metrics.MsgTx()
 				written += n
 			case errNoData:
 			// do nothing for no data, it could be deleted from the db

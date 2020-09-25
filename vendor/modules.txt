@@ -1,4 +1,4 @@
-# github.com/GeoNet/kit v0.0.0-20190918224938-2cc27e012059
+# github.com/GeoNet/kit v0.0.0-20191113213923-d97ebbef8351
 github.com/GeoNet/kit/cfg
 github.com/GeoNet/kit/metrics
 github.com/GeoNet/kit/mseed
@@ -7,7 +7,7 @@ github.com/GeoNet/kit/slink
 github.com/GeoNet/kit/weft
 github.com/GeoNet/kit/weft/wefttest
 github.com/GeoNet/kit/wgs84
-# github.com/aws/aws-sdk-go v1.25.14
+# github.com/aws/aws-sdk-go v1.19.12-0.20190405182354-a59596beb512
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
 github.com/aws/aws-sdk-go/aws/awsutil
@@ -29,14 +29,12 @@ github.com/aws/aws-sdk-go/aws/signer/v4
 github.com/aws/aws-sdk-go/internal/ini
 github.com/aws/aws-sdk-go/internal/s3err
 github.com/aws/aws-sdk-go/internal/sdkio
-github.com/aws/aws-sdk-go/internal/sdkmath
 github.com/aws/aws-sdk-go/internal/sdkrand
 github.com/aws/aws-sdk-go/internal/sdkuri
 github.com/aws/aws-sdk-go/internal/shareddefaults
 github.com/aws/aws-sdk-go/private/protocol
 github.com/aws/aws-sdk-go/private/protocol/eventstream
 github.com/aws/aws-sdk-go/private/protocol/eventstream/eventstreamapi
-github.com/aws/aws-sdk-go/private/protocol/json/jsonutil
 github.com/aws/aws-sdk-go/private/protocol/query
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
 github.com/aws/aws-sdk-go/private/protocol/rest
@@ -45,7 +43,6 @@ github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/service/sqs
 github.com/aws/aws-sdk-go/service/sts
-github.com/aws/aws-sdk-go/service/sts/stsiface
 # github.com/golang/groupcache v0.0.0-20191002201903-404acd9df4cc
 github.com/golang/groupcache
 github.com/golang/groupcache/consistenthash

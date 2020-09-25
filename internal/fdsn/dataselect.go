@@ -32,7 +32,12 @@ var dataSelectNotSupported = map[string]bool{
 	"minuimumlength": true,
 }
 
-var nslcReg *regexp.Regexp
+// nslcReg: FDSN spec allows all ascii, but we'll only allow alpha, number, _, ?, *, "," and "--" (exactly 2 hyphens only)
+var nslcReg = regexp.MustCompile(`^([\w*?,]+|--)$`)
+
+// nslcRegPassPattern: This is beyond FDSN spec.
+// Any NSLC regex string doesn't match this pattern we knew it won't generate any results.
+var nslcRegPassPattern = regexp.MustCompile(`^\^([A-Z0-9\*\?\.]{2,6})\$$`)
 
 type DataSelect struct {
 	StartTime   Time     `schema:"starttime"` // limit to data on or after the specified start time.
@@ -60,8 +65,6 @@ func init() {
 	decoder.RegisterConverter([]string{}, func(input string) reflect.Value {
 		return reflect.ValueOf(strings.Split(input, ","))
 	})
-
-	nslcReg = regexp.MustCompile(`^([\w*?,]+|--)$`) // FDSN spec allows all ascii, but we'll only allow alpha, number, _, ?, *, "," and "--" (exactly 2 hyphens only)
 }
 
 /*
@@ -205,27 +208,22 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 
 	// Defaults: as per spec we need to include any valid files in the search so use wildcards and broad time range
 	if len(e.Network) == 0 {
-		e.Network = []string{"*"}
+		return DataSelect{}, errors.New("network parameter must be present")
 	}
 	if len(e.Station) == 0 {
-		e.Station = []string{"*"}
+		return DataSelect{}, errors.New("station parameter must be present")
 	}
 	if len(e.Location) == 0 {
-		e.Location = []string{"*"}
+		return DataSelect{}, errors.New("location parameter must be present")
 	}
 	if len(e.Channel) == 0 {
-		e.Channel = []string{"*"}
+		return DataSelect{}, errors.New("channel parameter must be present")
 	}
-
 	if e.StartTime.IsZero() {
-		e.StartTime.Time, err = time.Parse(time.RFC3339, "2000-01-01T00:00:00Z")
-		if err != nil {
-			return DataSelect{}, err
-		}
+		return DataSelect{}, errors.New("startime parameter must be present")
 	}
-
 	if e.EndTime.IsZero() {
-		e.EndTime.Time = time.Now().UTC()
+		return DataSelect{}, errors.New("endtime parameter must be present")
 	}
 	return e, nil
 }
@@ -290,7 +288,7 @@ func GenRegex(input []string, emptyDash bool) ([]string, error) {
 
 		if emptyDash && s == "--" {
 			// "--" represents blank location which should be saved as 2 white spaces.
-			r = "^\\s{2}$"
+			r = `^\s{2}$`
 		} else {
 			s = strings.Replace(s, "*", ".*", -1)
 			s = strings.Replace(s, "?", ".", -1)
@@ -301,4 +299,8 @@ func GenRegex(input []string, emptyDash bool) ([]string, error) {
 	}
 
 	return result, nil
+}
+
+func WillBeEmpty(s string) bool {
+	return !(s == `^\s{2}$` || s == "--" || nslcRegPassPattern.MatchString(s))
 }
