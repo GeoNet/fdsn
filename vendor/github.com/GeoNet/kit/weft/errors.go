@@ -4,37 +4,6 @@ const (
 	ErrNotFound = `<html>
 	<head>
 	<title>GeoNet - 404</title>
-	<style>
-	body
-	{
-		font: normal normal 14px/1.3 verdana,arial,helvetica,sans-serif;
-		color: #AEAEAE;
-	}
-	#container
-	{
-		margin: 10% auto;
-		width: 90%;
-		background: #EFEFEF;
-		border: #CCC solid 1px;
-		padding: 2em;
-	}
-	h1
-	{
-		font-size: 3em;
-		color: #AEAEAE;
-	}
-	p
-	{
-		color: #666;
-		text-shadow: #CCC .1em 0px .1em;
-	}
-	.corners-all
-	{
-		-webkit-border-radius: 5px;
-		-moz-border-radius: 5px;
-		border-radius: 5px;
-	}
-	</style>
 	</head>
 	<body>
 	<div id="container" class="corners-all">
@@ -67,37 +36,6 @@ const (
 	ErrGone = `<html>
 	<head>
 	<title>GeoNet - 410</title>
-	<style>
-	body
-	{
-		font: normal normal 14px/1.3 verdana,arial,helvetica,sans-serif;
-		color: #AEAEAE;
-	}
-	#container
-	{
-		margin: 10% auto;
-		width: 90%;
-		background: #EFEFEF;
-		border: #CCC solid 1px;
-		padding: 2em;
-	}
-	h1
-	{
-		font-size: 3em;
-		color: #AEAEAE;
-	}
-	p
-	{
-		color: #666;
-		text-shadow: #CCC .1em 0px .1em;
-	}
-	.corners-all
-	{
-		-webkit-border-radius: 5px;
-		-moz-border-radius: 5px;
-		border-radius: 5px;
-	}
-	</style>
 	</head>
 	<body>
 	<div id="container" class="corners-all">
@@ -127,37 +65,6 @@ const (
 	ErrBadRequest = `<html>
 	<head>
 	<title>GeoNet - 400</title>
-	<style>
-	body
-	{
-		font: normal normal 14px/1.3 verdana,arial,helvetica,sans-serif;
-		color: #AEAEAE;
-	}
-	#container
-	{
-		margin: 10% auto;
-		width: 90%;
-		background: #EFEFEF;
-		border: #CCC solid 1px;
-		padding: 2em;
-	}
-	h1
-	{
-		font-size: 3em;
-		color: #AEAEAE;
-	}
-	p
-	{
-		color: #666;
-		text-shadow: #CCC .1em 0px .1em;
-	}
-	.corners-all
-	{
-		-webkit-border-radius: 5px;
-		-moz-border-radius: 5px;
-		border-radius: 5px;
-	}
-	</style>
 	</head>
 	<body>
 	<div id="container" class="corners-all">
@@ -177,37 +84,6 @@ const (
 	ErrMethodNotAllowed = `<html>
 	<head>
 	<title>GeoNet - 405</title>
-	<style>
-	body
-	{
-		font: normal normal 14px/1.3 verdana,arial,helvetica,sans-serif;
-		color: #AEAEAE;
-	}
-	#container
-	{
-		margin: 10% auto;
-		width: 90%;
-		background: #EFEFEF;
-		border: #CCC solid 1px;
-		padding: 2em;
-	}
-	h1
-	{
-		font-size: 3em;
-		color: #AEAEAE;
-	}
-	p
-	{
-		color: #666;
-		text-shadow: #CCC .1em 0px .1em;
-	}
-	.corners-all
-	{
-		-webkit-border-radius: 5px;
-		-moz-border-radius: 5px;
-		border-radius: 5px;
-	}
-	</style>
 	</head>
 	<body>
 	<div id="container" class="corners-all">
@@ -227,37 +103,6 @@ const (
 	ErrServiceUnavailable = `<html>
 	<head>
 	<title>GeoNet 503</title>
-	<style>
-	body
-	{
-		font: normal normal 14px/1.3 verdana,arial,helvetica,sans-serif;
-		color: #AEAEAE;
-	}
-	#container
-	{
-		margin: 10% auto;
-		width: 90%;
-		background: #EFEFEF;
-		border: #CCC solid 1px;
-		padding: 2em;
-	}
-	h1
-	{
-		font-size: 3em;
-		color: #AEAEAE;
-	}
-	p
-	{
-		color: #666;
-		text-shadow: #CCC .1em 0px .1em;
-	}
-	.corners-all
-	{
-		-webkit-border-radius: 5px;
-		-moz-border-radius: 5px;
-		border-radius: 5px;
-	}
-	</style>
 	</head>
 	<body>
 	<div id="container" class="corners-all">
