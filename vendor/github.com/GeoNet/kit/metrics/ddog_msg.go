@@ -15,7 +15,7 @@ const dogUrl = "https://app.datadoghq.com/api/v1/series"
 
 var client = &http.Client{}
 
-type point [2]float32
+type point [2]float64
 
 // metric is for sending metrics to datadog.
 type metric struct {
@@ -111,60 +111,60 @@ func DataDogMsgSync(apiKey, hostName, appName string, logger Logger) {
 }
 
 func dogMsg(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStats, c MsgCounters) error {
-	now := float32(time.Now().Unix())
+	now := float64(time.Now().Unix())
 
 	var series = series{Series: []metric{
 		{
 			Metric: appName + ".mem.sys",
-			Points: []point{[2]float32{now, float32(m.Sys)}},
+			Points: []point{[2]float64{now, float64(m.Sys)}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".mem.heap.sys",
-			Points: []point{[2]float32{now, float32(m.HeapSys)}},
+			Points: []point{[2]float64{now, float64(m.HeapSys)}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".mem.heap.alloc",
-			Points: []point{[2]float32{now, float32(m.HeapAlloc)}},
+			Points: []point{[2]float64{now, float64(m.HeapAlloc)}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".mem.heap.objects",
-			Points: []point{[2]float32{now, float32(m.HeapObjects)}},
+			Points: []point{[2]float64{now, float64(m.HeapObjects)}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".goroutines",
-			Points: []point{[2]float32{now, float32(runtime.NumGoroutine())}},
+			Points: []point{[2]float64{now, float64(runtime.NumGoroutine())}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".msg.rx",
-			Points: []point{[2]float32{now, float32(c.Rx)}},
+			Points: []point{[2]float64{now, float64(c.Rx)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".msg.tx",
-			Points: []point{[2]float32{now, float32(c.Tx)}},
+			Points: []point{[2]float64{now, float64(c.Tx)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".msg.proc",
-			Points: []point{[2]float32{now, float32(c.Proc)}},
+			Points: []point{[2]float64{now, float64(c.Proc)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".msg.err",
-			Points: []point{[2]float32{now, float32(c.Err)}},
+			Points: []point{[2]float64{now, float64(c.Err)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
@@ -174,13 +174,13 @@ func dogMsg(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStats
 	for _, v := range t {
 		series.Series = append(series.Series, metric{
 			Metric: appName + ".timer." + v.ID + ".95percentile",
-			Points: []point{[2]float32{now, float32(v.Percentile95)}},
+			Points: []point{[2]float64{now, float64(v.Percentile95)}},
 			Type:   "gauge",
 			Host:   hostName,
 		})
 		series.Series = append(series.Series, metric{
 			Metric: appName + ".timer." + v.ID + ".count",
-			Points: []point{[2]float32{now, float32(v.Count)}},
+			Points: []point{[2]float64{now, float64(v.Count)}},
 			Type:   "gauge",
 			Host:   hostName,
 		})

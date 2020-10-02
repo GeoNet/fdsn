@@ -2,6 +2,7 @@ package weft
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
@@ -51,13 +52,36 @@ func calcSRIhash(b []byte) (string, error) {
 	return "sha384-" + buf.String(), nil
 }
 
-/*
-	Wrapped by the following function to allow testing
-*/
-func createSubResourceTag(a *asset) (string, error) {
+/**
+ * create a random nonce string of specified length
+ */
+func getCspNonce(len int) (string, error) {
+	b := make([]byte, len)
+	if _, err := io.ReadFull(rand.Reader, b); err != nil {
+		return "", fmt.Errorf("failed to create nonce: %v", err)
+	}
+	var buf bytes.Buffer
+	enc := base64.NewEncoder(base64.StdEncoding, &buf)
+	defer enc.Close()
+	_, err := enc.Write(b)
+	if err != nil {
+		return "", fmt.Errorf("failed to create nonce: %v", err)
+	}
+	return buf.String(), nil
+}
+
+/**
+ * Wrapped by the following function to allow testing
+ * @param nonce: nonce to be added as script attribute
+ */
+func createSubResourceTag(a *asset, nonce string) (string, error) {
 	switch a.mime {
 	case "text/javascript":
-		return fmt.Sprintf(`<script src="%s" type="text/javascript" integrity="%s"></script>`, a.hashedPath, a.sri), nil
+		if nonce != "" {
+			return fmt.Sprintf(`<script src="%s" type="text/javascript" integrity="%s" nonce="%s"></script>`, a.hashedPath, a.sri, nonce), nil
+		} else {
+			return fmt.Sprintf(`<script src="%s" type="text/javascript" integrity="%s"></script>`, a.hashedPath, a.sri), nil
+		}
 	case "text/css":
 		return fmt.Sprintf(`<link rel="stylesheet" href="%s" integrity="%s">`, a.hashedPath, a.sri), nil
 	default:
@@ -66,16 +90,21 @@ func createSubResourceTag(a *asset) (string, error) {
 }
 
 /*
-	Generates a tag for a resource with the hashed path and SRI hash.
-	Returns a template.HTML so it won't throw warnings with golangci-lint
-*/
-func CreateSubResourceTag(path string) (template.HTML, error) {
-	a, ok := assets[path]
+ * Generates a tag for a resource with the hashed path and SRI hash.
+ * Returns a template.HTML so it won't throw warnings with golangci-lint
+ * @param args: 1~2 strings: 1. the asset path, 2. nonce for script attribute
+ */
+func CreateSubResourceTag(args ...string) (template.HTML, error) {
+	var nonce string
+	if len(args) > 1 {
+		nonce = args[1]
+	}
+	a, ok := assets[args[0]]
 	if !ok {
-		return template.HTML(""), fmt.Errorf("asset does not exist at path '%v'", path)
+		return template.HTML(""), fmt.Errorf("asset does not exist at path '%v'", args[0])
 	}
 
-	s, err := createSubResourceTag(a)
+	s, err := createSubResourceTag(a, nonce)
 
 	return template.HTML(s), err //nolint:gosec //We're writing these ourselves, any changes will be reviewd, acceptable risk. (Could add URLencoding if there's any concern)
 }

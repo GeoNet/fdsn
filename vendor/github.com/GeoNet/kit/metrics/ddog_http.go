@@ -49,84 +49,84 @@ func DataDogHttp(apiKey, hostName, appName string, logger Logger) {
 }
 
 func dogHttp(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStats, c HttpCounters) error {
-	now := float32(time.Now().Unix())
+	now := float64(time.Now().Unix())
 
 	var series = series{Series: []metric{
 		{
 			Metric: appName + ".mem.sys",
-			Points: []point{[2]float32{now, float32(m.Sys)}},
+			Points: []point{[2]float64{now, float64(m.Sys)}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".mem.heap.sys",
-			Points: []point{[2]float32{now, float32(m.HeapSys)}},
+			Points: []point{[2]float64{now, float64(m.HeapSys)}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".mem.heap.alloc",
-			Points: []point{[2]float32{now, float32(m.HeapAlloc)}},
+			Points: []point{[2]float64{now, float64(m.HeapAlloc)}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".mem.heap.objects",
-			Points: []point{[2]float32{now, float32(m.HeapObjects)}},
+			Points: []point{[2]float64{now, float64(m.HeapObjects)}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".goroutines",
-			Points: []point{[2]float32{now, float32(runtime.NumGoroutine())}},
+			Points: []point{[2]float64{now, float64(runtime.NumGoroutine())}},
 			Type:   "gauge",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".http.req",
-			Points: []point{[2]float32{now, float32(c.Request)}},
+			Points: []point{[2]float64{now, float64(c.Request)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".http.200",
-			Points: []point{[2]float32{now, float32(c.StatusOK)}},
+			Points: []point{[2]float64{now, float64(c.StatusOK)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".http.400",
-			Points: []point{[2]float32{now, float32(c.StatusBadRequest)}},
+			Points: []point{[2]float64{now, float64(c.StatusBadRequest)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".http.404",
-			Points: []point{[2]float32{now, float32(c.StatusNotFound)}},
+			Points: []point{[2]float64{now, float64(c.StatusNotFound)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".http.401",
-			Points: []point{[2]float32{now, float32(c.StatusUnauthorized)}},
+			Points: []point{[2]float64{now, float64(c.StatusUnauthorized)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".http.500",
-			Points: []point{[2]float32{now, float32(c.StatusInternalServerError)}},
+			Points: []point{[2]float64{now, float64(c.StatusInternalServerError)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".http.503",
-			Points: []point{[2]float32{now, float32(c.StatusServiceUnavailable)}},
+			Points: []point{[2]float64{now, float64(c.StatusServiceUnavailable)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
 		{
 			Metric: appName + ".http.written",
-			Points: []point{[2]float32{now, float32(c.Written)}},
+			Points: []point{[2]float64{now, float64(c.Written)}},
 			Type:   "counter",
 			Host:   hostName,
 		},
@@ -136,13 +136,13 @@ func dogHttp(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStat
 	for _, v := range t {
 		series.Series = append(series.Series, metric{
 			Metric: appName + ".timer." + v.ID + ".95percentile",
-			Points: []point{[2]float32{now, float32(v.Percentile95)}},
+			Points: []point{[2]float64{now, float64(v.Percentile95)}},
 			Type:   "gauge",
 			Host:   hostName,
 		})
 		series.Series = append(series.Series, metric{
 			Metric: appName + ".timer." + v.ID + ".count",
-			Points: []point{[2]float32{now, float32(v.Count)}},
+			Points: []point{[2]float64{now, float64(v.Count)}},
 			Type:   "gauge",
 			Host:   hostName,
 		})
