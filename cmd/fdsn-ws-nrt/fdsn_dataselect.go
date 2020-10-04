@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
 	"github.com/GeoNet/kit/metrics"
@@ -103,7 +104,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 			return 0, err
 		}
 		for _, k := range keys {
-			err = recordCache.Get(nil, k, groupcache.AllocatingByteSliceSink(&rec))
+			err = recordCache.Get(context.TODO(), k, groupcache.AllocatingByteSliceSink(&rec))
 			switch err {
 			case nil:
 				n, err = w.Write(rec)
