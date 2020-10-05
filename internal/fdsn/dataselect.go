@@ -208,16 +208,16 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 
 	// Defaults: as per spec we need to include any valid files in the search so use wildcards and broad time range
 	if len(e.Network) == 0 {
-		return DataSelect{}, errors.New("network parameter must be present")
+		e.Network = []string{"*"}
 	}
 	if len(e.Station) == 0 {
-		return DataSelect{}, errors.New("station parameter must be present")
+		e.Station = []string{"*"}
 	}
 	if len(e.Location) == 0 {
-		return DataSelect{}, errors.New("location parameter must be present")
+		e.Location = []string{"*"}
 	}
 	if len(e.Channel) == 0 {
-		return DataSelect{}, errors.New("channel parameter must be present")
+		e.Channel = []string{"*"}
 	}
 	if e.StartTime.IsZero() {
 		return DataSelect{}, errors.New("startime parameter must be present")
