@@ -1,4 +1,4 @@
-FROM alpine:3.9
+FROM quay.io/geonet/alpine:3.9
 
 RUN apk add --no-cache libxslt
 
