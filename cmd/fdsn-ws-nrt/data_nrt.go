@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -85,7 +86,7 @@ func primeCache(start time.Time) error {
 	var rec []byte
 
 	for _, k := range keys {
-		err = recordCache.Get(nil, k, groupcache.AllocatingByteSliceSink(&rec))
+		err = recordCache.Get(context.TODO(), k, groupcache.AllocatingByteSliceSink(&rec))
 		if err != nil && err != errNoData {
 			return err
 		}
@@ -97,7 +98,7 @@ func primeCache(start time.Time) error {
 // recordGetter implements groupcache.Getter for fetching miniSEED records from the cache.
 // key is like "NZ_AWRB_HNN_23_2017-04-22T22:38:50.115Z"
 // network_station_channel_location_time.RFC3339Nano
-func recordGetter(ctx groupcache.Context, key string, dest groupcache.Sink) error {
+func recordGetter(ctx context.Context, key string, dest groupcache.Sink) error {
 	p := strings.Split(key, "_")
 	if len(p) != 5 {
 		return errors.New("expected 5 parts to key: " + key)

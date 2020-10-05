@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -16,18 +17,21 @@ var client = &http.Client{Timeout: time.Second * 60}
 
 var httpMethods = []string{"GET", "DELETE", "POST", "PUT", "HEAD", "CONNECT", "OPTIONS", "TRACE", "PATCH"}
 
+var noncePattern = "^'nonce-[A-Za-z0-9+/=]{20}' 'strict-dynamic' %s$"
+
 // Request is for making requests to the server being tested.
 // It describes the Request parameters and elements of the expected response.
 type Request struct {
-	ID             string // An identifier for the request.  Used in error messages.
-	Method         string // Method for the request e.g., "PUT".  Defaults to "GET".
-	PostBody       []byte // Request body.
-	Accept         string // Accept header for the request.  Defaults to */*
-	URL            string // The URL to be tested e.g., /path/to/test.  The server can be added at test time.
-	User, Password string // Credentials for basic auth if required.
-	Status         int    // The expected HTTP status code for the request.  Defaults to http.StatusOK (200).
-	Content        string // The expected content type.  Not tested if zero.  A zero Content-Type in the response is an error.
-	Surrogate      string // The expected Surrogate-Control.  Not tested if zero.
+	ID             string            // An identifier for the request.  Used in error messages.
+	Method         string            // Method for the request e.g., "PUT".  Defaults to "GET".
+	PostBody       []byte            // Request body.
+	Accept         string            // Accept header for the request.  Defaults to */*
+	URL            string            // The URL to be tested e.g., /path/to/test.  The server can be added at test time.
+	User, Password string            // Credentials for basic auth if required.
+	Status         int               // The expected HTTP status code for the request.  Defaults to http.StatusOK (200).
+	Content        string            // The expected content type.  Not tested if zero.  A zero Content-Type in the response is an error.
+	Surrogate      string            // The expected Surrogate-Control.  Not tested if zero.
+	CSP            map[string]string // expected header for content-security-policy
 }
 
 type Requests []Request
@@ -117,7 +121,66 @@ func (r Request) Do(server string) ([]byte, error) {
 		return nil, fmt.Errorf("%s got empty Content-Type header for response", r.ID)
 	}
 
+	if r.CSP != nil { //check response csp
+		cspString := res.Header.Get(("content-security-policy"))
+		if err := checkCSP(parseCspContent(cspString), r.CSP); err != nil {
+			//fmt.Println("## error URL", r.URL, cspString)
+			return nil, fmt.Errorf("%s got error content-security-policy header url %s, \n error: %s", r.ID, r.URL, err.Error())
+		}
+	}
+
 	return ioutil.ReadAll(res.Body)
+}
+
+/**
+ * convert CSP string to map
+ */
+func parseCspContent(content string) map[string]string {
+	cspArray := strings.Split(content, ";")
+	cspMap := make(map[string]string)
+	for _, csp := range cspArray {
+		s := strings.TrimSpace(csp)
+		index := strings.Index(s, " ")
+		if index > 0 {
+			key := s[0:index]
+			val := s[index+1:]
+			cspMap[key] = strings.TrimSpace(val)
+		}
+	}
+	return cspMap
+}
+
+/**
+ * check response CSP match expected
+ */
+func checkCSP(respCsp, expectedCsp map[string]string) error {
+	l1 := len(respCsp)
+	l2 := len(expectedCsp)
+	if l1 != l2 {
+		return fmt.Errorf("## Response CSP count %v doesn't match expected %v", l1, l2)
+	}
+	for k, v := range expectedCsp {
+		v1 := respCsp[k]
+		if k == "script-src" && strings.Contains(v1, "nonce-") { //check nonce
+			pattern := fmt.Sprintf(noncePattern, v)
+			if !patternMatch(pattern, v1) {
+				return fmt.Errorf("## Response CSP %s=%s doesn't match expected %s=%s", k, v1, k, v)
+			}
+		} else {
+			if v1 != v {
+				return fmt.Errorf("## Response CSP %s=%s doesn't match expected %s=%s", k, v1, k, v)
+			}
+		}
+	}
+	return nil
+}
+
+func patternMatch(pattern string, str string) bool {
+	match, err := regexp.MatchString(pattern, str)
+	if err != nil {
+		return false
+	}
+	return match
 }
 
 // MethodNotAllowed tests r that all HTTP methods that are not in allowed return an http.StatusMethodNotAllowed.

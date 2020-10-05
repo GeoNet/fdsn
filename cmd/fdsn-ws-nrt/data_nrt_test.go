@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"github.com/GeoNet/fdsn/internal/fdsn"
 	"github.com/GeoNet/kit/mseed"
@@ -58,7 +59,7 @@ func TestGetRecord(t *testing.T) {
 
 	var r []byte
 
-	err := recordCache.Get(nil, "NZ_ABAZ_EHE_10_2016-03-19T00:00:01.968393Z", groupcache.AllocatingByteSliceSink(&r))
+	err := recordCache.Get(context.TODO(), "NZ_ABAZ_EHE_10_2016-03-19T00:00:01.968393Z", groupcache.AllocatingByteSliceSink(&r))
 	if err != nil {
 		t.Error(err)
 	}
@@ -152,7 +153,7 @@ func BenchmarkGetRecordCache(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		err = recordCache.Get(nil, "NZ_ABAZ_EHE_10_2016-03-19T00:00:01.968393Z", groupcache.AllocatingByteSliceSink(&r))
+		err = recordCache.Get(context.TODO(), "NZ_ABAZ_EHE_10_2016-03-19T00:00:01.968393Z", groupcache.AllocatingByteSliceSink(&r))
 		if err != nil {
 			b.Error(err)
 		}
