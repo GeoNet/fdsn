@@ -37,7 +37,7 @@ var nslcReg = regexp.MustCompile(`^([\w*?,]+|--)$`)
 
 // nslcRegPassPattern: This is beyond FDSN spec.
 // Any NSLC regex string doesn't match this pattern we knew it won't generate any results.
-var nslcRegPassPattern = regexp.MustCompile(`^\^([A-Z0-9\*\?\.]{2,6})\$$`)
+var nslcRegPassPattern = regexp.MustCompile(`^(\^[A-Z0-9\*\?\.]{2,6}\$)(\|?(\^[A-Z0-9\*\?\.]{2,6}\$))*$`) // "^WEL$|^VIZ$"
 
 type DataSelect struct {
 	StartTime   Time     `schema:"starttime"` // limit to data on or after the specified start time.
