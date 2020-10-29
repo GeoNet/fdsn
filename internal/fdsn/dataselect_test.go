@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/GeoNet/fdsn/internal/fdsn"
+	"net/url"
 	"reflect"
 	"testing"
 	"time"
@@ -60,6 +61,47 @@ NZ ABCD 10 E*? 2017-01-02T00:00:00 2017-01-03T00:00:00
 	}
 }
 
+func TestParseGet(t *testing.T) {
+	ts := "2020-01-01T00:00:00"
+	te := "2020-01-01T01:00:00"
+	u := url.Values{
+		"network": []string{"NZ"},
+		"station": []string{"ABAZ,AC*Z"},
+		"channel": []string{"?HZ"},
+		"start":   []string{ts},
+		"end":     []string{te},
+	}
+	var dsq fdsn.DataSelect
+	var err error
+	if dsq, err = fdsn.ParseDataSelectGet(u); err != nil {
+		t.Fatal(err)
+	}
+
+	var tms, tme fdsn.Time
+
+	if err = tms.UnmarshalText([]byte(ts)); err != nil {
+		t.Fatal(err)
+	}
+	if err = tme.UnmarshalText([]byte(te)); err != nil {
+		t.Fatal(err)
+	}
+	dsqExpected := fdsn.DataSelect{
+		StartTime: tms,
+		EndTime:   tme,
+		Network:   []string{"NZ"},
+		Station:   []string{"ABAZ", "AC*Z"},
+		Location:  []string{"*"},
+		Channel:   []string{"?HZ"},
+		Format:    "miniseed",
+		NoData:    204,
+	}
+
+	if !reflect.DeepEqual(dsq, dsqExpected) {
+		t.Errorf("structs do not match, expected: %+v, observed: %+v", dsqExpected, dsq)
+	}
+
+}
+
 func TestGenRegex(t *testing.T) {
 	// normal case
 	r, err := fdsn.GenRegex([]string{"ABA0"}, false)
@@ -108,5 +150,34 @@ func TestGenRegex(t *testing.T) {
 	_, err = fdsn.GenRegex([]string{"[E,H]H?"}, false)
 	if err == nil {
 		t.Error(fmt.Sprintf("expect to rejected but passed."))
+	}
+
+	_, err = fdsn.GenRegex([]string{"10,20"}, false)
+	if err != nil {
+		t.Error(fmt.Sprintf("expect to pass but rejected."))
+	}
+}
+
+func TestWillBeEmpty(t *testing.T) {
+	if shouldF := fdsn.WillBeEmpty("--"); shouldF != false {
+		t.Error("expected to true got false")
+	}
+	if shouldT := fdsn.WillBeEmpty("^  $"); shouldT != true {
+		t.Error("expected to true got false")
+	}
+	if shouldT := fdsn.WillBeEmpty("  "); shouldT != true {
+		t.Error("expected to true got false")
+	}
+	if shouldF := fdsn.WillBeEmpty("^NZ$"); shouldF != false {
+		t.Error("expected to false got true")
+	}
+	if shouldF := fdsn.WillBeEmpty("^WEL$"); shouldF != false {
+		t.Error("expected to false got true")
+	}
+	if shouldF := fdsn.WillBeEmpty("^WEL$|^VIZ$"); shouldF != false {
+		t.Error("expected to false got true")
+	}
+	if shouldT := fdsn.WillBeEmpty(",,"); shouldT != true {
+		t.Error("expected to true got false")
 	}
 }
