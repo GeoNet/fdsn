@@ -84,4 +84,12 @@ make
 
 Build.sh will automatically re-build these C libraries before building any Go executables in Docker.
 
+## Test tool
 
+A test bash script `fdsn-batch-test.sh` (loads URLs from `fdsn-test-urls.txt`) can used to test against both FDSN and FDSN-NRT web service.
+
+For tests expecting http response status code other than 200, append `;;{expected_http_code}` after the URL, for example:
+```
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=????&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10;;204
+```
+The test script will test the URL to see if the responsed http status is 204.
