@@ -180,4 +180,9 @@ func TestWillBeEmpty(t *testing.T) {
 	if shouldT := fdsn.WillBeEmpty(",,"); shouldT != true {
 		t.Error("expected to true got false")
 	}
+	// For GET requests, comma separated parameters will be joined by "|"
+	// The pattern below represents "--,10"
+	if shouldF := fdsn.WillBeEmpty(`^\s{2}$|^10$`); shouldF != false {
+		t.Error("expected to false got true")
+	}
 }

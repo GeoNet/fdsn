@@ -302,5 +302,13 @@ func GenRegex(input []string, emptyDash bool) ([]string, error) {
 }
 
 func WillBeEmpty(s string) bool {
-	return !(s == `^\s{2}$` || s == "--" || nslcRegPassPattern.MatchString(s))
+	// A query pattern could contains multiple patterns joined by "|", we check one by one
+	for _, t := range strings.Split(s, "|") {
+		// If a query doesn't match any of the patterns below,
+		//   the query will be empty result because it contains unwanted characters.
+		if !(t == `^\s{2}$` || t == "--" || nslcRegPassPattern.MatchString(t)) {
+			return true
+		}
+	}
+	return false
 }

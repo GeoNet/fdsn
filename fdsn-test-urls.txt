@@ -1,0 +1,80 @@
+#FDSN Queries options tests (10 seconds of data only)
+#For tests expecting http response status code other than 200, append ";;{expected_http_code}" after the URL.
+#  Check example noted with "# This should fail (channels are 3 ?)"
+
+##### Locationcode queries
+# Classic Listing
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=00,10,11,20,21&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=00,10,11,20,21&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+# TODO: add "--" to the location list for the 2 tests above after fix deployed.
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=00,10,11,20,21,22&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&location=30,40&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+# Wilcard test
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&location=3?,4?&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=*&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=??&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=*?&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=1?&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=2?&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&location=3?,*&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+# Would return part only (99 is non existing  for instance )
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&location=30,99&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=PREZ&location=30,31,32,33,34,35,36,37,38,39&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+##### Channel code queries
+# Gets every channels
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=*&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=???&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+# This should fail (channels are 3 ?)
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=????&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10;;204
+
+# Wildcards Combo
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=?T?&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=?TZ&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=BT*&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=??F&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+# List Channel
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=HDF,LTZ,HHZ&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+# Fake XXX channel
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=HDF,LTZ,XXX&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+# Should retrun nothing
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&channel=HDF,LTZ,XXX&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10;;204
+
+##### Station Code queries
+#List1=ABAZ,AKCZ,ALRZ,AMCZ,ANWZ,ARAZ,ARCZ,ARHZ,AWAZ,BHHZ,CAW,CKHZ,CMWZ,CNGZ,CPWZ,CRSZ,DREZ,DUWZ,DVHZ,EDRZ,EPAZ,ETAZ,GCSZ,HBAZ,HLRZ,HOWZ,HRRZ,HSRZ,KAHZ,KARZ,KATZ,KBAZ,KIW,KMRZ,KRHZ,KRVZ,KUTZ,KWHZ,LIRZ,LREZ,MARZ,MBAZ,MCHZ,MHCZ,MHEZ,MHGZ,MKRZ,MOVZ,MRHZ,MRNZ,MSWZ,MTHZ,MTVZ,MTW,MUGZ,MYRZ,NBEZ,NEZ,NGRZ,NGZ
+# list Max 60 stations (Aws quota may fail)
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=${List1}&channel=EHZ&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+#list 60 +1 (should fail)
+#http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=NMEZ,${List1}&channel=EHZ&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:40;;413
+
+# Not so good a query - return one single answer
+#List2= WEL,WEL,WEL,WEL,WEL,WEL,WEL,WEL
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=${List2}&channel=HHZ&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+## Wildcards
+#Ask everything HHZ - may  got nothing (AWS)
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=*&channel=HHZ&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+#Only the 3 letters stations 1 channel HHZ may fail upon numbers (AWS quota)
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=???&channel=HHZ&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+#Only the 4 letters stations 1 channel EHZ may fail upon numbers (AWS quota)
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=????&channel=EHZ&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+#all the I stations
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=I*&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+#all the W stations (TODO: reenable this after Fastly configuration changed)
+#http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=W*&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+#all the I 3 letters stations
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=I??&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+
+#all the W 3 letters stations (TODO: reenable this after Fastly configuration changed)
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=W??&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
