@@ -45,12 +45,12 @@ deploy:
      skip_cleanup: true
      script: ./build-push.sh fdsn-quake-consumer fdsn-ws fdsn-holdings-consumer fdsn-ws-nrt fdsn-slink-db
      on: 
-       branch: master 
+       branch: main
 
 notifications:
   email: false
   slack:
-    if: branch in (master, staging, production)
+    if: branch in (main, staging, production)
     on_success: never
     on_failure: always
     on_pull_requests: false
