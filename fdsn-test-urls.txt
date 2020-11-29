@@ -7,8 +7,8 @@
 http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=00,10,11,20,21&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
 http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=00,10,11,20,21&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
 # TODO: add "--" to the location list for the 2 tests above after fix deployed.
-http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=00,10,11,20,21,22&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
-http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&location=30,40&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=WEL&location=--,00,10,11,20,21,22&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&location=--,30,40&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
 
 # Wilcard test
 http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&location=3?,4?&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
@@ -71,7 +71,7 @@ http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=????&chann
 http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=I*&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
 
 #all the W stations (TODO: reenable this after Fastly configuration changed)
-#http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=W*&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=W*&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
 
 #all the I 3 letters stations
 http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=I??&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10

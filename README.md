@@ -86,10 +86,21 @@ Build.sh will automatically re-build these C libraries before building any Go ex
 
 ## Test tool
 
-A test bash script `fdsn-batch-test.sh` (loads URLs from `fdsn-test-urls.txt`) can used to test against both FDSN and FDSN-NRT web service.
+A test bash script `fdsn-batch-test.sh` which loads URLs from `fdsn-test-urls.txt`, can used to test against both FDSN and FDSN-NRT web service.
+
+### fdsn-batch-test.sh
+
+```
+./fdsn-batch-test.sh {optional_test_fdsn_service}
+```
+When `{optional_test_fdsn_service}` is omitted, the script will test against `service.geonet.org.nz` and `service-nrt.geonet.org.nz`. When `{optional_test_fdsn_service}` is present, the script tests against that service with the same URLs defined in the txt file.
+
+### fdsn-test-urls.txt
+
+Update `fdsn-test-urls.txt` to change the URLs to test.
 
 For tests expecting http response status code other than 200, append `;;{expected_http_code}` after the URL, for example:
 ```
 http://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&channel=????&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10;;204
 ```
-The test script will test the URL to see if the responsed http status is 204.
+The above `;;204` suffix makes test script to check whether the responsed http status is 204.
