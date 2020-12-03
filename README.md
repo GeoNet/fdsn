@@ -93,7 +93,9 @@ A test bash script `fdsn-batch-test.sh` which loads URLs from `fdsn-test-urls.tx
 ```
 ./fdsn-batch-test.sh {optional_test_fdsn_service}
 ```
-When `{optional_test_fdsn_service}` is omitted, the script will test against `service.geonet.org.nz` and `service-nrt.geonet.org.nz`. When `{optional_test_fdsn_service}` is present, the script tests against that service with the same URLs defined in the txt file.
+Example: `./fdsn-batch-test.sh https://test.geonet.org.nz`.
+
+When `{optional_test_fdsn_service}` is omitted, the script will test against `https://service.geonet.org.nz` and `https://service-nrt.geonet.org.nz`. When `{optional_test_fdsn_service}` is present, the script tests against that service with the same URLs defined in the txt file - note the time range will be based on NRT (20 minutes ago).
 
 ### fdsn-test-urls.txt
 
