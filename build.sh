@@ -38,6 +38,9 @@ for i in "$@"; do
     ASSET_DIR="./cmd/${i}/assets"
   fi
 
+  cat Dockerfile_template > Dockerfile
+  echo "CMD [\"/${i}\"]" >> Dockerfile
+
   docker build \
     --build-arg=BUILD="$i" \
     --build-arg=RUNNER_IMAGE="$RUNNER_IMAGE" \

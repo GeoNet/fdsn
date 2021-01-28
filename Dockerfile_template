@@ -46,10 +46,10 @@ ARG BUILD
 ENV TZ Pacific/Auckland
 ENV BUILD_BIN=${BUILD}
 # We have to make our binary have a fixed name, otherwise, we cannot run it without a shell
-COPY --from=builder /repo/gobin/${BUILD} /app
+COPY --from=builder /repo/gobin/${BUILD} /${BUILD}
 # Copy the assets
 ARG ASSET_DIR
 COPY ${ASSET_DIR} /assets
 ARG RUN_USER=nobody
 USER ${RUN_USER}
-CMD ["/app"]
+# Requires a CMD ["/${BUILD}"] appended by build.sh
