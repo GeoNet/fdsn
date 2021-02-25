@@ -17,39 +17,39 @@ fi
 
 # code will be compiled in this container
 BUILDER_IMAGE='quay.io/geonet/golang:1.13.1-alpine'
-RUNNER_IMAGE='quay.io/geonet/alpine:3.10'
-
+RUNNER_IMAGE='quay.io/geonet/go-scratch:latest'
+DOCKERFILE=${DOCKERFILE:-"Dockerfile"}
 
 VERSION='git-'$(git rev-parse --short HEAD)
 ACCOUNT=$(aws sts get-caller-identity --output text --query 'Account')
-CGO_ENABLED=0
 
 # some of the projects don't have asset directory
 EMPTY_DIR='empty-dir'
 mkdir -p $EMPTY_DIR || :
 
 for i in "$@"; do
+  mkdir -p cmd/$i/assets
+  dockerfile="Dockerfile"
+
   if [ ${i} = "fdsn-ws" ] || [ ${i} = "fdsn-holdings-consumer" ] || [ ${i} = "fdsn-slink-db" ]; then
     CGO_ENABLED=1
   fi
 
-  ASSET_DIR=$EMPTY_DIR
-  if [[ -d "./cmd/${i}/assets" ]]; then
-    ASSET_DIR="./cmd/${i}/assets"
+  if test -f "cmd/${i}/Dockerfile"; then
+    dockerfile="cmd/${i}/Dockerfile"
+  else
+    cat $DOCKERFILE > $dockerfile
+    echo "CMD [\"/${i}\"]" >> $dockerfile
   fi
-
-  cat Dockerfile_template > Dockerfile
-  echo "CMD [\"/${i}\"]" >> Dockerfile
 
   docker build \
     --build-arg=BUILD="$i" \
     --build-arg=RUNNER_IMAGE="$RUNNER_IMAGE" \
     --build-arg=BUILDER_IMAGE="$BUILDER_IMAGE" \
     --build-arg=GIT_COMMIT_SHA="$VERSION" \
-    --build-arg=ASSET_DIR="$ASSET_DIR" \
-    --build-arg=CGO_ENABLED="${CGO_ENABLED}" \
+    --build-arg=ASSET_DIR="./cmd/$i/assets" \
     -t "${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION" \
-    -f "Dockerfile" .
+    -f $dockerfile .
 
   # tag latest.  Makes it easier to test with compose.
   docker tag \

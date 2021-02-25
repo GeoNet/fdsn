@@ -13,4 +13,4 @@ cmd/slink-strong-db/slink-strong-db
 cmd/s3-notify/s3-notify
 *.o
 *.a
-Dockerfile
+/Dockerfile
