@@ -25,7 +25,7 @@ ENV GOOS linux
 ENV GOARCH amd64
 
 RUN echo 'nobody:x:65534:65534:Nobody:/:\' > /passwd
-RUN CGO_ENABLED=0 go install -a -installsuffix cgo -ldflags "-X main.Prefix=${BUILD}/${GIT_COMMIT_SHA}" /repo/cmd/${BUILD}
+RUN CGO_ENABLED=0 go install -a -installsuffix cgo -ldflags "-X main.Prefix=${BUILD}/${GIT_COMMIT_SHA} -extldflags -static" /repo/cmd/${BUILD}
 
 FROM ${RUNNER_IMAGE}
 # Export a port, default to 8080
