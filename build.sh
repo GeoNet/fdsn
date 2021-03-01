@@ -18,7 +18,6 @@ fi
 # code will be compiled in this container
 BUILDER_IMAGE='quay.io/geonet/golang:1.13.1-alpine'
 RUNNER_IMAGE='quay.io/geonet/go-scratch:latest'
-DOCKERFILE=${DOCKERFILE:-"Dockerfile"}
 
 VERSION='git-'$(git rev-parse --short HEAD)
 ACCOUNT=$(aws sts get-caller-identity --output text --query 'Account')
@@ -32,8 +31,11 @@ for i in "$@"; do
   dockerfile="Dockerfile"
 
   if [ ${i} = "fdsn-ws" ] || [ ${i} = "fdsn-holdings-consumer" ] || [ ${i} = "fdsn-slink-db" ]; then
-    CGO_ENABLED=1
+    DOCKERFILE='Dockerfile.cgo'
+  else
+    DOCKERFILE='Dockerfile.tmplate'
   fi
+
 
   if test -f "cmd/${i}/Dockerfile"; then
     dockerfile="cmd/${i}/Dockerfile"

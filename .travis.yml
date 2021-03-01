@@ -53,23 +53,11 @@ jobs:
     script:
       - >-
         bash build.sh
-        fdsn-quake-consumer
-        fdsn-ws-nrt
-    env: DOCKERFILE=Dockerfile.tmplate
-    deploy:
-      - provider: script
-        script: >-
-          bash push.sh
-        on_branch: main
-
-  - stage: build
-    script:
-      - >-
-        bash build.sh
         fdsn-ws
         fdsn-holdings-consumer
         fdsn-slink-db
-    env: DOCKERFILE=Dockerfile.cgo
+        fdsn-quake-consumer
+        fdsn-ws-nrt
     deploy:
       - provider: script
         script: >-
@@ -77,6 +65,8 @@ jobs:
           fdsn-ws
           fdsn-holdings-consumer
           fdsn-slink-db
+          fdsn-quake-consumer
+          fdsn-ws-nrt
         on_branch: main
  
 notifications:
