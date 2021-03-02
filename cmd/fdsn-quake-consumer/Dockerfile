@@ -22,7 +22,7 @@ ENV GOARCH amd64
 RUN echo 'nobody:x:65534:65534:Nobody:/:\' > /passwd
 RUN CGO_ENABLED=0 go install -a -installsuffix cgo -ldflags "-X main.Prefix=${BUILD}/${GIT_COMMIT_SHA}" /repo/cmd/fdsn-quake-consumer
 
-FROM quay.io/geonet/alpine:3.9
+FROM quay.io/geonet/alpine:3.10
 RUN apk add --no-cache libxslt
 
 COPY --from=builder /passwd /etc/passwd
