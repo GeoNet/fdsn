@@ -9,45 +9,66 @@ services:
   - docker
 
 addons:
-  postgresql: '9.6'
+  postgresql: '12'
+  apt:
+    packages:
+      - postgresql-12-postgis-3
 
 # trying to fix postgis bug which comes on the travis infrastructure that has sudo.
 before_install:
   - docker --version
   - export DEBIAN_FRONTEND=noninteractive;
+  - export PATH=$PATH:$HOME/.local/bin
+  - export GOFLAGS=-mod=vendor
 
 install:
   - sudo -E apt-get -yq update &>> ~/apt-get-update.log;
-  - sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install postgresql-9.6-postgis-2.4
   - sudo apt-get install -y xsltproc
-  - pip install --user awscli
-  - eval $(aws ecr get-login --no-include-email --region ap-southeast-2) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
-  - export PATH=$PATH:$HOME/.local/bin
-  - export GOFLAGS=-mod=vendor
+  - sudo sed -i -e '/local.*peer/s/postgres/all/' -e 's/peer\|md5/trust/g' /etc/postgresql/*/main/pg_hba.conf
+  - sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/*/main/postgresql.conf
+  - sudo systemctl restart postgresql@12-main
   - psql -U postgres -c "create extension postgis"
   - ./etc/scripts/initdb.sh
   - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
+  - pip install --user awscli
+  - eval $(aws ecr get-login --no-include-email --region ap-southeast-2) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
 
-before_script:
-  - make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
-  - make -C vendor/github.com/GeoNet/kit/cvendor/libslink
-  - test -z "$(gofmt -s -l `find . -name "*.go" | egrep -v vendor` | tee /dev/stderr)"
-  - go vet ./...
-  - go test -v ./internal/...
-  - ./all.sh
-  - 'if [ "TRAVIS_SECURE_ENV_VARS" = "true" ]; then bash ./all-integration.sh; fi'
-  - golangci-lint run -E gosec # default linters + gosec
+stages:
+  - test
+  - build
 
-script:
-  - ./build.sh fdsn-quake-consumer fdsn-ws fdsn-holdings-consumer fdsn-ws-nrt fdsn-slink-db
-
-deploy:
-   - provider: script
-     skip_cleanup: true
-     script: ./push.sh fdsn-quake-consumer fdsn-ws fdsn-holdings-consumer fdsn-ws-nrt fdsn-slink-db
-     on: 
-       branch: main
-
+jobs:
+  include:
+  - stage: test
+    script:
+      - make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
+      - make -C vendor/github.com/GeoNet/kit/cvendor/libslink
+      - test -z "$(gofmt -s -l `find . -name "*.go" | egrep -v vendor` | tee /dev/stderr)"
+      - go vet ./...
+      - go test -v ./internal/...
+      - ./all.sh
+      - 'if [ "TRAVIS_SECURE_ENV_VARS" = "true" ]; then bash ./all-integration.sh; fi'
+      - golangci-lint run -E gosec # default linters + gosec
+  - stage: build
+    script:
+      - >-
+        bash build.sh
+        fdsn-ws
+        fdsn-holdings-consumer
+        fdsn-slink-db
+        fdsn-quake-consumer
+        fdsn-ws-nrt
+    deploy:
+      - provider: script
+        script: >-
+          bash push.sh
+          fdsn-ws
+          fdsn-holdings-consumer
+          fdsn-slink-db
+          fdsn-quake-consumer
+          fdsn-ws-nrt
+        on_branch: main
+ 
 notifications:
   email: false
   slack:
