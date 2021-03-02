@@ -61,7 +61,7 @@ jobs:
     deploy:
       - provider: script
         script: >-
-          baash push.sh
+          bash push.sh
           fdsn-ws
           fdsn-holdings-consumer
           fdsn-slink-db
