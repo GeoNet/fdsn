@@ -67,7 +67,8 @@ jobs:
           fdsn-slink-db
           fdsn-quake-consumer
           fdsn-ws-nrt
-        on_branch: main
+        on:
+          branch: main
  
 notifications:
   email: false
