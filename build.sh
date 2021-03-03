@@ -30,7 +30,7 @@ for i in "$@"; do
   mkdir -p cmd/$i/assets
   dockerfile="Dockerfile"
 
-  if [ ${i} = "fdsn-ws" ] || [ ${i} = "fdsn-holdings-consumer" ] || [ ${i} = "fdsn-slink-db" ]; then
+  if [ ${i} = "fdsn-ws" ] || [ ${i} = "fdsn-holdings-consumer" ]; then
     DOCKERFILE='Dockerfile.cgo'
   else
     DOCKERFILE='Dockerfile.tmplate'
