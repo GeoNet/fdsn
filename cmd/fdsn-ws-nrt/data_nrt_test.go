@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
-	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/kit/mseed"
-	"github.com/golang/groupcache"
 	"io"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/seis/ms"
+	"github.com/golang/groupcache"
 )
 
 func TestHoldingsSearch(t *testing.T) {
@@ -68,10 +69,7 @@ func TestGetRecord(t *testing.T) {
 	}
 
 	// make sure we can unpack the miniSEED
-	msr := mseed.NewMSRecord()
-	defer mseed.FreeMSRecord(msr)
-
-	err = msr.Unpack(r, 512, 1, 0)
+	msr, err := ms.NewRecord(r)
 	if err != nil {
 		t.Error(err)
 	}
@@ -92,7 +90,7 @@ func TestGetRecord(t *testing.T) {
 		t.Errorf("expected location 10 got %s", msr.Location())
 	}
 
-	_, err = msr.DataSamples()
+	_, err = msr.Int32s()
 	if err != nil {
 		t.Errorf("error reading data %s", err.Error())
 	}
@@ -228,9 +226,6 @@ func testLoad(file string, t testing.TB) {
 	}
 	defer in.Close()
 
-	msr := mseed.NewMSRecord()
-	defer mseed.FreeMSRecord(msr)
-
 	r := make([]byte, 512)
 	first := true
 
@@ -243,7 +238,7 @@ func testLoad(file string, t testing.TB) {
 			t.Fatal(err)
 		}
 
-		err = msr.Unpack(r, 512, 1, 0)
+		msr, err := ms.NewRecord(r)
 		if err != nil {
 			t.Error(err)
 			continue
@@ -277,7 +272,7 @@ func testLoad(file string, t testing.TB) {
 	WHERE network = $1
 	AND station = $2
 	AND channel = $3
-	AND location = $4`, network, station, channel, location, msr.Starttime(), r, 0)
+	AND location = $4`, network, station, channel, location, msr.StartTime(), r, 0)
 		if err != nil {
 			t.Error(err)
 		}
@@ -293,9 +288,6 @@ func testLoadFirst(file string, t testing.TB) {
 	}
 	defer in.Close()
 
-	msr := mseed.NewMSRecord()
-	defer mseed.FreeMSRecord(msr)
-
 	r := make([]byte, 512)
 
 	_, err = io.ReadFull(in, r)
@@ -306,7 +298,7 @@ func testLoadFirst(file string, t testing.TB) {
 		t.Fatal(err)
 	}
 
-	err = msr.Unpack(r, 512, 1, 0)
+	msr, err := ms.NewRecord(r)
 	if err != nil {
 		t.Error(err)
 		return
@@ -337,7 +329,7 @@ func testLoadFirst(file string, t testing.TB) {
 	WHERE network = $1
 	AND station = $2
 	AND channel = $3
-	AND location = $4`, network, station, channel, location, msr.Starttime(), r, 0, 0)
+	AND location = $4`, network, station, channel, location, msr.StartTime(), r, 0, 0)
 	if err != nil {
 		t.Error(err)
 	}

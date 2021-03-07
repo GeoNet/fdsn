@@ -2,9 +2,10 @@
 package holdings
 
 import (
-	"github.com/GeoNet/kit/mseed"
 	"io"
 	"time"
+
+	ms "github.com/GeoNet/kit/seis/ms"
 )
 
 // the record length of the miniSEED records.  Constant for all GNS miniSEED files.
@@ -19,9 +20,6 @@ type Holding struct {
 // SingleStream reads miniSEED from r in 512 byte records and returns a summary.
 // Expects a single stream (not multiplexed miniSEED) in r.
 func SingleStream(r io.Reader) (Holding, error) {
-	msr := mseed.NewMSRecord()
-	defer mseed.FreeMSRecord(msr)
-
 	record := make([]byte, recordLength)
 
 	// read the first record and use it to set up h.
@@ -35,7 +33,7 @@ func SingleStream(r io.Reader) (Holding, error) {
 		return Holding{}, err
 	}
 
-	err = msr.Unpack(record, recordLength, 1, 0)
+	msr, err := ms.NewRecord(record)
 	if err != nil {
 		return Holding{}, err
 	}
@@ -45,8 +43,8 @@ func SingleStream(r io.Reader) (Holding, error) {
 		Station:    msr.Station(),
 		Channel:    msr.Channel(),
 		Location:   msr.Location(),
-		Start:      msr.Starttime(),
-		NumSamples: int(msr.Numsamples()),
+		Start:      msr.StartTime(),
+		NumSamples: int(msr.NumberOfSamples),
 	}
 
 loop:
@@ -59,12 +57,12 @@ loop:
 			return Holding{}, err
 		}
 
-		err = msr.Unpack(record, recordLength, 1, 0)
+		msr, err = ms.NewRecord(record)
 		if err != nil {
 			return Holding{}, err
 		}
 
-		h.NumSamples += int(msr.Numsamples())
+		h.NumSamples += int(msr.NumberOfSamples)
 	}
 
 	return h, nil

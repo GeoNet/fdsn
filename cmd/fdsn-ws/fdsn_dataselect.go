@@ -17,7 +17,7 @@ import (
 
 	"github.com/GeoNet/fdsn/internal/fdsn"
 	"github.com/GeoNet/kit/metrics"
-	"github.com/GeoNet/kit/mseed"
+	ms "github.com/GeoNet/kit/seis/ms"
 	"github.com/GeoNet/kit/weft"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
@@ -225,9 +225,6 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 	// Fetch the miniSEED files from S3.  Parse them and write
 	// the records inside the time window for the query to the client.
-	msr := mseed.NewMSRecord()
-	defer mseed.FreeMSRecord(msr)
-
 	record := make([]byte, RECORDLEN)
 
 	w.Header().Set("Content-Type", "application/vnd.fdsn.mseed")
@@ -260,12 +257,12 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 					return 0, err
 				}
 
-				err = msr.Unpack(record, RECORDLEN, 0, 0)
+				msr, err := ms.NewRecord(record)
 				if err != nil {
 					return 0, err
 				}
 
-				if msr.Starttime().Before(v.d.End) && msr.Endtime().After(v.d.Start) {
+				if msr.StartTime().Before(v.d.End) && msr.EndTime().After(v.d.Start) {
 					n, err = w.Write(record)
 					if err != nil {
 						return 0, err

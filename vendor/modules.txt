@@ -1,7 +1,6 @@
 # github.com/GeoNet/kit v0.0.0-20200925000328-10c206971dcd => ../kit
 github.com/GeoNet/kit/cfg
 github.com/GeoNet/kit/metrics
-github.com/GeoNet/kit/mseed
 github.com/GeoNet/kit/sc3ml
 github.com/GeoNet/kit/seis/ms
 github.com/GeoNet/kit/seis/sl
