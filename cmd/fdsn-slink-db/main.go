@@ -43,11 +43,9 @@ func main() {
 
 	// Request old data
 	latest, err := a.latestTS()
-	if err == nil { // NOTICE: On error we do nothing
+	if err != nil || time.Since(latest) > maxPatchBefore {
 		// Limit number of missing data to start from "maxPatchBefore ago" if we've missed too much
-		if time.Since(latest) > maxPatchBefore {
-			latest = time.Now().UTC().Add(-1 * maxPatchBefore)
-		}
+		latest = time.Now().UTC().Add(-1 * maxPatchBefore)
 	}
 
 	log.Println("listening for packets from seedlink")
@@ -55,15 +53,19 @@ func main() {
 	// additional logic in recv loop handles cases where the connection to
 	// SEEDLink is hung or a corrupt packet is received.  In these
 	// cases the program exits and the service should restart it.
-	slink := sl.NewSLink(
-		sl.SetServer(server),
-		sl.SetNetTo(netto),
-		sl.SetKeepAlive(keepalive),
-		sl.SetStart(latest),
-		sl.SetStreams(streams),
-	)
-
 	for {
+		if latest, err = a.latestTS(); err != nil || time.Since(latest) > maxPatchBefore {
+			// In fact, whenever we can't get the latest it means database is not working properly.
+			// We would facing error when doing save()
+			latest = time.Now().UTC().Add(-1 * maxPatchBefore)
+		}
+		slink := sl.NewSLink(
+			sl.SetServer(server),
+			sl.SetNetTo(netto),
+			sl.SetKeepAlive(keepalive),
+			sl.SetStart(latest),
+			sl.SetStreams(streams),
+		)
 		if err := slink.Collect(func(seq string, data []byte) (bool, error) {
 			select {
 			case process <- data:
