@@ -2,19 +2,21 @@ package main
 
 import (
 	"database/sql"
-	"github.com/GeoNet/kit/cfg"
-	"github.com/gorilla/schema"
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/GeoNet/kit/cfg"
+	"github.com/gorilla/schema"
+	_ "github.com/lib/pq"
 )
 
 var (
 	db           *sql.DB
 	decoder      = schema.NewDecoder() // decoder for URL queries.
 	S3_BUCKET    string                // the S3 bucket storing the miniseed files used by dataselect
+	LOG_EXTRA    bool                  // Whether POST body is logged.
 	zeroDateTime time.Time
 )
 
@@ -26,6 +28,11 @@ func main() {
 	var err error
 	if S3_BUCKET = os.Getenv("S3_BUCKET"); S3_BUCKET == "" {
 		log.Fatal("ERROR: S3_BUCKET environment variable is not set")
+	}
+
+	LOG_EXTRA = false
+	if log_extra := os.Getenv("LOG_EXTRA"); log_extra == "true" {
+		LOG_EXTRA = true
 	}
 
 	p, err := cfg.PostgresEnv()

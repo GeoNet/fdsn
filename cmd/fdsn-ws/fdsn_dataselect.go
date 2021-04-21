@@ -4,14 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/kit/metrics"
-	"github.com/GeoNet/kit/mseed"
-	"github.com/GeoNet/kit/weft"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/client"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"io"
 	"io/ioutil"
 	"log"
@@ -22,6 +14,15 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/metrics"
+	"github.com/GeoNet/kit/mseed"
+	"github.com/GeoNet/kit/weft"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/client"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 const (
@@ -169,6 +170,11 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 	if len(params) > MAX_QUERIES {
 		return 0, weft.StatusError{Code: http.StatusRequestEntityTooLarge,
 			Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
+	}
+
+	//Log extra information about POST request if needed
+	if r.Method == "POST" && LOG_EXTRA {
+		log.Printf("About to execute the following query params: %+v\n", params)
 	}
 
 	// search the holdings DB for the files to fetch from S3.
