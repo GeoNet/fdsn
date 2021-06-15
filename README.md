@@ -4,6 +4,10 @@ Federation of Digital Seismic Networks (FDSN) Web Services (FDSN-WS) http://www.
 
 Refer to notes in `cmd/*/deploy/DEPLOY.md` for specific deployment requirements.
 
+## System diagram
+
+![FDSN diagram](./geonet-fdsn.png "FDSN diagram")
+
 ## Applications
 
 ### fdsn-ws
