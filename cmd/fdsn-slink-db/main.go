@@ -41,18 +41,12 @@ func main() {
 
 	go a.expire()
 
-	// Request old data
-	latest, err := a.latestTS()
-	if err != nil || time.Since(latest) > maxPatchBefore {
-		// Limit number of missing data to start from "maxPatchBefore ago" if we've missed too much
-		latest = time.Now().UTC().Add(-1 * maxPatchBefore)
-	}
-
 	log.Println("listening for packets from seedlink")
 
 	// additional logic in recv loop handles cases where the connection to
 	// SEEDLink is hung or a corrupt packet is received.  In these
 	// cases the program exits and the service should restart it.
+	var latest time.Time
 	for {
 		if latest, err = a.latestTS(); err != nil || time.Since(latest) > maxPatchBefore {
 			// In fact, whenever we can't get the latest it means database is not working properly.
