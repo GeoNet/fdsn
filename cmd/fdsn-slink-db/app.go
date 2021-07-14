@@ -2,12 +2,13 @@ package main
 
 import (
 	"database/sql"
-	"github.com/GeoNet/kit/cfg"
-	"github.com/GeoNet/kit/metrics"
-	"github.com/GeoNet/kit/mseed"
-	"github.com/pkg/errors"
 	"log"
 	"time"
+
+	"github.com/GeoNet/kit/cfg"
+	"github.com/GeoNet/kit/metrics"
+	ms "github.com/GeoNet/kit/seis/ms"
+	"github.com/pkg/errors"
 )
 
 // app is for shared application resources
@@ -57,15 +58,9 @@ func (a *app) initDB() error {
 }
 
 func (a *app) save(inbound chan []byte) {
-	msr := mseed.NewMSRecord()
-	defer mseed.FreeMSRecord(msr)
-
-	var err error
-
 	for b := range inbound {
 		t := metrics.Start()
-
-		err = msr.Unpack(b, 512, 0, 0)
+		msr, err := ms.NewRecord(b)
 		if err != nil {
 			metrics.MsgErr()
 			log.Printf("unpacking miniSEED record: %s", err.Error())
@@ -78,9 +73,9 @@ func (a *app) save(inbound chan []byte) {
 				station:      msr.Station(),
 				channel:      msr.Channel(),
 				location:     msr.Location(),
-				start:        msr.Starttime(),
-				latency_tx:   time.Now().UTC().Sub(msr.Endtime()).Seconds(),
-				latency_data: time.Now().UTC().Sub(msr.Starttime()).Seconds(),
+				start:        msr.StartTime(),
+				latency_tx:   time.Now().UTC().Sub(msr.EndTime()).Seconds(),
+				latency_data: time.Now().UTC().Sub(msr.StartTime()).Seconds(),
 				raw:          b,
 			})
 			if err != nil {

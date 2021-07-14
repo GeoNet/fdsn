@@ -3,7 +3,7 @@ sudo: required
 language: go
 
 go:
-  - 1.13.1
+  - 1.15.7
 
 services:
   - docker
@@ -41,8 +41,8 @@ jobs:
   include:
   - stage: test
     script:
-      - make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
-      - make -C vendor/github.com/GeoNet/kit/cvendor/libslink
+#      - make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
+#      - make -C vendor/github.com/GeoNet/kit/cvendor/libslink
       - test -z "$(gofmt -s -l `find . -name "*.go" | egrep -v vendor` | tee /dev/stderr)"
       - go vet ./...
       - go test -v ./internal/...

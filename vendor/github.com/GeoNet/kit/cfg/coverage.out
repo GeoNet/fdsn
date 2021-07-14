@@ -1,0 +1,18 @@
+mode: atomic
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:24.38,37.12 5 9
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:56.2,59.16 3 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:63.2,64.16 2 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:68.2,69.16 2 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:73.2,73.15 1 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:38.14,39.64 1 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:40.14,41.64 1 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:42.18,43.66 1 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:44.14,45.64 1 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:46.17,47.67 1 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:48.9,49.72 1 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:50.12,51.74 1 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:52.12,53.74 1 1
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:59.16,61.3 1 0
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:64.16,66.3 1 0
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:69.16,71.3 1 0
+github.com/GeoNet/fdsn/internal/platform/cfg/cfg.go:76.40,79.2 1 1

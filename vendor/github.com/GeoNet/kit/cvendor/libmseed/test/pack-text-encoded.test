@@ -1,2 +1,0 @@
-#!/bin/sh
-./lmtestpack -e 0 -o -
