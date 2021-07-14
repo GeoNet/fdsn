@@ -67,12 +67,8 @@ func main() {
 			sl.SetStreams(streams),
 		)
 		if err := slink.Collect(func(seq string, data []byte) (bool, error) {
-			select {
-			case process <- data:
-				metrics.MsgRx()
-			default:
-				log.Fatal("process chan full, exiting")
-			}
+			process <- data // when process chan is full, the collect waits.
+			metrics.MsgRx()
 			return false, nil
 		}); err != nil {
 			log.Println("slink.Collect:", err)
