@@ -8,7 +8,7 @@
 // the collection loop to allow interuption or as a shutdown mechanism. It is not passed to the underlying
 // seedlink connection messaging which is managed via a deadline mechanism, e.g. the `SetTimeout` option.
 //
-// An example Seedlink application can be as simple as:
+// An example raw Seedlink application can be as simple as:
 //
 //  if err := sl.NewSLink().Collect(func(seq string, data []byte) (bool, error) {
 //	   //... process miniseed data
@@ -18,7 +18,25 @@
 //          log.Fatal(err)
 //  }
 //
-// A state mechanism is available for the initial connection, although it is the clients responsibility to
-// periodically maintain its content.
+// An example using Seedlink collection mechanism with state could look like.
+//
+//
+//  slink := sl.NewSLink(
+//   sl.SetServer(slinkHost),
+//   sl.SetNetTo(60*time.Second),
+//   sl.SetKeepAlive(time.Second),
+//   sl.SetStreams(streamList),
+//   sl.SetSelectors(selectors),
+//   sl.SetStart(beginTime),
+//  )
+//
+//  slconn := sl.NewSLConn(slink, sl.SetStateFile("example.json"), sl.SetFlush(time.Minute))
+//  if err := slconn.Collect(func(seq string, data []byte) (bool, error) {
+//	   //... process miniseed data
+//
+//         return false, nil
+//  }); err != nil {
+//          log.Fatal(err)
+//  }
 //
 package sl

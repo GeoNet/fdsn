@@ -17,7 +17,7 @@ and received miniseed blocks can be processed with a call back function. A conte
 the collection loop to allow interuption or as a shutdown mechanism. It is not passed to the underlying
 seedlink connection messaging which is managed via a deadline mechanism, e.g. the `SetTimeout` option.
 
-An example Seedlink application can be as simple as:
+An example raw Seedlink application can be as simple as:
 
 
 	 if err := sl.NewSLink().Collect(func(seq string, data []byte) (bool, error) {
@@ -28,8 +28,26 @@ An example Seedlink application can be as simple as:
 	         log.Fatal(err)
 	 }
 
-A state mechanism is available for the initial connection, although it is the clients responsibility to
-periodically maintain its content.
+An example using Seedlink collection mechanism with state could look like.
+
+
+	 slink := sl.NewSLink(
+	  sl.SetServer(slinkHost),
+	  sl.SetNetTo(60*time.Second),
+	  sl.SetKeepAlive(time.Second),
+	  sl.SetStreams(streamList),
+	  sl.SetSelectors(selectors),
+	  sl.SetStart(beginTime),
+	 )
+	
+	 slconn := sl.NewSLConn(slink, sl.SetStateFile("example.json"), sl.SetFlush(time.Minute))
+	 if err := slconn.Collect(func(seq string, data []byte) (bool, error) {
+		   //... process miniseed data
+	
+	        return false, nil
+	 }); err != nil {
+	         log.Fatal(err)
+	 }
 
 
 
@@ -58,6 +76,14 @@ periodically maintain its content.
 * [type PacketError](#PacketError)
   * [func NewPacketError(message string) *PacketError](#NewPacketError)
   * [func (e *PacketError) Error() string](#PacketError.Error)
+* [type SLConn](#SLConn)
+  * [func NewSLConn(slink *SLink, opts ...SLConnOpt) *SLConn](#NewSLConn)
+  * [func (s *SLConn) Collect(fn CollectFunc) error](#SLConn.Collect)
+  * [func (s *SLConn) CollectWithContext(ctx context.Context, fn CollectFunc) error](#SLConn.CollectWithContext)
+* [type SLConnOpt](#SLConnOpt)
+  * [func SetDelay(v time.Duration) SLConnOpt](#SetDelay)
+  * [func SetFlush(v time.Duration) SLConnOpt](#SetFlush)
+  * [func SetStateFile(v string) SLConnOpt](#SetStateFile)
 * [type SLink](#SLink)
   * [func NewSLink(opts ...SLinkOpt) *SLink](#NewSLink)
   * [func (s *SLink) AddState(stations ...Station)](#SLink.AddState)
@@ -86,18 +112,19 @@ periodically maintain its content.
   * [func SetTimeout(d time.Duration) SLinkOpt](#SetTimeout)
 * [type State](#State)
   * [func (s *State) Add(station Station)](#State.Add)
-  * [func (s *State) Find(stn Station) *Station](#State.Find)
+  * [func (s *State) Find(stn Station) (Station, bool)](#State.Find)
   * [func (s *State) Marshal() ([]byte, error)](#State.Marshal)
   * [func (s *State) ReadFile(path string) error](#State.ReadFile)
   * [func (s *State) Stations() []Station](#State.Stations)
   * [func (s *State) Unmarshal(data []byte) error](#State.Unmarshal)
   * [func (s *State) WriteFile(path string) error](#State.WriteFile)
 * [type Station](#Station)
+  * [func UnpackStation(seq string, data []byte) Station](#UnpackStation)
   * [func (s Station) Key() Station](#Station.Key)
 
 
 #### <a name="pkg-files">Package files</a>
-[conn.go](/src/target/conn.go) [doc.go](/src/target/doc.go) [info.go](/src/target/info.go) [packet.go](/src/target/packet.go) [slink.go](/src/target/slink.go) [state.go](/src/target/state.go) [stream.go](/src/target/stream.go) 
+[conn.go](/src/target/conn.go) [doc.go](/src/target/doc.go) [info.go](/src/target/info.go) [packet.go](/src/target/packet.go) [slconn.go](/src/target/slconn.go) [slink.go](/src/target/slink.go) [state.go](/src/target/state.go) [station.go](/src/target/station.go) [stream.go](/src/target/stream.go) 
 
 
 ## <a name="pkg-constants">Constants</a>
@@ -358,6 +385,87 @@ func (e *PacketError) Error() string
 
 
 
+## <a name="SLConn">type</a> [SLConn](/src/target/slconn.go?s=102:201#L10)
+``` go
+type SLConn struct {
+    *SLink
+
+    StateFile string
+    Flush     time.Duration
+    Delay     time.Duration
+}
+
+```
+SLConn is a wrapper around SLink to manage state.
+
+
+
+
+
+
+
+### <a name="NewSLConn">func</a> [NewSLConn](/src/target/slconn.go?s=868:923#L45)
+``` go
+func NewSLConn(slink *SLink, opts ...SLConnOpt) *SLConn
+```
+NewSLConn builds a SLConn from a SLink and any extra options.
+
+
+
+
+
+### <a name="SLConn.Collect">func</a> (\*SLConn) [Collect](/src/target/slconn.go?s=2266:2312#L112)
+``` go
+func (s *SLConn) Collect(fn CollectFunc) error
+```
+Collect calls CollectWithContext with a background Context and a handler function.
+
+
+
+
+### <a name="SLConn.CollectWithContext">func</a> (\*SLConn) [CollectWithContext](/src/target/slconn.go?s=1029:1107#L55)
+``` go
+func (s *SLConn) CollectWithContext(ctx context.Context, fn CollectFunc) error
+```
+
+
+
+## <a name="SLConnOpt">type</a> [SLConnOpt](/src/target/slconn.go?s=268:296#L19)
+``` go
+type SLConnOpt func(*SLConn)
+```
+SLinkOpt is a function for setting SLink internal parameters.
+
+
+
+
+
+
+
+### <a name="SetDelay">func</a> [SetDelay](/src/target/slconn.go?s=714:754#L38)
+``` go
+func SetDelay(v time.Duration) SLConnOpt
+```
+SetDelay sets how long to wait until retrying a network connection
+
+
+### <a name="SetFlush">func</a> [SetFlush](/src/target/slconn.go?s=555:595#L31)
+``` go
+func SetFlush(v time.Duration) SLConnOpt
+```
+SetFlush sets how often the state file should be flushed
+
+
+### <a name="SetStateFile">func</a> [SetStateFile](/src/target/slconn.go?s=346:383#L22)
+``` go
+func SetStateFile(v string) SLConnOpt
+```
+SetStateFile sets the connection state file.
+
+
+
+
+
 ## <a name="SLink">type</a> [SLink](/src/target/slink.go?s=156:393#L12)
 ``` go
 type SLink struct {
@@ -407,7 +515,7 @@ AddState appends the list of station state information.
 
 
 
-### <a name="SLink.Collect">func</a> (\*SLink) [Collect](/src/target/slink.go?s=7891:7936#L301)
+### <a name="SLink.Collect">func</a> (\*SLink) [Collect](/src/target/slink.go?s=7889:7934#L301)
 ``` go
 func (s *SLink) Collect(fn CollectFunc) error
 ```
@@ -607,7 +715,7 @@ SetTimeout sets the timeout for seedlink server commands and packet requests.
 
 
 
-## <a name="State">type</a> [State](/src/target/state.go?s=637:719#L29)
+## <a name="State">type</a> [State](/src/target/state.go?s=154:236#L12)
 ``` go
 type State struct {
     // contains filtered or unexported fields
@@ -625,7 +733,7 @@ State maintains the current state information for a seedlink connection.
 
 
 
-### <a name="State.Add">func</a> (\*State) [Add](/src/target/state.go?s=1348:1384#L62)
+### <a name="State.Add">func</a> (\*State) [Add](/src/target/state.go?s=865:901#L45)
 ``` go
 func (s *State) Add(station Station)
 ```
@@ -634,28 +742,28 @@ Add inserts or updates the station collection details into the connection state.
 
 
 
-### <a name="State.Find">func</a> (\*State) [Find](/src/target/state.go?s=1655:1697#L75)
+### <a name="State.Find">func</a> (\*State) [Find](/src/target/state.go?s=1172:1221#L58)
 ``` go
-func (s *State) Find(stn Station) *Station
+func (s *State) Find(stn Station) (Station, bool)
 ```
 
 
 
-### <a name="State.Marshal">func</a> (\*State) [Marshal](/src/target/state.go?s=2177:2218#L106)
+### <a name="State.Marshal">func</a> (\*State) [Marshal](/src/target/state.go?s=1719:1760#L89)
 ``` go
 func (s *State) Marshal() ([]byte, error)
 ```
 
 
 
-### <a name="State.ReadFile">func</a> (\*State) [ReadFile](/src/target/state.go?s=2339:2382#L116)
+### <a name="State.ReadFile">func</a> (\*State) [ReadFile](/src/target/state.go?s=1881:1924#L99)
 ``` go
 func (s *State) ReadFile(path string) error
 ```
 
 
 
-### <a name="State.Stations">func</a> (\*State) [Stations](/src/target/state.go?s=794:830#L37)
+### <a name="State.Stations">func</a> (\*State) [Stations](/src/target/state.go?s=311:347#L20)
 ``` go
 func (s *State) Stations() []Station
 ```
@@ -664,21 +772,21 @@ Stations returns a sorted slice of current station state information.
 
 
 
-### <a name="State.Unmarshal">func</a> (\*State) [Unmarshal](/src/target/state.go?s=1971:2015#L92)
+### <a name="State.Unmarshal">func</a> (\*State) [Unmarshal](/src/target/state.go?s=1513:1557#L75)
 ``` go
 func (s *State) Unmarshal(data []byte) error
 ```
 
 
 
-### <a name="State.WriteFile">func</a> (\*State) [WriteFile](/src/target/state.go?s=2565:2609#L134)
+### <a name="State.WriteFile">func</a> (\*State) [WriteFile](/src/target/state.go?s=2073:2117#L113)
 ``` go
 func (s *State) WriteFile(path string) error
 ```
 
 
 
-## <a name="Station">type</a> [Station](/src/target/state.go?s=180:358#L13)
+## <a name="Station">type</a> [Station](/src/target/station.go?s=167:345#L11)
 ``` go
 type Station struct {
     Network   string    `json:"network"`
@@ -696,10 +804,17 @@ Station stores the latest state information for the given network and station co
 
 
 
+### <a name="UnpackStation">func</a> [UnpackStation](/src/target/station.go?s=620:671#L27)
+``` go
+func UnpackStation(seq string, data []byte) Station
+```
+UnpackStation builds a Station based on a raw miniseed block header.
 
 
 
-### <a name="Station.Key">func</a> (Station) [Key](/src/target/state.go?s=461:491#L21)
+
+
+### <a name="Station.Key">func</a> (Station) [Key](/src/target/station.go?s=448:478#L19)
 ``` go
 func (s Station) Key() Station
 ```

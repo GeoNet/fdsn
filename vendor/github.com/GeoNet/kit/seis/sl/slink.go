@@ -221,7 +221,7 @@ func (s *SLink) CollectWithContext(ctx context.Context, fn CollectFunc) error {
 		}
 
 		sequence, starttime := s.Sequence, s.Start
-		if v := state.Find(Station{Network: l.network, Station: l.station}); v != nil {
+		if v, ok := state.Find(Station{Network: l.network, Station: l.station}); ok {
 			sequence, starttime = v.Sequence, v.Timestamp
 		}
 

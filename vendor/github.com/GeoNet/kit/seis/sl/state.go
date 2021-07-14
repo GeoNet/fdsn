@@ -6,24 +6,7 @@ import (
 	"path"
 	"sort"
 	"sync"
-	"time"
 )
-
-// Station stores the latest state information for the given network and station combination.
-type Station struct {
-	Network   string    `json:"network"`
-	Station   string    `json:"station"`
-	Sequence  int       `json:"sequence"`
-	Timestamp time.Time `json:"timestamp"`
-}
-
-// Key returns a blank Station except for the Network and Station entries, this useful as a map key.
-func (s Station) Key() Station {
-	return Station{
-		Network: s.Network,
-		Station: s.Station,
-	}
-}
 
 // State maintains the current state information for a seedlink connection.
 type State struct {
@@ -72,7 +55,7 @@ func (s *State) Add(station Station) {
 	s.state[station.Key()] = station
 }
 
-func (s *State) Find(stn Station) *Station {
+func (s *State) Find(stn Station) (Station, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -83,10 +66,10 @@ func (s *State) Find(stn Station) *Station {
 		if ok, err := path.Match(stn.Station, k.Station); err != nil || !ok {
 			continue
 		}
-		return &v
+		return v, true
 	}
 
-	return nil
+	return Station{}, false
 }
 
 func (s *State) Unmarshal(data []byte) error {
@@ -115,10 +98,6 @@ func (s *State) Marshal() ([]byte, error) {
 
 func (s *State) ReadFile(path string) error {
 
-	if path == "" {
-		return nil
-	}
-
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
@@ -132,10 +111,6 @@ func (s *State) ReadFile(path string) error {
 }
 
 func (s *State) WriteFile(path string) error {
-
-	if path == "" {
-		return nil
-	}
 
 	data, err := s.Marshal()
 	if err != nil {

@@ -54,6 +54,8 @@ var infoLevel = map[string]struct {
 	"ALL":          {"info:all", cmdInfoAll},
 }
 
+const capabilityWildCard = "NSWILDCARD"
+
 type Conn struct {
 	net.Conn
 	timeout time.Duration
@@ -299,10 +301,10 @@ func (c *Conn) CommandCat() ([]byte, error) {
 
 // CommandStation sends a STATION command to the seedlink server.
 func (c *Conn) CommandStation(station, network string) error {
-	if strings.ContainsAny(station, "*?") && !c.capabilities["NSWILDCARD"] {
+	if strings.ContainsAny(station, "*?") && !c.capabilities[capabilityWildCard] {
 		return fmt.Errorf("station selector '%s' contains wildcards but the server does not report capability NSWILDCARD", station)
 	}
-	if strings.ContainsAny(network, "*?") && !c.capabilities["NSWILDCARD"] {
+	if strings.ContainsAny(network, "*?") && !c.capabilities[capabilityWildCard] {
 		return fmt.Errorf("network selector '%s' contains wildcards but the server does not report capability NSWILDCARD", network)
 	}
 	switch {
