@@ -1,4 +1,4 @@
-ARG BUILDER_IMAGE=quay.io/geonet/golang:1.13-alpine
+ARG BUILDER_IMAGE=quay.io/geonet/golang:1.15-alpine
 ARG RUNNER_IMAGE=quay.io/geonet/go-scratch:latest
 ARG RUN_USER=nobody
 # Only support image based on AlpineLinux
@@ -25,7 +25,7 @@ ENV GOOS linux
 ENV GOARCH amd64
 
 RUN echo 'nobody:x:65534:65534:Nobody:/:\' > /passwd
-RUN CGO_ENABLED=0 go install -a -installsuffix cgo -ldflags "-X main.Prefix=${BUILD}/${GIT_COMMIT_SHA} -extldflags -static" /repo/cmd/${BUILD}
+RUN CGO_ENABLED=0 go install -a -ldflags "-X main.Prefix=${BUILD}/${GIT_COMMIT_SHA} -extldflags -static" /repo/cmd/${BUILD}
 
 FROM ${RUNNER_IMAGE}
 # Export a port, default to 8080

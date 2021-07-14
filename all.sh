@@ -17,8 +17,8 @@ if [ ! -f all.sh ]; then
 fi
 
 # Build the C libraries required by our vendored go wrappers
-make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
-make -C vendor/github.com/GeoNet/kit/cvendor/libslink
+#make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
+#make -C vendor/github.com/GeoNet/kit/cvendor/libslink
 
 projects=`ls cmd`
 
