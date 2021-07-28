@@ -1,2 +1,0 @@
-#!/bin/sh
-./lmtestparse data/GEOSCOPE-16bit-3exp-encoded.mseed -D

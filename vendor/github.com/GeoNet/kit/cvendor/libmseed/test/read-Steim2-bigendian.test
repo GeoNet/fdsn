@@ -1,2 +1,0 @@
-#!/bin/sh
-./lmtestparse data/Steim2-AllDifferences-BE.mseed -D

@@ -1,2 +1,0 @@
-#!/bin/sh
-./lmtestparse data/SRO-encoded.mseed -D

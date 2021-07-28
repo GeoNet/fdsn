@@ -1,2 +1,0 @@
-#!/bin/sh
-./lmtestparse data/detection.record.mseed -pp
