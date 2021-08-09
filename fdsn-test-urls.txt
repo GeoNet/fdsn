@@ -21,7 +21,7 @@ https://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&loca
 
 # Would return part only (99 is non existing  for instance )
 https://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=RBCT&location=30,99&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
-https://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=PREZ&location=30,31,32,33,34,35,36,37,38,39&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
+https://service.geonet.org.nz/fdsnws/dataselect/1/query?network=NZ&sta=PREZ,KHEZ&location=30,31,32,33,34,35,36,37,38,39&starttime=2018-05-15T23:45:00&endtime=2018-05-15T23:45:10
 
 ##### Channel code queries
 # Gets every channels
