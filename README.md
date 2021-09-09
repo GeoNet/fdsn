@@ -59,31 +59,6 @@ The only version of QuakeML created and stored is 1.2
 
 Receives notifications for miniSEED file uploads to S3, indexes the files, and saves the results to the holdings DB. 
 
-
-## Development
-
-### Building C libraries
-
-Go wrappers to the libmseed and libslink need the C libraries.  The C source is vendored using govendor.  A special govendor 
-command was used to vendor the C code from the kit repo:
-
-```
-govendor fetch github.com/GeoNet/kit/cvendor/libmseed^
-govendor fetch github.com/GeoNet/kit/cvendor/libslink^
-```
-
-You will need to build these C libraries in-place before building fdsn-ws.  This will require a C compiler (eg: gcc)
-and make (possibly other packages depending on your system.  Alpine requires musl-dev):
-
-```
-cd vendor/github.com/GeoNet/kit/cvendor/libmseed/
-make
-cd ../libslink/
-make
-```
-
-Build.sh will automatically re-build these C libraries before building any Go executables in Docker.
-
 ## Test tool
 
 A test bash script `fdsn-batch-test.sh` which loads URLs from `fdsn-test-urls.txt`, can used to test against both FDSN and FDSN-NRT web service.
