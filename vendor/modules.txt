@@ -1,4 +1,5 @@
-# github.com/GeoNet/kit v0.0.0-20210610214455-dafd8e077cdc => ../kit
+# github.com/GeoNet/kit v0.0.0-20210809233201-69bdd1cf9894
+## explicit
 github.com/GeoNet/kit/cfg
 github.com/GeoNet/kit/metrics
 github.com/GeoNet/kit/sc3ml
@@ -7,7 +8,8 @@ github.com/GeoNet/kit/seis/sl
 github.com/GeoNet/kit/weft
 github.com/GeoNet/kit/weft/wefttest
 github.com/GeoNet/kit/wgs84
-# github.com/aws/aws-sdk-go v1.39.6
+# github.com/aws/aws-sdk-go v1.40.39
+## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
 github.com/aws/aws-sdk-go/aws/awserr
@@ -59,6 +61,7 @@ github.com/aws/aws-sdk-go/service/sso/ssoiface
 github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
 # github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
+## explicit
 github.com/golang/groupcache
 github.com/golang/groupcache/consistenthash
 github.com/golang/groupcache/groupcachepb
@@ -67,14 +70,17 @@ github.com/golang/groupcache/singleflight
 # github.com/golang/protobuf v1.5.2
 github.com/golang/protobuf/proto
 # github.com/gorilla/schema v1.2.0
+## explicit
 github.com/gorilla/schema
 # github.com/jmespath/go-jmespath v0.4.0
 github.com/jmespath/go-jmespath
-# github.com/lib/pq v1.10.2
+# github.com/lib/pq v1.10.3
+## explicit
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
 # github.com/pkg/errors v0.9.1
+## explicit
 github.com/pkg/errors
 # google.golang.org/protobuf v1.27.1
 google.golang.org/protobuf/encoding/prototext
