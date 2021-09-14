@@ -365,6 +365,7 @@ func TestLongitudeWrap180(t *testing.T) {
 		t.Errorf("expected 1 records got %d\n", c)
 	}
 
+	v = url.Values{}
 	v.Set("minlon", "176")
 	v.Set("maxlon", "-176")
 	e, err = parseEventV1(v)
@@ -381,7 +382,7 @@ func TestLongitudeWrap180(t *testing.T) {
 		t.Errorf("expected 2 records got %d\n", c)
 	}
 
-	v.Del("minlon")
+	v = url.Values{}
 	v.Set("maxlon", "-177.0")
 	e, err = parseEventV1(v)
 	if err != nil {
@@ -397,4 +398,23 @@ func TestLongitudeWrap180(t *testing.T) {
 		t.Errorf("expected 1 records got %d\n", c)
 	}
 
+	v = url.Values{}
+	v.Set("lon", "179.4")
+	v.Set("lat", "-40.57806609")
+	v.Set("maxradius", "5")
+	// 2 records, 176.3257242 and another at -176.3257242, distances are 4.27 and 3.07
+	// if the query can cross 180 then we'll get 2 records
+	e, err = parseEventV1(v)
+	if err != nil {
+		t.Error(err)
+	}
+
+	c, err = e.count()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if c != 2 {
+		t.Errorf("expected 2 records got %d\n", c)
+	}
 }
