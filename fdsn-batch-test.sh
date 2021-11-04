@@ -42,11 +42,11 @@ sample_date="2018-05-15"
 sample_tstart="23:45:00"
 sample_tend="23:45:10"
 # Note1 : this date/time string replacing won't work when start/end window is crossing midnight
-# Note2 : For OSX replace `-d "20 minutes ago"` with `-v-20M`, and -v-15M for end time.
-# Note3 : The time range (20 minutes ago) is for NRT service. If it's FDSN archive then 10080 minutes ~ 10075 minutes ago.
-nrt_date=$(TZ="GMT0" date -d "20 minutes ago" +'%Y-%m-%d')
-nrt_tstart=$(TZ="GMT0" date -d "20 minutes ago" +'%H:%M:%S') #start: 20 min age
-nrt_tend=$(TZ="GMT0" date -d "15 minutes ago" +'%H:%M:%S') #end: 15 min ago
+# Note2 : For OSX replace `-d "60 minutes ago"` with `-v-60M`, and -v-30M for end time.
+# Note3 : The time range (60 minutes ago) is for NRT service. If it's FDSN archive then 10080 minutes ~ 10075 minutes ago.
+nrt_date=$(TZ="GMT0" date -d "60 minutes ago" +'%Y-%m-%d')
+nrt_tstart=$(TZ="GMT0" date -d "60 minutes ago" +'%H:%M:%S') #start: 60 min ago
+nrt_tend=$(TZ="GMT0" date -d "30 minutes ago" +'%H:%M:%S') #end: 30 min ago
 echo "NRT test date: $nrt_date $nrt_tstart to $nrt_tend"
 
 linenum=0
