@@ -110,11 +110,13 @@ func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) e
 	for _, v := range params {
 		d, err := v.Regexp()
 		if err != nil {
-			return err
+			// regular expression check failed: invalid request
+			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
 		}
 		m, err := metricsSearch(d)
 		if err != nil {
-			return err
+			// search into db failed: 500
+			return weft.StatusError{Code: http.StatusInternalServerError, Err: err}
 		}
 
 		if len(metrics) > MAX_FILES {
@@ -131,7 +133,7 @@ func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) e
 
 	by, err := json.Marshal(metrics)
 	if err != nil {
-		return err
+		return weft.StatusError{Code: http.StatusInternalServerError, Err: err}
 	}
 
 	b.Write(by)
@@ -206,7 +208,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 		}
 		keys, err := holdingsSearch(d)
 		if err != nil {
-			return 0, err
+			return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
 		}
 
 		files += len(keys)
@@ -242,7 +244,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 				Bucket: aws.String(S3_BUCKET),
 			})
 			if err != nil {
-				return 0, err
+				return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
 			}
 			defer result.Body.Close()
 
@@ -254,18 +256,18 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 					break loop
 				case err != nil:
 					result.Body.Close()
-					return 0, err
+					return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
 				}
 
 				msr, err := ms.NewRecord(record)
 				if err != nil {
-					return 0, err
+					return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
 				}
 
 				if msr.StartTime().Before(v.d.End) && msr.EndTime().After(v.d.Start) {
 					n, err = w.Write(record)
 					if err != nil {
-						return 0, err
+						return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
 					}
 					metrics.MsgTx()
 					written += n
