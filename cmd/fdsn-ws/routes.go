@@ -2,8 +2,11 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/GeoNet/kit/weft"
 	"net/http"
+	"strings"
+	"time"
 )
 
 var mux *http.ServeMux
@@ -17,7 +20,7 @@ func init() {
 
 	// fdsn-ws-event
 	mux.HandleFunc("/fdsnws/event/1", weft.MakeHandler(fdsnEventV1Index, weft.TextError))
-	mux.HandleFunc("/fdsnws/event/1/query", weft.MakeHandler(fdsnEventV1Handler, weft.TextError))
+	mux.HandleFunc("/fdsnws/event/1/query", weft.MakeHandler(fdsnEventV1Handler, fdsnErrorHandler))
 	mux.HandleFunc("/fdsnws/event/1/version", weft.MakeHandler(fdsnEventVersion, weft.TextError))
 	mux.HandleFunc("/fdsnws/event/1/catalogs", weft.MakeHandler(fdsnEventCatalogs, weft.TextError))
 	mux.HandleFunc("/fdsnws/event/1/contributors", weft.MakeHandler(fdsnEventContributors, weft.TextError))
@@ -25,13 +28,13 @@ func init() {
 
 	// fdsn-ws-station
 	mux.HandleFunc("/fdsnws/station/1", weft.MakeHandler(fdsnStationV1Index, weft.TextError))
-	mux.HandleFunc("/fdsnws/station/1/query", weft.MakeHandler(fdsnStationV1Handler, weft.TextError))
+	mux.HandleFunc("/fdsnws/station/1/query", weft.MakeHandler(fdsnStationV1Handler, fdsnErrorHandler))
 	mux.HandleFunc("/fdsnws/station/1/version", weft.MakeHandler(fdsnStationVersion, weft.TextError))
 	mux.HandleFunc("/fdsnws/station/1/application.wadl", weft.MakeHandler(fdsnStationWadl, weft.TextError))
 
 	// This service implements the dataselect spec from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf.
 	mux.HandleFunc("/fdsnws/dataselect/1", weft.MakeHandler(fdsnDataselectV1Index, weft.TextError))
-	mux.HandleFunc("/fdsnws/dataselect/1/query", weft.MakeDirectHandler(fdsnDataselectV1Handler, weft.TextError))
+	mux.HandleFunc("/fdsnws/dataselect/1/query", weft.MakeDirectHandler(fdsnDataselectV1Handler, fdsnErrorHandler))
 	mux.HandleFunc("/fdsnws/dataselect/1/version", weft.MakeHandler(fdsnDataselectVersion, weft.TextError))
 	mux.HandleFunc("/fdsnws/dataselect/1/application.wadl", weft.MakeHandler(fdsnDataselectWadl, weft.TextError))
 
@@ -56,4 +59,54 @@ func soh(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	b.WriteString("<html><head></head><body>ok</body></html>")
 
 	return nil
+}
+
+const FDSN_ERR_FORMAT = `Error %03d: %s
+%s
+Usage details are available from https://www.geonet.org.nz/data/tools/FDSN
+Request:
+%s
+Request Submitted:
+%s
+Service version:
+%s`
+
+type fdsnError struct {
+	weft.StatusError
+	url       string
+	timestamp time.Time
+}
+
+func fdsnErrorHandler(err error, h http.Header, b *bytes.Buffer) error {
+	switch e := err.(type) {
+	case fdsnError:
+		var ver string
+		if strings.HasPrefix(e.url, "/fdsnws/event/") {
+			ver = eventVersion
+		} else if strings.HasPrefix(e.url, "/fdsnws/station/") {
+			ver = stationVersion
+		} else if strings.HasPrefix(e.url, "fdsnws/dataselect/") {
+			ver = dataselectVersion
+		}
+
+		h.Set("Content-Type", "text/plain; charset=utf-8")
+
+		switch e.Code {
+		case http.StatusNoContent, http.StatusNotFound: // NOTE: thought NoContent is not an error but we handled here
+			h.Set("Surrogate-Control", "max-age=10")
+		case http.StatusBadRequest:
+			h.Set("Surrogate-Control", "max-age=86400")
+		case http.StatusMethodNotAllowed:
+			h.Set("Surrogate-Control", "max-age=86400")
+		case http.StatusServiceUnavailable, http.StatusInternalServerError:
+			h.Set("Surrogate-Control", "max-age=10")
+		default:
+		}
+
+		msg := fmt.Sprintf(FDSN_ERR_FORMAT, e.Code, http.StatusText(e.Code), e.Err, e.url, e.timestamp.Format(time.RFC3339), ver)
+		b.WriteString(msg)
+		return nil
+	}
+
+	return weft.TextError(err, h, b)
 }

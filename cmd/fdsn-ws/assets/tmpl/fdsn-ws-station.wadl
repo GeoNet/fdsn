@@ -1,4 +1,5 @@
 {{define "body" -}}
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <application xmlns="http://wadl.dev.java.net/2009/02"
 		xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<resources base="http://{{.}}/fdsnws/1/station">
@@ -29,7 +30,6 @@
 						<option value="channel"/>
 						<option value="response"/>
 					</param>
-					<param name="includerestricted" style="query" type="xsd:boolean" default="false"/>
 					<param name="nodata" style="query" type="xsd:int" default="204">
 						<option value="204"/>
 						<option value="404"/>
@@ -39,7 +39,6 @@
 						<option value="text"/>
 					</param>
 
-					<!-- additional, non standard parameters -->
 					<param name="formatted" style="query" type="xsd:boolean" default="false">
 						<doc>
 							Controls formatted (pretty print) output.
@@ -51,9 +50,6 @@
                         <option value="204"/>
                         <option value="404"/>
                     </param>
-
-					<!-- not implemented -->
-					<!--param name="updateafter" style="query" type="xsd:dateTime"/-->
 				</request>
 				<response status="200">
 					<representation mediaType="application/xml"/>

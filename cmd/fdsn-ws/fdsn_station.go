@@ -343,19 +343,19 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		return fdsnStationV1Search{}, errors.New("nodata must be 204 or 404.")
 	}
 
-	ne, err := fdsn.GenRegex(p.Network, false)
+	ne, err := fdsn.GenRegex(p.Network, false, false)
 	if err != nil {
 		return fdsnStationV1Search{}, err
 	}
-	st, err := fdsn.GenRegex(p.Station, false)
+	st, err := fdsn.GenRegex(p.Station, false, false)
 	if err != nil {
 		return fdsnStationV1Search{}, err
 	}
-	ch, err := fdsn.GenRegex(p.Channel, false)
+	ch, err := fdsn.GenRegex(p.Channel, false, false)
 	if err != nil {
 		return fdsnStationV1Search{}, err
 	}
-	lo, err := fdsn.GenRegex(p.Location, true)
+	lo, err := fdsn.GenRegex(p.Location, true, false)
 	if err != nil {
 		return fdsnStationV1Search{}, err
 	}
@@ -469,28 +469,30 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error
 	var v url.Values
 	var params []fdsnStationV1Search
 
+	tm := time.Now()
+
 	switch r.Method {
 	case "GET":
 		v = r.URL.Query()
 		p, err := parseStationV1(v)
 		if err != nil {
-			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, timestamp: tm, url: r.URL.String()}
 		}
 		params = []fdsnStationV1Search{p}
 	case "POST":
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, timestamp: tm, url: r.URL.String()}
 		}
 		params, err = parseStationV1Post(string(body))
 		if err != nil {
-			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, timestamp: tm, url: r.URL.String()}
 		}
 		if len(params) == 0 {
-			return weft.StatusError{Code: NO_DATA, Err: fmt.Errorf("%s", "unable to parse post request")}
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: fmt.Errorf("%s", "unable to parse post request")}, timestamp: tm, url: r.URL.String()}
 		}
 	default:
-		return weft.StatusError{Code: http.StatusMethodNotAllowed}
+		return fdsnError{StatusError: weft.StatusError{Code: http.StatusMethodNotAllowed}, timestamp: tm, url: r.URL.String()}
 	}
 
 	fdsnStations.RLock()
@@ -500,7 +502,7 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error
 	hasContent := c.doFilter(params)
 
 	if !hasContent {
-		return weft.StatusError{Code: params[0].NoData}
+		return fdsnError{StatusError: weft.StatusError{Code: params[0].NoData}, timestamp: tm, url: r.URL.String()}
 	}
 
 	if params[0].Format == "xml" {

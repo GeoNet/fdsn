@@ -20,6 +20,10 @@ var (
 	zeroDateTime time.Time
 )
 
+var stationVersion = "1.1"
+var eventVersion = "1.2"
+var dataselectVersion = "1.1"
+
 func init() {
 	zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }

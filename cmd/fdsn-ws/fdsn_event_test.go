@@ -51,6 +51,7 @@ func TestEventV1Query(t *testing.T) {
 		MinRadius:    0.0,
 		NoData:       204,
 		Format:       "xml",
+		EventType:    "*", // default value
 	}
 
 	ex.StartTime.Time, err = time.Parse(time.RFC3339Nano, "2015-01-12T12:12:12.000000000Z")
@@ -417,4 +418,36 @@ func TestLongitudeWrap180(t *testing.T) {
 	if c != 2 {
 		t.Errorf("expected 2 records got %d\n", c)
 	}
+}
+
+func TestEventTypes(t *testing.T) {
+	queryCases := []struct {
+		query     string
+		shouldErr bool
+		expected  string
+	}{
+		{"earthquake", false, "'earthquake'"},
+		{"e*", false, "'earthquake','explosion','experimental explosion'"},
+		{"z*", true, ""}, // no such match
+		{"experimental explosion", false, "'experimental explosion'"},
+		{"e*,a*", false, "'earthquake','anthropogenic event','explosion','accidental explosion','experimental explosion','atmospheric event','acoustic noise','avalanche'"},
+		// TODO: how do query for "unset eventtype"? The spec list all allowed values and empty is not in the list.
+	}
+	for _, c := range queryCases {
+		v := url.Values{}
+		v.Set("eventtype", c.query)
+		e, err := parseEventV1(v)
+		if !c.shouldErr && err != nil {
+			t.Errorf("error %s: %v", c.query, err)
+			continue
+		}
+		if c.shouldErr && err == nil {
+			t.Errorf("expected to error but passed for %s", c.query)
+			continue
+		}
+		if e.eventTypeStr != c.expected {
+			t.Errorf("expected %s got %s", c.expected, e.eventTypeStr)
+		}
+	}
+
 }
