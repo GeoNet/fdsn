@@ -92,7 +92,7 @@ func fdsnErrorHandler(err error, h http.Header, b *bytes.Buffer) error {
 		h.Set("Content-Type", "text/plain; charset=utf-8")
 
 		switch e.Code {
-		case http.StatusNoContent, http.StatusNotFound: // NOTE: thought NoContent is not an error but we handled here
+		case http.StatusNoContent, http.StatusNotFound: // NOTE: though NoContent is not an error but we handled here
 			h.Set("Surrogate-Control", "max-age=10")
 		case http.StatusBadRequest:
 			h.Set("Surrogate-Control", "max-age=86400")

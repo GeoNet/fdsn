@@ -79,9 +79,19 @@ var eventNotSupported = map[string]bool{
 }
 
 // copied from p.17 of FDSN-WS-Specifications-1.2.pdf
-const EVENT_TYPES = `not existing, not reported, earthquake, anthropogenic event, collapse, cavity collapse, mine collapse, building collapse, explosion, accidental explosion, chemical explosion, controlled explosion, experimental explosion, industrial explosion, mining explosion, quarry blast, road cut, blasting levee, nuclear explosion, induced or triggered event, rock burst, reservoir loading, fluid injection, fluid extraction, crash, plane crash, train crash, boat crash, other event, atmospheric event, sonic boom, sonic blast, acoustic noise, thunder, avalanche, snow avalanche, debris avalanche, hydroacoustic event, ice quake, slide, landslide, rockslide, meteorite, volcanic eruption`
+const EVENT_TYPES = `not existing, not reported, earthquake, anthropogenic event, collapse,
+cavity collapse, mine collapse, building collapse, explosion, accidental explosion, chemical explosion,
+controlled explosion, experimental explosion, industrial explosion, mining explosion, quarry blast,
+road cut, blasting levee, nuclear explosion, induced or triggered event, rock burst, reservoir loading,
+fluid injection, fluid extraction, crash, plane crash, train crash, boat crash, other event,
+atmospheric event, sonic boom, sonic blast, acoustic noise, thunder, avalanche, snow avalanche,
+debris avalanche, hydroacoustic event, ice quake, slide, landslide, rockslide, meteorite, volcanic eruption`
 
-var validEventTypes = strings.Split(strings.ReplaceAll(EVENT_TYPES, ", ", ","), ",") // remove spaces after comma
+var validEventTypes = strings.Split(
+	strings.ReplaceAll(
+		strings.ReplaceAll(EVENT_TYPES, "\n", ""),
+		", ", ","),
+	",") // remove spaces after comma
 
 func init() {
 	var err error
@@ -258,12 +268,12 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 			}
 		}
 
-		if qp != "" {
-			e.eventTypeStr = strings.TrimSuffix(qp, ",") // remove the unnecessary last comma
-		} else {
+		if qp == "" {
 			err = fmt.Errorf("invalid value for eventtype: %s", e.EventType)
 			return e, err
 		}
+
+		e.eventTypeStr = strings.TrimSuffix(qp, ",") // remove the unnecessary last comma
 	} else {
 		// default value, no filtering
 		e.eventTypeStr = ""
