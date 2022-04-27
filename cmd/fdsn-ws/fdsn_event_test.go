@@ -424,13 +424,13 @@ func TestEventTypes(t *testing.T) {
 	queryCases := []struct {
 		query     string
 		shouldErr bool
-		expected  string
+		expected  []interface{}
 	}{
-		{"earthquake", false, "'earthquake'"},
-		{"e*", false, "'earthquake','explosion','experimental explosion'"},
-		{"z*", true, ""}, // no such match
-		{"experimental explosion", false, "'experimental explosion'"},
-		{"e*,a*", false, "'earthquake','anthropogenic event','explosion','accidental explosion','experimental explosion','atmospheric event','acoustic noise','avalanche'"},
+		{"earthquake", false, []interface{}{"earthquake"}},
+		{"e*", false, []interface{}{"earthquake", "explosion", "experimental explosion"}},
+		{"z*", true, nil}, // no such match, expected value doesn't matter
+		{"experimental explosion", false, []interface{}{"experimental explosion"}},
+		{"e*,a*", false, []interface{}{"earthquake", "anthropogenic event", "explosion", "accidental explosion", "experimental explosion", "atmospheric event", "acoustic noise", "avalanche"}},
 		// TODO: how do query for "unset eventtype"? The spec list all allowed values and empty is not in the list.
 	}
 	for _, c := range queryCases {
@@ -445,8 +445,13 @@ func TestEventTypes(t *testing.T) {
 			t.Errorf("expected to error but passed for %s", c.query)
 			continue
 		}
-		if e.eventTypeStr != c.expected {
-			t.Errorf("expected %s got %s", c.expected, e.eventTypeStr)
+		if len(e.eventTypeSlice) != len(c.expected) {
+			t.Errorf("expected %v got %v", c.expected, e.eventTypeSlice)
+		}
+		for i, v := range c.expected {
+			if e.eventTypeSlice[i] != v {
+				t.Errorf("expected %s got %s", v, e.eventTypeSlice[i])
+			}
 		}
 	}
 

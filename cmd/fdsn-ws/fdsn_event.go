@@ -49,16 +49,16 @@ type fdsnEventV1 struct {
 	OrderBy      string  `schema:"orderby"`      // order the result by time or magnitude with the following possibilities: time, time-asc, magnitude, magnitude-asc
 
 	// supported optionals
-	Latitude     float64 `schema:"latitude"`
-	Longitude    float64 `schema:"longitude"`
-	MinRadius    float64 `schema:"minradius"`
-	MaxRadius    float64 `schema:"maxradius"`
-	PublicID     string  `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
-	UpdatedAfter Time    `schema:"updatedafter"` // Limit to events updated after the specified time.
-	Format       string  `schema:"format"`
-	NoData       int     `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
-	EventType    string  `schema:"eventtype"`
-	eventTypeStr string  // interal use only. holds comma seperated eventtypes
+	Latitude       float64       `schema:"latitude"`
+	Longitude      float64       `schema:"longitude"`
+	MinRadius      float64       `schema:"minradius"`
+	MaxRadius      float64       `schema:"maxradius"`
+	PublicID       string        `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
+	UpdatedAfter   Time          `schema:"updatedafter"` // Limit to events updated after the specified time.
+	Format         string        `schema:"format"`
+	NoData         int           `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
+	EventType      string        `schema:"eventtype"`
+	eventTypeSlice []interface{} // interal use only. holds matched eventtypes
 }
 
 type Time struct {
@@ -259,24 +259,20 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 			err = fmt.Errorf("invalid value for eventtype: %s", e.EventType)
 			return e, err
 		}
-
-		// we generate eventtype SQL query parameter
-		qp := ""
+		e.eventTypeSlice = make([]interface{}, 0)
 		for _, t := range validEventTypes {
 			if matchAnyRegex(t, regs) {
-				qp += fmt.Sprintf("'%s',", t)
+				e.eventTypeSlice = append(e.eventTypeSlice, t)
 			}
 		}
 
-		if qp == "" {
+		if len(e.eventTypeSlice) == 0 { // the input eventtype should expect at least a match
 			err = fmt.Errorf("invalid value for eventtype: %s", e.EventType)
 			return e, err
 		}
-
-		e.eventTypeStr = strings.TrimSuffix(qp, ",") // remove the unnecessary last comma
 	} else {
 		// default value, no filtering
-		e.eventTypeStr = ""
+		e.eventTypeSlice = nil
 	}
 
 	return e, nil
@@ -344,7 +340,6 @@ func (e *fdsnEventV1) count() (int, error) {
 
 	var c int
 	err := db.QueryRow(q, args...).Scan(&c)
-
 	return c, err
 }
 
@@ -435,9 +430,15 @@ func (e *fdsnEventV1) filter() (q string, args []interface{}) {
 		i += 3
 	}
 
-	if e.eventTypeStr != "" {
-		q = fmt.Sprintf("%s EventType IN ($%d) AND", q, i)
-		args = append(args, e.eventTypeStr)
+	if e.eventTypeSlice != nil {
+		// creating N SQL placeholders for number of matched eventTypeSlice
+		p := make([]string, 0, len(e.eventTypeSlice))
+		for c := range e.eventTypeSlice {
+			p = append(p, fmt.Sprintf("$%d", i+c))
+		}
+		q = fmt.Sprintf("%s eventtype IN (%s) AND", q, strings.Join(p, ",")) // example: IN ($3,$4,$5,$6)
+		args = append(args, e.eventTypeSlice...)
+		i += len(e.eventTypeSlice) // nolint:ineffassign
 	}
 
 	q = strings.TrimSuffix(q, " AND")
