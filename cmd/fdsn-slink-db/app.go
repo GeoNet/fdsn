@@ -2,13 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/GeoNet/kit/cfg"
 	"github.com/GeoNet/kit/metrics"
 	ms "github.com/GeoNet/kit/seis/ms"
-	"github.com/pkg/errors"
 )
 
 // app is for shared application resources
@@ -21,12 +21,12 @@ type app struct {
 func (a *app) initDB() error {
 	p, err := cfg.PostgresEnv()
 	if err != nil {
-		return errors.Wrap(err, "error reading DB config from the environment vars")
+		return fmt.Errorf("error reading DB config from the environment vars: %w", err)
 	}
 
 	a.db, err = sql.Open("postgres", p.Connection())
 	if err != nil {
-		return errors.Wrap(err, "error with DB config")
+		return fmt.Errorf("error with DB config: %w", err)
 	}
 
 	a.db.SetMaxIdleConns(p.MaxIdle)
@@ -51,7 +51,7 @@ func (a *app) initDB() error {
 	AND channel = $3
 	AND location = $4`)
 	if err != nil {
-		return errors.Wrap(err, "preparing saveRecord stmt")
+		return fmt.Errorf("error preparing saveRecord stmt: %w", err)
 	}
 
 	return nil

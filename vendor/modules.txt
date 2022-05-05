@@ -122,9 +122,6 @@ github.com/jmespath/go-jmespath
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
-# github.com/pkg/errors v0.9.1
-## explicit
-github.com/pkg/errors
 # google.golang.org/protobuf v1.27.1
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire

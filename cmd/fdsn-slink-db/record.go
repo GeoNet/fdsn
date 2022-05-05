@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/lib/pq"
-	"github.com/pkg/errors"
+	"fmt"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 // http://www.postgresql.org/docs/9.4/static/errcodes-appendix.html
@@ -74,5 +75,5 @@ func (a *app) saveRecord(r record) error {
 		return nil
 	}
 
-	return errors.Errorf("affected zero rows saving record %s.%s.%s.%s", r.network, r.station, r.location, r.channel)
+	return fmt.Errorf("affected zero rows saving record %s.%s.%s.%s", r.network, r.station, r.location, r.channel)
 }

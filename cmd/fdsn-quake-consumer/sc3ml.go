@@ -3,13 +3,13 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/GeoNet/kit/sc3ml"
-	"github.com/lib/pq"
-	"github.com/pkg/errors"
 	"io"
 	"log"
 	"os/exec"
 	"time"
+
+	"github.com/GeoNet/kit/sc3ml"
+	"github.com/lib/pq"
 )
 
 const deleted = `not existing`
@@ -146,11 +146,11 @@ func unmarshal(seisComPML []byte, e *event) error {
 	var err error
 
 	if err = sc3ml.Unmarshal(seisComPML, &s); err != nil {
-		return errors.Wrapf(err, "unmarshaling SC3ML")
+		return fmt.Errorf("error unmarshaling SC3ML: %w", err)
 	}
 
 	if len(s.EventParameters.Events) != 1 {
-		return errors.Errorf("expected 1 event, got %d", len(s.EventParameters.Events))
+		return fmt.Errorf("error expected 1 event, got %d: %w", len(s.EventParameters.Events), err)
 	}
 
 	e.PublicID = s.EventParameters.Events[0].PublicID
