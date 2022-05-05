@@ -16,13 +16,10 @@ import (
 	"time"
 
 	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/aws/s3"
 	"github.com/GeoNet/kit/metrics"
 	ms "github.com/GeoNet/kit/seis/ms"
 	"github.com/GeoNet/kit/weft"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/client"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 const (
@@ -35,7 +32,6 @@ const (
 )
 
 var (
-	s3Session              *session.Session
 	s3Client               *s3.S3
 	fdsnDataselectWadlFile []byte
 	fdsnDataselectIndex    []byte
@@ -70,13 +66,11 @@ func init() {
 		log.Printf("error reading assets/fdsn-ws-dataselect.html: %s", err.Error())
 	}
 
-	s3Session, err = session.NewSession()
+	s3c, err := s3.NewWithMaxRetries(3)
 	if err != nil {
-		log.Fatalf("creating S3 session: %s", err)
+		log.Fatalf("error creating S3 client: %s", err)
 	}
-
-	s3Session.Config.Retryer = client.DefaultRetryer{NumMaxRetries: 3}
-	s3Client = s3.New(s3Session)
+	s3Client = &s3c
 }
 
 // fdsnDataMetricsV1Handler handles all datametrics queries.
@@ -239,23 +233,19 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 			log.Printf("files=%d request_length=%f", len(v.keys), v.d.End.Sub(v.d.Start).Seconds())
 
-			result, err := s3Client.GetObject(&s3.GetObjectInput{
-				Key:    aws.String(k),
-				Bucket: aws.String(S3_BUCKET),
-			})
+			buf := &bytes.Buffer{}
+			err := s3Client.Get(S3_BUCKET, k, "", buf)
 			if err != nil {
 				return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
 			}
-			defer result.Body.Close()
 
 		loop:
 			for {
-				_, err = io.ReadFull(result.Body, record)
+				_, err = io.ReadFull(buf, record)
 				switch {
 				case err == io.EOF:
 					break loop
 				case err != nil:
-					result.Body.Close()
 					return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
 				}
 
@@ -273,7 +263,6 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 					written += n
 				}
 			}
-			result.Body.Close()
 		}
 	}
 

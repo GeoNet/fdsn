@@ -6,37 +6,35 @@
 // Multiple instances (workers) of this code can be run against the same queue for
 // Large data reindexing tasks.  Reindexing files that already exist in the bucket
 // would require sending messages in the notification format to the SQS queue.
-// See github.com/GeoNet/fdsn/internal/platform/s3 for the Event type.
+// See github.com/GeoNet/kit/aws/s3 for the Event type.
 package main
 
 import (
 	"database/sql"
 	"encoding/json"
-	nf "github.com/GeoNet/fdsn/internal/platform/s3"
-	"github.com/GeoNet/fdsn/internal/platform/sqs"
-	"github.com/GeoNet/kit/cfg"
-	"github.com/GeoNet/kit/metrics"
-	"github.com/aws/aws-sdk-go/aws/client"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/GeoNet/kit/aws/s3"
+	"github.com/GeoNet/kit/aws/sqs"
+	"github.com/GeoNet/kit/cfg"
+	"github.com/GeoNet/kit/metrics"
 )
 
 var (
 	db           *sql.DB
 	queueURL     = os.Getenv("SQS_QUEUE_URL")
 	sqsClient    sqs.SQS
-	s3Session    *session.Session
 	s3Client     *s3.S3
 	saveHoldings *sql.Stmt
 )
 
 type event struct {
-	nf.Event
+	s3.Event
 }
 
 func main() {
@@ -93,18 +91,16 @@ ping:
 		break ping
 	}
 
-	sqsClient, err = sqs.New(100)
+	sqsClient, err = sqs.NewWithMaxRetries(100)
 	if err != nil {
-		log.Fatalf("creating SQS client: %s", err)
+		log.Fatalf("error creating SQS client: %s", err)
 	}
 
-	s3Session, err = session.NewSession()
+	s3c, err := s3.NewWithMaxRetries(3)
 	if err != nil {
-		log.Fatalf("creating S3 session: %s", err)
+		log.Fatalf("error creating S3 client: %s", err)
 	}
-
-	s3Session.Config.Retryer = client.DefaultRetryer{NumMaxRetries: 3}
-	s3Client = s3.New(s3Session)
+	s3Client = &s3c
 
 	log.Println("listening for messages")
 
@@ -164,14 +160,14 @@ func (e *event) Process(msg []byte) error {
 
 			err = h.save()
 			if err != nil {
-				return errors.Wrapf(err, "error saving holding for %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
+				return fmt.Errorf("error saving holding for %s %s: %w", v.S3.Bucket.Name, v.S3.Object.Key, err)
 			}
 
 		case strings.HasPrefix(v.EventName, "ObjectRemoved"):
 			h := holding{key: v.S3.Object.Key}
 			err = h.delete()
 			if err != nil {
-				return errors.Wrapf(err, "error deleting holdings for %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
+				return fmt.Errorf("error deleting holdings for %s %s: %w", v.S3.Bucket.Name, v.S3.Object.Key, err)
 			}
 		default:
 			return errors.New("unknown EventName: " + v.EventName)

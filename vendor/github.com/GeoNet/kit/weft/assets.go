@@ -197,6 +197,8 @@ func loadAsset(file, prefix string) (*asset, error) {
 		a.mime = "application/octet-stream"
 	case "json":
 		a.mime = "application/json"
+	case "svg":
+		a.mime = "image/svg+xml"
 	}
 
 	p := strings.Split(a.path, "/")

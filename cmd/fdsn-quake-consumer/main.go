@@ -7,14 +7,15 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"github.com/GeoNet/fdsn/internal/platform/s3"
-	"github.com/GeoNet/fdsn/internal/platform/sqs"
-	"github.com/GeoNet/kit/cfg"
-	"github.com/GeoNet/kit/metrics"
-	"github.com/pkg/errors"
 	"log"
 	"os"
 	"time"
+
+	"github.com/GeoNet/kit/aws/s3"
+	"github.com/GeoNet/kit/aws/sqs"
+	"github.com/GeoNet/kit/cfg"
+	"github.com/GeoNet/kit/metrics"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -54,12 +55,12 @@ ping:
 		break ping
 	}
 
-	s3Client, err = s3.New(100)
+	s3Client, err = s3.NewWithMaxRetries(100)
 	if err != nil {
 		log.Fatalf("creating S3 client: %s", err)
 	}
 
-	sqsClient, err = sqs.New(100)
+	sqsClient, err = sqs.NewWithMaxRetries(100)
 	if err != nil {
 		log.Fatalf("creating SQS client: %s", err)
 	}

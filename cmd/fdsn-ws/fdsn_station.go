@@ -6,10 +6,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/fdsn/internal/platform/s3"
-	"github.com/GeoNet/kit/weft"
-	"github.com/GeoNet/kit/wgs84"
 	"io"
 	"io/ioutil"
 	"log"
@@ -23,6 +19,11 @@ import (
 	"sync"
 	"text/template"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/aws/s3"
+	"github.com/GeoNet/kit/weft"
+	"github.com/GeoNet/kit/wgs84"
 )
 
 const (
@@ -869,8 +870,7 @@ func (v fdsnStationV1Search) validBounding(latitude, longitude float64) bool {
 
 // Download station XML from S3
 func downloadStationXML(since time.Time) (by *bytes.Buffer, modified time.Time, err error) {
-	var s3Client s3.S3
-	s3Client, err = s3.New(100)
+	s3Client, err := s3.NewWithMaxRetries(100)
 	if err != nil {
 		return
 	}
@@ -892,7 +892,7 @@ func downloadStationXML(since time.Time) (by *bytes.Buffer, modified time.Time, 
 		return
 	}
 
-	modified = *tp
+	modified = tp
 	log.Println("Download complete.")
 	return
 }

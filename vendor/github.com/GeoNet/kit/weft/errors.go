@@ -89,7 +89,7 @@ const (
 	<div id="container" class="corners-all">
 	<h1>Error 405</h1>
 
-	<p><b>405 Bad Request</b>: '405' is standard notation indicating the HTTP method used is not allowed, please correct your query and try again.</p>
+	<p><b>405 Method Not Allowed</b>: '405' is standard notation indicating the HTTP method used is not allowed, please correct your query and try again.</p>
 
 	<p>If you need more information about this error please contact us directly.</p>
 

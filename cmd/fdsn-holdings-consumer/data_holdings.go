@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bytes"
+
 	"github.com/GeoNet/fdsn/internal/holdings"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/lib/pq"
 )
 
@@ -71,17 +71,14 @@ func (h *holding) delete() error {
 }
 
 func holdingS3(bucket, key string) (holding, error) {
-	result, err := s3Client.GetObject(&s3.GetObjectInput{
-		Key:    aws.String(key),
-		Bucket: aws.String(bucket),
-	})
 
+	buf := &bytes.Buffer{}
+	err := s3Client.Get(bucket, key, "", buf)
 	if err != nil {
 		return holding{}, err
 	}
-	defer result.Body.Close()
 
-	h, err := holdings.SingleStream(result.Body)
+	h, err := holdings.SingleStream(buf)
 	if err != nil {
 		return holding{}, err
 	}
