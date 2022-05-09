@@ -29,7 +29,7 @@ install:
   - sudo systemctl restart postgresql@12-main
   - psql -U postgres -c "create extension postgis"
   - ./etc/scripts/initdb.sh
-  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.18.0
+  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin
   - pip install --user awscli
   - eval $(aws ecr get-login --no-include-email --region ap-southeast-2) #needs AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
 
@@ -69,7 +69,7 @@ jobs:
           fdsn-ws-nrt
         on:
           branch: main
- 
+
 notifications:
   email: false
   slack:
