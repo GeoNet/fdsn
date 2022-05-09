@@ -2,12 +2,12 @@ package fdsn_test
 
 import (
 	"bytes"
-	"fmt"
-	"github.com/GeoNet/fdsn/internal/fdsn"
 	"net/url"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
 )
 
 func TestParsePostBody(t *testing.T) {
@@ -109,7 +109,7 @@ func TestGenRegex(t *testing.T) {
 		t.Error(err)
 	}
 	if len(r) != 1 || r[0] != "^ABA0$" {
-		t.Error(fmt.Sprintf("expect ^ABA0$ got %+v", r[0]))
+		t.Errorf("expect ^ABA0$ got %+v", r[0])
 	}
 
 	// "--" empty location
@@ -118,7 +118,7 @@ func TestGenRegex(t *testing.T) {
 		t.Error(err)
 	}
 	if len(r) != 1 || r[0] != "^\\s{2}$" {
-		t.Error(fmt.Sprintf("expect ^\\s{2}$ got %+v", r[0]))
+		t.Errorf("expect ^\\s{2}$ got %+v", r[0])
 	}
 
 	// "?" and "*" special
@@ -127,34 +127,34 @@ func TestGenRegex(t *testing.T) {
 		t.Error(err)
 	}
 	if len(r) != 1 || r[0] != "^A.Z.*$" {
-		t.Error(fmt.Sprintf("expect ^A.Z.*$ got %+v", r[0]))
+		t.Errorf("expect ^A.Z.*$ got %+v", r[0])
 	}
 
 	// "--" (exactly 2 hyphens) means empty in FDSN
 	_, err = fdsn.GenRegex([]string{"--"}, false)
 	if err != nil {
-		t.Error(fmt.Sprintf("expect to passed but rejected"))
+		t.Error("expect to passed but rejected")
 	}
 
 	_, err = fdsn.GenRegex([]string{"---"}, false)
 	if err == nil {
-		t.Error(fmt.Sprintf("expect to rejected but passed"))
+		t.Error("expect to rejected but passed")
 	}
 
 	// block all other chars, including valid regex since we're not supporting regex
 	_, err = fdsn.GenRegex([]string{"*\\^{]"}, false)
 	if err == nil {
-		t.Error(fmt.Sprintf("expect to rejected but passed."))
+		t.Error("expect to rejected but passed.")
 	}
 
 	_, err = fdsn.GenRegex([]string{"[E,H]H?"}, false)
 	if err == nil {
-		t.Error(fmt.Sprintf("expect to rejected but passed."))
+		t.Error("expect to rejected but passed.")
 	}
 
 	_, err = fdsn.GenRegex([]string{"10,20"}, false)
 	if err != nil {
-		t.Error(fmt.Sprintf("expect to pass but rejected."))
+		t.Error("expect to pass but rejected.")
 	}
 }
 
