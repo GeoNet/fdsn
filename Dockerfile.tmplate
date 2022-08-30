@@ -1,11 +1,11 @@
-ARG BUILDER_IMAGE=quay.io/geonet/golang:1.15-alpine
+ARG BUILDER_IMAGE=quay.io/geonet/golang:1.16-alpine
 ARG RUNNER_IMAGE=quay.io/geonet/go-scratch:latest
 ARG RUN_USER=nobody
 # Only support image based on AlpineLinux
 FROM ${BUILDER_IMAGE} as builder
 
 # Obtain ca-cert and tzdata, which we will add to the container
-RUN apk add --update ca-certificates tzdata gcc make musl-dev 
+RUN apk add --update ca-certificates tzdata gcc make musl-dev
 
 # Project to build
 ARG BUILD

@@ -1,6 +1,6 @@
 module github.com/GeoNet/fdsn
 
-go 1.15
+go 1.16
 
 require (
 	github.com/GeoNet/kit v0.0.0-20220629232654-4b4c51b3443f

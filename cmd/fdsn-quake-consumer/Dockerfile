@@ -1,8 +1,8 @@
-ARG BUILDER_IMAGE=quay.io/geonet/golang:1.15-alpine
+ARG BUILDER_IMAGE=quay.io/geonet/golang:1.16-alpine
 
 FROM ${BUILDER_IMAGE} as builder
 # Obtain ca-cert and tzdata, which we will add to the container
-RUN apk add --update ca-certificates tzdata 
+RUN apk add --update ca-certificates tzdata
 
 # Git commit SHA
 ARG GIT_COMMIT_SHA
