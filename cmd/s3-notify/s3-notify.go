@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/GeoNet/kit/aws/s3"
-	fdsnS3 "github.com/GeoNet/kit/aws/s3"
 	"github.com/GeoNet/kit/aws/sqs"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	flag.Parse()
 
 	var err error
-	s3c, err := fdsnS3.NewWithMaxRetries(100)
+	s3c, err := s3.NewWithMaxRetries(100)
 	if err != nil {
 		log.Fatalf("error creating S3 client: %s", err)
 	}
@@ -75,15 +74,15 @@ func sendSQS(key string) error {
 		return nil
 	}
 
-	e := fdsnS3.Event{
-		Records: []fdsnS3.EventRecord{
+	e := s3.Event{
+		Records: []s3.EventRecord{
 			{
 				EventName: "ObjectCreated:Put",
-				S3: fdsnS3.EventS3{
-					Object: fdsnS3.EventObject{
+				S3: s3.EventS3{
+					Object: s3.EventObject{
 						Key: key,
 					},
-					Bucket: fdsnS3.EventBucket{
+					Bucket: s3.EventBucket{
 						Name: bucketName,
 					},
 				},
