@@ -2,15 +2,16 @@ package main
 
 import (
 	"database/sql"
-	"github.com/GeoNet/kit/cfg"
-	"github.com/GeoNet/kit/metrics"
-	"github.com/golang/groupcache"
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/GeoNet/kit/cfg"
+	"github.com/GeoNet/kit/metrics"
+	"github.com/golang/groupcache"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -82,5 +83,11 @@ func main() {
 	}()
 
 	log.Println("starting server")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	server := &http.Server{
+		Addr:         ":8080",
+		Handler:      mux,
+		ReadTimeout:  1 * time.Minute,
+		WriteTimeout: 10 * time.Minute,
+	}
+	log.Fatal(server.ListenAndServe())
 }

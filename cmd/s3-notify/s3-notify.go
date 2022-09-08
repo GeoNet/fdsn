@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	fdsnS3 "github.com/GeoNet/fdsn/internal/platform/s3"
-	"github.com/GeoNet/fdsn/internal/platform/sqs"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"log"
+	"strings"
+
+	"github.com/GeoNet/kit/aws/s3"
+	"github.com/GeoNet/kit/aws/sqs"
 )
 
 var (
@@ -26,15 +25,15 @@ func init() {
 	flag.StringVar(&sqsUrl, "sqs-url", "", "SQS queue url to send notifications to. Omit this parameter to show the list of matched keys only.")
 	flag.Parse()
 
-	s3Session, err := session.NewSession()
+	var err error
+	s3c, err := s3.NewWithMaxRetries(100)
 	if err != nil {
-		log.Fatalf("creating S3 session: %s", err)
+		log.Fatalf("error creating S3 client: %s", err)
 	}
-
-	s3Client = s3.New(s3Session)
-	sqsClient, err = sqs.New(100)
+	s3Client = &s3c
+	sqsClient, err = sqs.NewWithMaxRetries(100)
 	if err != nil {
-		log.Fatalf("creating sqs: %s", err)
+		log.Fatalf("error creating SQS client: %s", err)
 	}
 }
 
@@ -51,49 +50,39 @@ func main() {
 		fmt.Println("Send to SQS:", sqsUrl)
 	}
 
-	params := s3.ListObjectsV2Input{
-		Bucket: aws.String(bucketName),
-		Prefix: aws.String(keyPrefix),
-	}
-
-	cnt := 0
-	err := s3Client.ListObjectsV2Pages(&params,
-		func(page *s3.ListObjectsV2Output, lastPage bool) bool {
-			for _, o := range page.Contents {
-				if *o.Size > 0 { // directories has the size of 0
-					if err := sendSQS(o); err != nil {
-						log.Fatal(err)
-						break
-					}
-					cnt++
-				}
-			}
-			return !lastPage
-		})
-
+	keys, err := s3Client.ListAll(bucketName, keyPrefix)
 	if err != nil {
-		log.Fatalf("listing s3 objects: %s", err)
+		log.Fatalf("error listing S3 objects: %s", err)
+	}
+	for _, k := range keys {
+		if strings.HasSuffix(k, "/") {
+			continue // directories have trailing /
+		}
+		if err := sendSQS(k); err != nil {
+			log.Fatal(err)
+			break
+		}
 	}
 
-	fmt.Println("Total keys matched:", cnt)
+	fmt.Println("Total keys matched:", len(keys))
 }
 
-func sendSQS(o *s3.Object) error {
-	fmt.Println("Key:", *o.Key)
+func sendSQS(key string) error {
+	fmt.Println("Key:", key)
 
 	if sqsUrl == "" {
 		return nil
 	}
 
-	e := fdsnS3.Event{
-		Records: []fdsnS3.EventRecord{
+	e := s3.Event{
+		Records: []s3.EventRecord{
 			{
 				EventName: "ObjectCreated:Put",
-				S3: fdsnS3.EventS3{
-					Object: fdsnS3.EventObject{
-						Key: *o.Key,
+				S3: s3.EventS3{
+					Object: s3.EventObject{
+						Key: key,
 					},
-					Bucket: fdsnS3.EventBucket{
+					Bucket: s3.EventBucket{
 						Name: bucketName,
 					},
 				},
@@ -106,5 +95,5 @@ func sendSQS(o *s3.Object) error {
 		return err
 	}
 
-	return sqsClient.Send(sqsUrl, sqs.Raw{Body: string(b)})
+	return sqsClient.Send(sqsUrl, string(b))
 }

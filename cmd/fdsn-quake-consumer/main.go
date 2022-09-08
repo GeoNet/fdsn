@@ -7,14 +7,16 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"github.com/GeoNet/fdsn/internal/platform/s3"
-	"github.com/GeoNet/fdsn/internal/platform/sqs"
-	"github.com/GeoNet/kit/cfg"
-	"github.com/GeoNet/kit/metrics"
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
+
+	"github.com/GeoNet/kit/aws/s3"
+	"github.com/GeoNet/kit/aws/sqs"
+	"github.com/GeoNet/kit/cfg"
+	"github.com/GeoNet/kit/metrics"
 )
 
 var (
@@ -54,12 +56,12 @@ ping:
 		break ping
 	}
 
-	s3Client, err = s3.New(100)
+	s3Client, err = s3.NewWithMaxRetries(100)
 	if err != nil {
 		log.Fatalf("creating S3 client: %s", err)
 	}
 
-	sqsClient, err = sqs.New(100)
+	sqsClient, err = sqs.NewWithMaxRetries(100)
 	if err != nil {
 		log.Fatalf("creating SQS client: %s", err)
 	}
@@ -115,17 +117,17 @@ func (n *notification) Process(msg []byte) error {
 
 		err = s3Client.Get(v.S3.Bucket.Name, v.S3.Object.Key, v.S3.Object.VersionId, &b)
 		if err != nil {
-			return errors.Wrapf(err, "error getting SC3ML %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
+			return fmt.Errorf("error getting SC3ML %s %s: %w", v.S3.Bucket.Name, v.S3.Object.Key, err)
 		}
 
 		var e event
 
 		if err := unmarshal(b.Bytes(), &e); err != nil {
-			return errors.Wrapf(err, "error unmarshalling SC3ML %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
+			return fmt.Errorf("error unmarshalling SC3ML %s %s: %w", v.S3.Bucket.Name, v.S3.Object.Key, err)
 		}
 
 		if err := e.save(); err != nil {
-			return errors.Wrapf(err, "error saving SC3ML %s %s", v.S3.Bucket.Name, v.S3.Object.Key)
+			return fmt.Errorf("error saving SC3ML %s %s: %w", v.S3.Bucket.Name, v.S3.Object.Key, err)
 		}
 	}
 

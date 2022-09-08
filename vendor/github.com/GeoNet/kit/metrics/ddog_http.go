@@ -18,7 +18,7 @@ func DataDogHttp(apiKey, hostName, appName string, logger Logger) {
 		logger = discarder{}
 	}
 
-	if apiKey == "" {
+	if apiKey == "" && dumpMetric {
 		logger.Printf("empty env var DDOG_API_KEY metrics will be logged")
 	}
 
@@ -38,7 +38,7 @@ func DataDogHttp(apiKey, hostName, appName string, logger Logger) {
 				if err != nil {
 					logger.Printf("error sending metrics to datadog for %s %s %s", hostName, appName, err.Error())
 				}
-			} else {
+			} else if dumpMetric {
 				logger.Printf("%s %s", hostName, appName)
 				logger.Printf("%+v", m)
 				logger.Printf("%+v", ReadTimers())

@@ -59,5 +59,11 @@ func main() {
 	setupStationXMLUpdater()
 
 	log.Println("starting server")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	server := &http.Server{
+		Addr:         ":8080",
+		Handler:      mux,
+		ReadTimeout:  1 * time.Minute,
+		WriteTimeout: 10 * time.Minute,
+	}
+	log.Fatal(server.ListenAndServe())
 }

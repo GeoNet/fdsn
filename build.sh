@@ -7,7 +7,7 @@
 # Adds the assets dir from each project to the container e.g., origin/assets
 # It is not an error for the assets dir to not exist.
 # Any assets needed by the application should be read from the assets dir
-# relative to the executable. 
+# relative to the executable.
 #
 # usage: ./build.sh project [project]
 if [ $# -eq 0 ]; then
@@ -16,7 +16,7 @@ if [ $# -eq 0 ]; then
 fi
 
 # code will be compiled in this container
-BUILDER_IMAGE='quay.io/geonet/golang:1.15-alpine'
+BUILDER_IMAGE='quay.io/geonet/golang:1.16-alpine'
 RUNNER_IMAGE='quay.io/geonet/go-scratch:latest'
 
 VERSION='git-'$(git rev-parse --short HEAD)

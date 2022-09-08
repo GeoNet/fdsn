@@ -14,6 +14,7 @@ import (
 const dogUrl = "https://app.datadoghq.com/api/v1/series"
 
 var client = &http.Client{}
+var dumpMetric = (os.Getenv("DDOG_DUMP") == "1")
 
 type point [2]float64
 
@@ -50,7 +51,7 @@ func DataDogMsg(apiKey, hostName, appName string, logger Logger) {
 		logger = discarder{}
 	}
 
-	if apiKey == "" {
+	if apiKey == "" && dumpMetric {
 		logger.Printf("empty apiKey metrics will be logged")
 	}
 
@@ -70,7 +71,7 @@ func DataDogMsg(apiKey, hostName, appName string, logger Logger) {
 				if err != nil {
 					logger.Printf("error sending metrics to datadog for %s %s %s", hostName, appName, err.Error())
 				}
-			} else {
+			} else if dumpMetric {
 				logger.Printf("%s %s", hostName, appName)
 				logger.Printf("%+v", m)
 				logger.Printf("%+v", ReadTimers())
@@ -87,7 +88,7 @@ func DataDogMsgSync(apiKey, hostName, appName string, logger Logger) {
 		logger = discarder{}
 	}
 
-	if apiKey == "" {
+	if apiKey == "" && dumpMetric {
 		logger.Printf("empty apiKey metrics will be logged")
 	}
 
@@ -101,7 +102,7 @@ func DataDogMsgSync(apiKey, hostName, appName string, logger Logger) {
 		if err != nil {
 			logger.Printf("error sending metrics to datadog for %s %s %s", hostName, appName, err.Error())
 		}
-	} else {
+	} else if dumpMetric {
 		logger.Printf("%s %s", hostName, appName)
 		logger.Printf("%+v", m)
 		logger.Printf("%+v", ReadTimers())
