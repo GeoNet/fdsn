@@ -154,7 +154,7 @@ func TestGenRegex(t *testing.T) {
 
 	_, err = fdsn.GenRegex([]string{"10,20"}, false, false)
 	if err != nil {
-		t.Error(fmt.Sprintf("expect to pass but rejected."))
+		t.Error("expect to pass but rejected.")
 	}
 
 	_, err = fdsn.GenRegex([]string{"10 20"}, false, true) // allows space

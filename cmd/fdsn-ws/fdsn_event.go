@@ -168,11 +168,17 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		}
 	}
 
+	emptyEventType := false
+
 	for key, val := range v {
 		if _, ok := eventNotSupported[key]; ok {
 			return e, fmt.Errorf("\"%s\" is not supported", key)
 		}
 		if len(val[0]) == 0 {
+			if key == "eventtype" { // eventtype allows empty value, "eventtype="
+				emptyEventType = true
+				continue
+			}
 			return e, fmt.Errorf("Invalid %s value", key)
 		}
 	}
@@ -180,6 +186,13 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 	err := decoder.Decode(&e, v)
 	if err != nil {
 		return e, err
+	}
+
+	// decoder.Decode applies default value ("*") for query like "eventtype=" (without value)
+	// We overwrites it here.
+	if emptyEventType {
+		// overwrites default value "*"
+		e.EventType = ""
 	}
 
 	if e.Format != "xml" && e.Format != "text" {
@@ -251,7 +264,10 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		return e, err
 	}
 
-	if e.EventType != "*" {
+	if e.EventType == "" {
+		// query for events having empty eventtype value
+		e.eventTypeSlice = []interface{}{""}
+	} else if e.EventType != "*" {
 		types := strings.Split(strings.ToLower(e.EventType), ",") // spec: case insensitive
 		// we generate regexps from user's input, then check if we can match them
 		regs, err := fdsn.GenRegex(types, false, true)

@@ -431,7 +431,7 @@ func TestEventTypes(t *testing.T) {
 		{"z*", true, nil}, // no such match, expected value doesn't matter
 		{"experimental explosion", false, []interface{}{"experimental explosion"}},
 		{"e*,a*", false, []interface{}{"earthquake", "anthropogenic event", "explosion", "accidental explosion", "experimental explosion", "atmospheric event", "acoustic noise", "avalanche"}},
-		// TODO: how do query for "unset eventtype"? The spec list all allowed values and empty is not in the list.
+		{"", false, []interface{}{""}},
 	}
 	for _, c := range queryCases {
 		v := url.Values{}
