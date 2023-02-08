@@ -575,6 +575,10 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 				net.StartDate.MarshalFormatText(), net.EndDate.MarshalFormatText(),
 				net.TotalNumberStations))
 		} else {
+			if levelVal == STATION_LEVEL_STATION && len(net.Station) == 0 {
+				// Write Network name only
+				by.WriteString(fmt.Sprintf("%s|||||||\n", net.Code))
+			}
 			for s := 0; s < len(net.Station); s++ {
 				sta := &net.Station[s]
 				if levelVal == STATION_LEVEL_STATION {
@@ -583,6 +587,10 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 						sta.Latitude.Value, sta.Longitude.Value, sta.Elevation.Value,
 						sta.Site.Name, sta.StartDate.MarshalFormatText(), sta.EndDate.MarshalFormatText()))
 				} else {
+					if len(sta.Channel) == 0 {
+						// Write Station name only
+						by.WriteString(fmt.Sprintf("%s|%s||||||\n", net.Code, sta.Code))
+					}
 					for c := 0; c < len(sta.Channel); c++ {
 						cha := &sta.Channel[c]
 						var frequency float64
@@ -618,10 +626,11 @@ func (r *FDSNStationXML) doFilter(params []fdsnStationV1Search) bool {
 		}
 	}
 
+	nNet := len(r.Network)
 	r.Network = ns
 
-	if len(ns) == 0 {
-		// No result ( no "Network" node )
+	if nNet != 0 && len(ns) == 0 {
+		// this means the query has network parameter but idn't match one, we want to give a no data
 		return false
 	}
 
@@ -661,33 +670,14 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
 		}
 	}
 
-	if len(ss) == 0 {
-		// Special case: when requested level is deeper than this level,
-		// but no child node from this node, then we should skip this node.
-		if params[0].LevelValue > STATION_LEVEL_NETWORK {
-			return false
-		}
-
-		// NOTE: the long description under is unlikely to happen since we only got 1 network.
-		//   However I still included the logic.
-		// ---
-		// Normally this network is included since it has met the query parameters for network.
-		// However, there's another case:
-		//   e.g. "query?station=ZZZZ&level=network"
-		// This kind of query makes the network test bypassed due to no query parameter for network,
-		//   but when there's no child node for this network we should skip this network.
-		// In short:
-		//   when there's no child node and there's query parameter for station, channel or location,
-		//   this network is excluded.
-		for _, p := range params {
-			if p.StationReg != nil || p.ChannelReg != nil || p.LocationReg != nil {
-				return false
-			}
-		}
-	}
-
 	n.SelectedNumberStations = len(ss)
+	nSta := len(n.Station)
 	n.Station = ss
+
+	if nSta != 0 && len(ss) == 0 {
+		// this means the query has station parameter but idn't match one, we want to give a no data
+		return false
+	}
 
 	return true
 }
@@ -725,30 +715,14 @@ func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
 		}
 	}
 
-	if len(cs) == 0 {
-		// Special case: when requested level is deeper than this level,
-		//   but no child node from this node, then we should skip this node.
-		if params[0].LevelValue > STATION_LEVEL_STATION {
-			return false
-		}
-
-		// Normally this stations is included since it has met the query parameters for station.
-		// However, there's another case:
-		//   e.g. "query?channel=BTT"
-		// This kind of query makes the station test bypassed due to no query parameter for station,
-		//   but when there's no child node for this station we should skip this station.
-		// In conclusion:
-		//   when there's no sub child and there's query parameter for channel or location,
-		//   this station is excluded.
-		for _, p := range params {
-			if p.ChannelReg != nil || p.LocationReg != nil {
-				return false
-			}
-		}
-	}
-
 	s.SelectedNumberChannels = len(cs)
+	nCha := len(s.Channel)
 	s.Channel = cs
+
+	if nCha != 0 && len(cs) == 0 {
+		// this means the query has channel name in parameter but didn't match one, we want to give a no data
+		return false
+	}
 
 	return true
 }

@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/xml"
-	wt "github.com/GeoNet/kit/weft/wefttest"
 	"net/url"
 	"strings"
 	"testing"
+
+	wt "github.com/GeoNet/kit/weft/wefttest"
 )
 
 // NOTE: To run the test, please export :
