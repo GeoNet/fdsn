@@ -431,7 +431,7 @@ func TestEventTypes(t *testing.T) {
 		{"z*", true, nil}, // no such match, expected value doesn't matter
 		{"experimental explosion", false, []interface{}{"experimental explosion"}},
 		{"e*,a*", false, []interface{}{"earthquake", "anthropogenic event", "explosion", "accidental explosion", "experimental explosion", "atmospheric event", "acoustic noise", "avalanche"}},
-		{"", false, []interface{}{""}},
+		{"unknown", false, []interface{}{""}}, // specify "unknown" means query for empty value
 	}
 	for _, c := range queryCases {
 		v := url.Values{}

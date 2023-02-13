@@ -5,9 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/kit/weft"
-	"github.com/GeoNet/kit/wgs84"
 	"io/ioutil"
 	"log"
 	"math"
@@ -17,6 +14,10 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/weft"
+	"github.com/GeoNet/kit/wgs84"
 )
 
 var eventAbbreviations = map[string]string{
@@ -86,6 +87,8 @@ road cut, blasting levee, nuclear explosion, induced or triggered event, rock bu
 fluid injection, fluid extraction, crash, plane crash, train crash, boat crash, other event,
 atmospheric event, sonic boom, sonic blast, acoustic noise, thunder, avalanche, snow avalanche,
 debris avalanche, hydroacoustic event, ice quake, slide, landslide, rockslide, meteorite, volcanic eruption`
+
+const UNKNOWN_TYPE = "unknown"
 
 var validEventTypes = strings.Split(
 	strings.ReplaceAll(
@@ -264,10 +267,7 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		return e, err
 	}
 
-	if e.EventType == "" {
-		// query for events having empty eventtype value
-		e.eventTypeSlice = []interface{}{""}
-	} else if e.EventType != "*" {
+	if e.EventType != "" && e.EventType != "*" {
 		types := strings.Split(strings.ToLower(e.EventType), ",") // spec: case insensitive
 		// we generate regexps from user's input, then check if we can match them
 		regs, err := fdsn.GenRegex(types, false, true)
@@ -280,6 +280,10 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 			if matchAnyRegex(t, regs) {
 				e.eventTypeSlice = append(e.eventTypeSlice, t)
 			}
+		}
+
+		if matchAnyRegex(UNKNOWN_TYPE, regs) {
+			e.eventTypeSlice = append(e.eventTypeSlice, "")
 		}
 
 		if len(e.eventTypeSlice) == 0 { // the input eventtype should expect at least a match
@@ -321,7 +325,7 @@ func (e *fdsnEventV1) queryQuakeML12Event() (*sql.Rows, error) {
 }
 
 func (e *fdsnEventV1) queryRaw() (*sql.Rows, error) {
-	q := "SELECT PublicID,OriginTime,Latitude,Longitude,Depth,MagnitudeType,Magnitude,EventType FROM fdsn.event WHERE deleted != true"
+	q := fmt.Sprintf("SELECT PublicID,OriginTime,Latitude,Longitude,Depth,MagnitudeType,Magnitude,COALESCE(NULLIF(EventType,''), '%s') FROM fdsn.event WHERE deleted != true", UNKNOWN_TYPE)
 
 	qq, args := e.filter()
 
