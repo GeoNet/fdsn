@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/GeoNet/kit/weft"
-	"github.com/GeoNet/kit/wgs84"
 	"io/ioutil"
 	"log"
 	"math"
@@ -16,6 +14,10 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/weft"
+	"github.com/GeoNet/kit/wgs84"
 )
 
 var eventAbbreviations = map[string]string{
@@ -34,28 +36,30 @@ var eventAbbreviations = map[string]string{
 
 // supported query parameters for the event service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
 type fdsnEventV1 struct {
-	PublicID             string  `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
-	MinLatitude          float64 `schema:"minlatitude"`  // limit to events with a latitude larger than or equal to the specified minimum.
-	MaxLatitude          float64 `schema:"maxlatitude"`  // limit to events with a latitude smaller than or equal to the specified maximum.
-	MinLongitude         float64 `schema:"minlongitude"` // limit to events with a longitude larger than or equal to the specified minimum.
-	MaxLongitude         float64 `schema:"maxlongitude"` // limit to events with a longitude smaller than or equal to the specified maximum.
-	MinDepth             float64 `schema:"mindepth"`     // limit to events with depth more than the specified minimum.
-	MaxDepth             float64 `schema:"maxdepth"`     // limit to events with depth less than the specified maximum.
-	MinMagnitude         float64 `schema:"minmagnitude"` // limit to events with a magnitude larger than the specified minimum.
-	MaxMagnitude         float64 `schema:"maxmagnitude"` // limit to events with a magnitude smaller than the specified maximum.
-	OrderBy              string  `schema:"orderby"`      // order the result by time or magnitude with the following possibilities: time, time-asc, magnitude, magnitude-asc
-	StartTime            Time    `schema:"starttime"`    // limit to events on or after the specified start time.
-	EndTime              Time    `schema:"endtime"`      // limit to events on or before the specified end time.
-	IncludeAllOrigins    bool    `schema:"includeallorigins"`
-	IncludeAllMagnitudes bool    `schema:"includeallmagnitudes"`
-	IncludeArrivals      bool    `schema:"includearrivals"`
-	Format               string  `schema:"format"`
-	Latitude             float64 `schema:"latitude"`
-	Longitude            float64 `schema:"longitude"`
-	MinRadius            float64 `schema:"minradius"`
-	MaxRadius            float64 `schema:"maxradius"`
-	NoData               int     `schema:"nodata"`       // Select status code for “no data”, either ‘204’ (default) or ‘404’.
-	UpdatedAfter         Time    `schema:"updatedafter"` // Limit to events updated after the specified time.
+	// required
+	StartTime    Time    `schema:"starttime"`    // limit to events on or after the specified start time.
+	EndTime      Time    `schema:"endtime"`      // limit to events on or before the specified end time.
+	MinLatitude  float64 `schema:"minlatitude"`  // limit to events with a latitude larger than or equal to the specified minimum.
+	MaxLatitude  float64 `schema:"maxlatitude"`  // limit to events with a latitude smaller than or equal to the specified maximum.
+	MinLongitude float64 `schema:"minlongitude"` // limit to events with a longitude larger than or equal to the specified minimum.
+	MaxLongitude float64 `schema:"maxlongitude"` // limit to events with a longitude smaller than or equal to the specified maximum.
+	MinDepth     float64 `schema:"mindepth"`     // limit to events with depth more than the specified minimum.
+	MaxDepth     float64 `schema:"maxdepth"`     // limit to events with depth less than the specified maximum.
+	MinMagnitude float64 `schema:"minmagnitude"` // limit to events with a magnitude larger than the specified minimum.
+	MaxMagnitude float64 `schema:"maxmagnitude"` // limit to events with a magnitude smaller than the specified maximum.
+	OrderBy      string  `schema:"orderby"`      // order the result by time or magnitude with the following possibilities: time, time-asc, magnitude, magnitude-asc
+
+	// supported optionals
+	Latitude       float64       `schema:"latitude"`
+	Longitude      float64       `schema:"longitude"`
+	MinRadius      float64       `schema:"minradius"`
+	MaxRadius      float64       `schema:"maxradius"`
+	PublicID       string        `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
+	UpdatedAfter   Time          `schema:"updatedafter"` // Limit to events updated after the specified time.
+	Format         string        `schema:"format"`
+	NoData         int           `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
+	EventType      string        `schema:"eventtype"`
+	eventTypeSlice []interface{} // interal use only. holds matched eventtypes
 }
 
 type Time struct {
@@ -65,12 +69,32 @@ type Time struct {
 var fdsnEventWadlFile []byte
 var fdsnEventIndex []byte
 var eventNotSupported = map[string]bool{
-	"magnitudetype": true,
-	"limit":         true,
-	"offset":        true,
-	"catalog":       true,
-	"contributor":   true,
+	"magnitudetype":        true,
+	"limit":                true,
+	"offset":               true,
+	"catalog":              true,
+	"contributor":          true,
+	"includeallorigins":    true,
+	"includeallmagnitudes": true,
+	"includearrivals":      true,
 }
+
+// copied from p.17 of FDSN-WS-Specifications-1.2.pdf
+const EVENT_TYPES = `not existing, not reported, earthquake, anthropogenic event, collapse,
+cavity collapse, mine collapse, building collapse, explosion, accidental explosion, chemical explosion,
+controlled explosion, experimental explosion, industrial explosion, mining explosion, quarry blast,
+road cut, blasting levee, nuclear explosion, induced or triggered event, rock burst, reservoir loading,
+fluid injection, fluid extraction, crash, plane crash, train crash, boat crash, other event,
+atmospheric event, sonic boom, sonic blast, acoustic noise, thunder, avalanche, snow avalanche,
+debris avalanche, hydroacoustic event, ice quake, slide, landslide, rockslide, meteorite, volcanic eruption`
+
+const UNKNOWN_TYPE = "unknown"
+
+var validEventTypes = strings.Split(
+	strings.ReplaceAll(
+		strings.ReplaceAll(EVENT_TYPES, "\n", ""),
+		", ", ","),
+	",") // remove spaces after comma
 
 func init() {
 	var err error
@@ -137,6 +161,7 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		MinRadius:    0.0,
 		MaxRadius:    180.0,
 		NoData:       204,
+		EventType:    "*",
 	}
 
 	for abbrev, expanded := range eventAbbreviations {
@@ -146,11 +171,17 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		}
 	}
 
+	emptyEventType := false
+
 	for key, val := range v {
 		if _, ok := eventNotSupported[key]; ok {
 			return e, fmt.Errorf("\"%s\" is not supported", key)
 		}
 		if len(val[0]) == 0 {
+			if key == "eventtype" { // eventtype allows empty value, "eventtype="
+				emptyEventType = true
+				continue
+			}
 			return e, fmt.Errorf("Invalid %s value", key)
 		}
 	}
@@ -160,20 +191,15 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		return e, err
 	}
 
+	// decoder.Decode applies default value ("*") for query like "eventtype=" (without value)
+	// We overwrites it here.
+	if emptyEventType {
+		// overwrites default value "*"
+		e.EventType = ""
+	}
+
 	if e.Format != "xml" && e.Format != "text" {
 		return e, errors.New("Invalid format.")
-	}
-
-	if e.IncludeAllMagnitudes {
-		return e, errors.New("include all magnitudes is not supported.")
-	}
-
-	if e.IncludeAllOrigins {
-		return e, errors.New("include all origins is not supported.")
-	}
-
-	if e.IncludeArrivals {
-		return e, errors.New("include arrivals is not supported.")
 	}
 
 	if e.NoData != 204 && e.NoData != 404 {
@@ -238,9 +264,38 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 	case "", "time", "time-asc", "magnitude", "magnitude-asc":
 	default:
 		err = fmt.Errorf("invalid option for orderby: %s", e.OrderBy)
+		return e, err
 	}
 
-	return e, err
+	if e.EventType != "" && e.EventType != "*" {
+		types := strings.Split(strings.ToLower(e.EventType), ",") // spec: case insensitive
+		// we generate regexps from user's input, then check if we can match them
+		regs, err := fdsn.GenRegex(types, false, true)
+		if err != nil {
+			err = fmt.Errorf("invalid value for eventtype: %s", e.EventType)
+			return e, err
+		}
+		e.eventTypeSlice = make([]interface{}, 0)
+		for _, t := range validEventTypes {
+			if matchAnyRegex(t, regs) {
+				e.eventTypeSlice = append(e.eventTypeSlice, t)
+			}
+		}
+
+		if matchAnyRegex(UNKNOWN_TYPE, regs) {
+			e.eventTypeSlice = append(e.eventTypeSlice, "")
+		}
+
+		if len(e.eventTypeSlice) == 0 { // the input eventtype should expect at least a match
+			err = fmt.Errorf("invalid value for eventtype: %s", e.EventType)
+			return e, err
+		}
+	} else {
+		// default value, no filtering
+		e.eventTypeSlice = nil
+	}
+
+	return e, nil
 }
 
 // query queries the DB for events matching e.
@@ -270,7 +325,7 @@ func (e *fdsnEventV1) queryQuakeML12Event() (*sql.Rows, error) {
 }
 
 func (e *fdsnEventV1) queryRaw() (*sql.Rows, error) {
-	q := "SELECT PublicID,OriginTime,Latitude,Longitude,Depth,MagnitudeType,Magnitude FROM fdsn.event WHERE deleted != true"
+	q := fmt.Sprintf("SELECT PublicID,OriginTime,Latitude,Longitude,Depth,MagnitudeType,Magnitude,COALESCE(NULLIF(EventType,''), '%s') FROM fdsn.event WHERE deleted != true", UNKNOWN_TYPE)
 
 	qq, args := e.filter()
 
@@ -305,7 +360,6 @@ func (e *fdsnEventV1) count() (int, error) {
 
 	var c int
 	err := db.QueryRow(q, args...).Scan(&c)
-
 	return c, err
 }
 
@@ -393,6 +447,18 @@ func (e *fdsnEventV1) filter() (q string, args []interface{}) {
 	if e.MinRadius != 0.0 {
 		q = fmt.Sprintf("%s ST_Distance(ST_ShiftLongitude(origin_geom::GEOMETRY), ST_ShiftLongitude(ST_SetSRID(ST_Makepoint($%d, $%d), 4326))) >= $%d AND", q, i, i+1, i+2)
 		args = append(args, e.Longitude, e.Latitude, e.MinRadius)
+		i += 3
+	}
+
+	if e.eventTypeSlice != nil {
+		// creating N SQL placeholders for number of matched eventTypeSlice
+		p := make([]string, 0, len(e.eventTypeSlice))
+		for c := range e.eventTypeSlice {
+			p = append(p, fmt.Sprintf("$%d", i+c))
+		}
+		q = fmt.Sprintf("%s eventtype IN (%s) AND", q, strings.Join(p, ",")) // example: IN ($3,$4,$5,$6)
+		args = append(args, e.eventTypeSlice...)
+		i += len(e.eventTypeSlice) // nolint:ineffassign
 	}
 
 	q = strings.TrimSuffix(q, " AND")
@@ -405,35 +471,34 @@ eventV1Handler assembles QuakeML event fragments from the DB into a complete
 QuakeML event.  The result set is limited to 10,000 events which will be ~1.2GB.
 */
 func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	tm := time.Now()
+
 	if r.Method != "GET" {
-		return weft.StatusError{Code: http.StatusMethodNotAllowed}
+		return fdsnError{StatusError: weft.StatusError{Code: http.StatusMethodNotAllowed}, url: r.URL.String(), timestamp: tm}
 	}
 
 	e, err := parseEventV1(r.URL.Query())
 	if err != nil {
-		return weft.StatusError{Code: http.StatusBadRequest, Err: err}
+		return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, url: r.URL.String(), timestamp: tm}
 	}
 
 	c, err := e.count()
 	if err != nil {
-		return err
+		return fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 	}
 
 	if c == 0 {
-		return weft.StatusError{Code: e.NoData}
+		return fdsnError{StatusError: weft.StatusError{Code: e.NoData}, url: r.URL.String(), timestamp: tm}
 	}
 
 	if c > 10000 {
-		return weft.StatusError{
-			Code: http.StatusRequestEntityTooLarge,
-			Err:  fmt.Errorf("result to large found %d events, limit is 10,000", c),
-		}
+		return fdsnError{StatusError: weft.StatusError{Code: http.StatusRequestEntityTooLarge, Err: fmt.Errorf("result to large found %d events, limit is 10,000", c)}, url: r.URL.String(), timestamp: tm}
 	}
 
 	if e.Format == "xml" {
 		rows, err := e.queryQuakeML12Event()
 		if err != nil {
-			return err
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 		defer rows.Close()
 
@@ -446,7 +511,7 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 		for rows.Next() {
 			err = rows.Scan(&xml)
 			if err != nil {
-				return err
+				return fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 			}
 
 			b.WriteString(xml)
@@ -458,25 +523,25 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	} else {
 		rows, err := e.queryRaw()
 		if err != nil {
-			return err
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 		defer rows.Close()
 
-		b.WriteString("#EventID | Time | Latitude | Longitude | Depth/km | Author | Catalog | Contributor | ContributorID | MagType | Magnitude | MagAuthor | EventLocationName\n")
+		b.WriteString("#EventID | Time | Latitude | Longitude | Depth/km | Author | Catalog | Contributor | ContributorID | MagType | Magnitude | MagAuthor | EventLocationName | EventType\n")
 
-		var eventID, magType string
+		var eventID, magType, eventType string
 		var tm time.Time
 		var latitude, longitude, depth, magnitude float64
 		for rows.Next() {
-			err = rows.Scan(&eventID, &tm, &latitude, &longitude, &depth, &magType, &magnitude)
+			err = rows.Scan(&eventID, &tm, &latitude, &longitude, &depth, &magType, &magnitude, &eventType)
 			if err != nil {
-				return err
+				return fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 			}
 			loc := ""
 			if l, err := wgs84.ClosestNZ(latitude, longitude); err == nil {
 				loc = l.Description()
 			}
-			s := fmt.Sprintf("%s|%s|%.3f|%.3f|%.1f|GNS|GNS|GNS|%s|%s|%.1f|GNS|%s\n", eventID, tm.Format("2006-01-02T15:04:05"), latitude, longitude, depth, eventID, magType, magnitude, loc)
+			s := fmt.Sprintf("%s|%s|%.3f|%.3f|%.1f|GNS|GNS|GNS|%s|%s|%.1f|GNS|%s|%s\n", eventID, tm.Format("2006-01-02T15:04:05"), latitude, longitude, depth, eventID, magType, magnitude, loc, eventType)
 			b.WriteString(s)
 		}
 

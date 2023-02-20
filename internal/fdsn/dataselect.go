@@ -34,6 +34,7 @@ var dataSelectNotSupported = map[string]bool{
 
 // nslcReg: FDSN spec allows all ascii, but we'll only allow alpha, number, _, ?, *, "," and "--" (exactly 2 hyphens only)
 var nslcReg = regexp.MustCompile(`^([\w*?,]+|--)$`)
+var eventTypeReg = regexp.MustCompile(`^([\w*?, ]+|--)$`) // space allowed
 
 // nslcRegPassPattern: This is beyond FDSN spec.
 // Any NSLC regex string doesn't match this pattern we knew it won't generate any results.
@@ -262,14 +263,14 @@ func (d *DataSelect) Regexp() (DataSearch, error) {
 }
 
 func toPattern(params []string, emptyDash bool) (string, error) {
-	newParams, err := GenRegex(params, emptyDash)
+	newParams, err := GenRegex(params, emptyDash, false)
 	if err != nil {
 		return "", err
 	}
 	return strings.Join(newParams, `|`), nil
 }
 
-func GenRegex(input []string, emptyDash bool) ([]string, error) {
+func GenRegex(input []string, emptyDash bool, allowSpace bool) ([]string, error) {
 	if len(input) == 0 {
 		return nil, nil
 	}
@@ -281,9 +282,17 @@ func GenRegex(input []string, emptyDash bool) ([]string, error) {
 			continue
 		}
 
-		if !nslcReg.MatchString(s) {
+		var matched bool
+
+		if allowSpace {
+			matched = eventTypeReg.MatchString(s)
+		} else {
+			matched = nslcReg.MatchString(s)
+		}
+		if !matched {
 			return nil, fmt.Errorf("Invalid parameter:'%s'", s)
 		}
+
 		var r string
 
 		if emptyDash && s == "--" {

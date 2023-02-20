@@ -51,6 +51,7 @@ func TestEventV1Query(t *testing.T) {
 		MinRadius:    0.0,
 		NoData:       204,
 		Format:       "xml",
+		EventType:    "*", // default value
 	}
 
 	ex.StartTime.Time, err = time.Parse(time.RFC3339Nano, "2015-01-12T12:12:12.000000000Z")
@@ -417,4 +418,41 @@ func TestLongitudeWrap180(t *testing.T) {
 	if c != 2 {
 		t.Errorf("expected 2 records got %d\n", c)
 	}
+}
+
+func TestEventTypes(t *testing.T) {
+	queryCases := []struct {
+		query     string
+		shouldErr bool
+		expected  []interface{}
+	}{
+		{"earthquake", false, []interface{}{"earthquake"}},
+		{"e*", false, []interface{}{"earthquake", "explosion", "experimental explosion"}},
+		{"z*", true, nil}, // no such match, expected value doesn't matter
+		{"experimental explosion", false, []interface{}{"experimental explosion"}},
+		{"e*,a*", false, []interface{}{"earthquake", "anthropogenic event", "explosion", "accidental explosion", "experimental explosion", "atmospheric event", "acoustic noise", "avalanche"}},
+		{"unknown", false, []interface{}{""}}, // specify "unknown" means query for empty value
+	}
+	for _, c := range queryCases {
+		v := url.Values{}
+		v.Set("eventtype", c.query)
+		e, err := parseEventV1(v)
+		if !c.shouldErr && err != nil {
+			t.Errorf("error %s: %v", c.query, err)
+			continue
+		}
+		if c.shouldErr && err == nil {
+			t.Errorf("expected to error but passed for %s", c.query)
+			continue
+		}
+		if len(e.eventTypeSlice) != len(c.expected) {
+			t.Errorf("expected %v got %v", c.expected, e.eventTypeSlice)
+		}
+		for i, v := range c.expected {
+			if e.eventTypeSlice[i] != v {
+				t.Errorf("expected %s got %s", v, e.eventTypeSlice[i])
+			}
+		}
+	}
+
 }

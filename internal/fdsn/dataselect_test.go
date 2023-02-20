@@ -104,7 +104,7 @@ func TestParseGet(t *testing.T) {
 
 func TestGenRegex(t *testing.T) {
 	// normal case
-	r, err := fdsn.GenRegex([]string{"ABA0"}, false)
+	r, err := fdsn.GenRegex([]string{"ABA0"}, false, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -113,7 +113,7 @@ func TestGenRegex(t *testing.T) {
 	}
 
 	// "--" empty location
-	r, err = fdsn.GenRegex([]string{"--"}, true)
+	r, err = fdsn.GenRegex([]string{"--"}, true, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -122,7 +122,7 @@ func TestGenRegex(t *testing.T) {
 	}
 
 	// "?" and "*" special
-	r, err = fdsn.GenRegex([]string{"A?Z*"}, false)
+	r, err = fdsn.GenRegex([]string{"A?Z*"}, false, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -131,28 +131,33 @@ func TestGenRegex(t *testing.T) {
 	}
 
 	// "--" (exactly 2 hyphens) means empty in FDSN
-	_, err = fdsn.GenRegex([]string{"--"}, false)
+	_, err = fdsn.GenRegex([]string{"--"}, false, false)
 	if err != nil {
 		t.Error("expect to passed but rejected")
 	}
 
-	_, err = fdsn.GenRegex([]string{"---"}, false)
+	_, err = fdsn.GenRegex([]string{"---"}, false, false)
 	if err == nil {
 		t.Error("expect to rejected but passed")
 	}
 
 	// block all other chars, including valid regex since we're not supporting regex
-	_, err = fdsn.GenRegex([]string{"*\\^{]"}, false)
+	_, err = fdsn.GenRegex([]string{"*\\^{]"}, false, false)
 	if err == nil {
 		t.Error("expect to rejected but passed.")
 	}
 
-	_, err = fdsn.GenRegex([]string{"[E,H]H?"}, false)
+	_, err = fdsn.GenRegex([]string{"[E,H]H?"}, false, false)
 	if err == nil {
 		t.Error("expect to rejected but passed.")
 	}
 
-	_, err = fdsn.GenRegex([]string{"10,20"}, false)
+	_, err = fdsn.GenRegex([]string{"10,20"}, false, false)
+	if err != nil {
+		t.Error("expect to pass but rejected.")
+	}
+
+	_, err = fdsn.GenRegex([]string{"10 20"}, false, true) // allows space
 	if err != nil {
 		t.Error("expect to pass but rejected.")
 	}

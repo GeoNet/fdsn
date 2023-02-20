@@ -1,6 +1,7 @@
 {{define "body" -}}
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<application xmlns="http://wadl.dev.java.net/2009/02">
+<application xmlns="http://wadl.dev.java.net/2009/02"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <doc title="FDSN event web service 1.0"/>
     <resources base="https://{{.}}/fdsnws/event/1/">
 
@@ -8,65 +9,65 @@
             <method id="query" name="GET">
                 <request>
                     <doc xml:lang="english" title="the response size is limited to 10,000 events."/>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="starttime" style="query" type="xs:date">
+                    <param name="starttime" style="query" type="xs:date">
                         <doc xml:lang="english" title="limit to events occurring on or after the specified start time">
                             Examples: starttime=2012-11-29 or 2012-11-29T00:00:00 or 2012-11-29T00:00:00.000
                         </doc>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="endtime" style="query" type="xs:date">
+                    <param name="endtime" style="query" type="xs:date">
                         <doc xml:lang="english" title="limit to events occurring on or before the specified end time"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="minlatitude" style="query" type="xs:double"
+                    <param name="minlatitude" style="query" type="xs:double"
                            default="-90.0">
                         <doc xml:lang="english" title="southern boundary"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="maxlatitude" style="query" type="xs:double"
+                    <param name="maxlatitude" style="query" type="xs:double"
                            default="90.0">
                         <doc xml:lang="english" title="northern boundary"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="minlongitude" style="query"
+                    <param name="minlongitude" style="query"
                            type="xs:double" default="-180.0">
                         <doc xml:lang="english" title="western boundary"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="maxlongitude" style="query"
+                    <param name="maxlongitude" style="query"
                            type="xs:double" default="180.0">
                         <doc xml:lang="english" title="eastern boundary"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="minmagnitude" style="query"
+                    <param name="minmagnitude" style="query"
                            type="xs:double">
                         <doc xml:lang="english"
                              title="Limit to events with a magnitude larger than or equal to the specified minimum"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="maxmagnitude" style="query"
+                    <param name="maxmagnitude" style="query"
                            type="xs:double">
                         <doc xml:lang="english"
                              title="Limit to events with a magnitude smaller than or equal to the specified maximum"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="maxdepth" style="query" type="xs:double">
+                    <param name="maxdepth" style="query" type="xs:double">
                         <doc xml:lang="english"
                              title="Limit to events with depths equal to or less than the specified depth"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="mindepth" style="query" type="xs:double">
+                    <param name="mindepth" style="query" type="xs:double">
                         <doc xml:lang="english"
                              title="Limit to events with depths equal to or greater than the specified depth"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="latitude" style="query" type="xs:double" default="0.0">
+                    <param name="latitude" style="query" type="xs:double" default="0.0">
                         <doc xml:lang="english"
                             title="Specify the central latitude point for a radial search"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="longitude" style="query" type="xs:double" default="0.0">
+                    <param name="longitude" style="query" type="xs:double" default="0.0">
                         <doc xml:lang="english"
                             title="Specify the central longitude point for a radial search"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="maxradius" style="query" type="xs:double" default="180.0">
+                    <param name="maxradius" style="query" type="xs:double" default="180.0">
                         <doc xml:lang="english"
                             title="Specify maximum distance from the geographic point defined by latitude and longitude"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="minradius" style="query" type="xs:double" default="0.0">
+                    <param name="minradius" style="query" type="xs:double" default="0.0">
                         <doc xml:lang="english"
                             title="Specify minimum distance from the geographic point defined by latitude and longitude"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="orderby" style="query" type="xs:string"
+                    <param name="orderby" style="query" type="xs:string"
                            default="time">
                         <doc xml:lang="english" title="Specify the ordering of the returned results"/>
                         <option value="time">
@@ -82,22 +83,26 @@
                             <doc xml:lang="english" title="Sort by magnitude, ascending"/>
                         </option>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="eventid" style="query" type="xs:string">
+                    <param name="eventid" style="query" type="xs:string">
                         <doc xml:lang="english"
                              title="Retrieve an event based on the unique ID numbers assigned by the IRIS DMC"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="format" style="query" type="xs:string" default="xml">
+                    <param name="format" style="query" type="xs:string" default="xml">
                         <doc xml:lang="english" title="Specify output format. This is an IRIS extension to the FDSN specification"/>
                         <option value="xml" mediaType="application/xml"/>
                         <option value="text" mediaType="text/plain"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="nodata" style="query" type="xs:int" default="204">
+                    <param name="nodata" style="query" type="xs:int" default="204">
                         <doc xml:lang="english" title="Specify which HTML Status code is returned when no data is found."/>
                         <option value="204"/>
                         <option value="404"/>
                     </param>
-                    <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="updatedafter" style="query" type="xs:date">
+                    <param name="updatedafter" style="query" type="xs:date">
                         <doc xml:lang="english" title="Limit to events updated after the specified time"/>
+                    </param>
+					<param name="eventtype" style="query" type="xs:string" default="*">
+						<doc xml:lang="english" title="Limit to events with a specified eventType. The parameter value can be a single item, a comma-separated list of items, or the asterisk wildcard. Allowed values are
+from the QuakeML 1.2 EventType enumeration."/>
                     </param>
                 </request>
                 <response>

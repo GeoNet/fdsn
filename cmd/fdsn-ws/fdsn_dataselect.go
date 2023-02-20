@@ -77,26 +77,27 @@ func init() {
 func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	var params []fdsn.DataSelect
 
+	tm := time.Now()
+
 	switch r.Method {
 	case "POST":
 		defer r.Body.Close()
 		if err := fdsn.ParseDataSelectPost(r.Body, &params); err != nil {
-			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 	case "GET":
 		d, err := fdsn.ParseDataSelectGet(r.URL.Query())
 		if err != nil {
-			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 
 		params = append(params, d)
 	default:
-		return weft.StatusError{Code: http.StatusMethodNotAllowed}
+		return fdsnError{StatusError: weft.StatusError{Code: http.StatusMethodNotAllowed}, url: r.URL.String(), timestamp: tm}
 	}
 
 	if len(params) > MAX_QUERIES {
-		return weft.StatusError{Code: http.StatusRequestEntityTooLarge,
-			Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
+		return fdsnError{StatusError: weft.StatusError{Code: http.StatusRequestEntityTooLarge, Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}, url: r.URL.String(), timestamp: tm}
 	}
 
 	var metrics []metric
@@ -105,29 +106,29 @@ func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) e
 		d, err := v.Regexp()
 		if err != nil {
 			// regular expression check failed: invalid request
-			return weft.StatusError{Code: http.StatusBadRequest, Err: err}
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 		m, err := metricsSearch(d)
 		if err != nil {
 			// search into db failed: 500
-			return weft.StatusError{Code: http.StatusInternalServerError, Err: err}
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 
 		if len(metrics) > MAX_FILES {
-			return weft.StatusError{Code: http.StatusRequestEntityTooLarge,
-				Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
+			return fdsnError{StatusError: weft.StatusError{Code: http.StatusRequestEntityTooLarge,
+				Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}, url: r.URL.String(), timestamp: tm}
 		}
 
 		metrics = append(metrics, m...)
 	}
 
 	if len(metrics) == 0 {
-		return weft.StatusError{Code: params[0].NoData, Err: fmt.Errorf("%s", "no results for specified query")}
+		return fdsnError{StatusError: weft.StatusError{Code: params[0].NoData, Err: fmt.Errorf("%s", "no results for specified query")}, url: r.URL.String(), timestamp: tm}
 	}
 
 	by, err := json.Marshal(metrics)
 	if err != nil {
-		return weft.StatusError{Code: http.StatusInternalServerError, Err: err}
+		return fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 	}
 
 	b.Write(by)
@@ -143,29 +144,31 @@ func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) e
 func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, error) {
 	var params []fdsn.DataSelect
 
+	tm := time.Now()
+
 	switch r.Method {
 	case "POST":
 		defer r.Body.Close()
 		if err := fdsn.ParseDataSelectPost(r.Body, &params); err != nil {
-			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
+			return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 		if len(params) == 0 {
-			return 0, weft.StatusError{Code: NO_DATA, Err: fmt.Errorf("%s", "unable to parse post request")}
+			return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: fmt.Errorf("%s", "unable to parse post request")}, url: r.URL.String(), timestamp: tm}
 		}
 	case "GET":
 		d, err := fdsn.ParseDataSelectGet(r.URL.Query())
 		if err != nil {
-			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
+			return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 
 		params = append(params, d)
 	default:
-		return 0, weft.StatusError{Code: http.StatusMethodNotAllowed}
+		return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusMethodNotAllowed}, url: r.URL.String(), timestamp: tm}
 	}
 
 	if len(params) > MAX_QUERIES {
-		return 0, weft.StatusError{Code: http.StatusRequestEntityTooLarge,
-			Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
+		return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusRequestEntityTooLarge,
+			Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}, url: r.URL.String(), timestamp: tm}
 	}
 
 	//Log extra information about POST request if needed
@@ -186,10 +189,10 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 		d, err := v.Regexp()
 		if err != nil {
-			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: err}
+			return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 		if !d.End.After(d.Start) {
-			return 0, weft.StatusError{Code: http.StatusBadRequest, Err: fmt.Errorf("endtime must be after starttime")}
+			return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: fmt.Errorf("endtime must be after starttime")}, url: r.URL.String(), timestamp: tm}
 		}
 		// we only do "NZ"
 		if m, err := regexp.MatchString(d.Network, "NZ"); err != nil || !m {
@@ -202,21 +205,21 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 		}
 		keys, err := holdingsSearch(d)
 		if err != nil {
-			return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
+			return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
 
 		files += len(keys)
 
 		if files > MAX_FILES && gtHalfHour {
-			return 0, weft.StatusError{Code: http.StatusRequestEntityTooLarge,
-				Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}
+			return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusRequestEntityTooLarge,
+				Err: fmt.Errorf("number of queries in the POST request: %d exceeded the limit: %d", len(params), MAX_QUERIES)}, url: r.URL.String(), timestamp: tm}
 		}
 
 		request = append(request, dataSelect{d: d, keys: keys})
 	}
 
 	if files == 0 {
-		return 0, weft.StatusError{Code: params[0].NoData, Err: fmt.Errorf("%s", "no results for specified query")}
+		return 0, fdsnError{StatusError: weft.StatusError{Code: params[0].NoData, Err: fmt.Errorf("%s", "no results for specified query")}, url: r.URL.String(), timestamp: tm}
 	}
 
 	// Fetch the miniSEED files from S3.  Parse them and write
@@ -236,7 +239,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 			buf := &bytes.Buffer{}
 			err := s3Client.Get(S3_BUCKET, k, "", buf)
 			if err != nil {
-				return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
+				return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 			}
 
 		loop:
@@ -246,18 +249,18 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 				case err == io.EOF:
 					break loop
 				case err != nil:
-					return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
+					return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 				}
 
 				msr, err := ms.NewRecord(record)
 				if err != nil {
-					return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
+					return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 				}
 
 				if msr.StartTime().Before(v.d.End) && msr.EndTime().After(v.d.Start) {
 					n, err = w.Write(record)
 					if err != nil {
-						return 0, weft.StatusError{Code: http.StatusInternalServerError, Err: err}
+						return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 					}
 					metrics.MsgTx()
 					written += n
