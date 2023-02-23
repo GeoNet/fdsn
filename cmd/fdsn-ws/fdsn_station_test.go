@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/xml"
-	wt "github.com/GeoNet/kit/weft/wefttest"
 	"net/url"
 	"strings"
 	"testing"
+
+	wt "github.com/GeoNet/kit/weft/wefttest"
 )
 
 // NOTE: To run the test, please export :
@@ -471,7 +472,50 @@ NZ|ARHZ|-39.263100|176.995900|270.000000|Aropaoanui|2010-03-11T00:00:00|`)
 format=xml
 NZ ARA* * EHE*  2001-01-01T00:00:00 *
 NZ ARH? * EHN*  2001-01-01T00:00:00 *`
-	testXml := `<?xml version="1.0" encoding="UTF-8"?><FDSNStationXML schemaVersion="1" xmlns="http://www.fdsn.org/xml/station/1"><Source>GeoNet</Source><Sender>WEL(GNS_Test)</Sender><Module>Delta</Module><Created>2017-09-26T02:37:17</Created><Network code="NZ" startDate="1884-02-01T00:00:00" restrictedStatus="open"><Description>New Zealand National Seismograph Network</Description><TotalNumberStations>2</TotalNumberStations><SelectedNumberStations>2</SelectedNumberStations><Station code="ARAZ" startDate="2007-05-20T23:00:00" restrictedStatus="closed"><Description>Private seismograph sites</Description><Comment><Value>Location is given in NZGD2000</Value></Comment><Latitude datum="NZGD2000">-38.62769</Latitude><Longitude datum="NZGD2000">176.12006</Longitude><Elevation>420</Elevation><Site><Name>Aratiatia Landcorp Farm</Name><Description>9 km north of Taupo</Description></Site><CreationDate>2007-05-20T23:00:00</CreationDate><TotalNumberChannels>9</TotalNumberChannels><SelectedNumberChannels>3</SelectedNumberChannels></Station><Station code="ARHZ" startDate="2010-03-11T00:00:00" restrictedStatus="open"><Description>Hawke&#39;s Bay regional seismic network</Description><Comment><Value>Location is given in WGS84</Value></Comment><Latitude datum="WGS84">-39.2631</Latitude><Longitude datum="WGS84">176.9959</Longitude><Elevation>270</Elevation><Site><Name>Aropaoanui</Name><Description>28 km north of Napier</Description></Site><CreationDate>2010-03-11T00:00:00</CreationDate><TotalNumberChannels>6</TotalNumberChannels><SelectedNumberChannels>2</SelectedNumberChannels></Station></Network></FDSNStationXML>`
+	testXml := `<?xml version="1.0" encoding="UTF-8"?>
+	<FDSNStationXML schemaVersion="1" xmlns="http://www.fdsn.org/xml/station/1">
+	<Source>GeoNet</Source>
+	<Sender>WEL(GNS_Test)</Sender>
+	<Module>Delta</Module>
+	<Created>2017-09-26T02:37:17</Created>
+	<Network code="NZ" startDate="1884-02-01T00:00:00" restrictedStatus="open">
+		<Description>New Zealand National Seismograph Network</Description>
+		<TotalNumberStations>2</TotalNumberStations>
+		<SelectedNumberStations>2</SelectedNumberStations>
+		<Station code="ARAZ" startDate="2007-05-20T23:00:00" restrictedStatus="closed">
+			<Description>Private seismograph sites</Description>
+			<Comment>
+				<Value>Location is given in NZGD2000</Value>
+			</Comment>
+			<Latitude datum="NZGD2000">-38.62769</Latitude>
+			<Longitude datum="NZGD2000">176.12006</Longitude>
+			<Elevation>420</Elevation>
+			<Site>
+				<Name>Aratiatia Landcorp Farm</Name>
+				<Description>9 km north of Taupo</Description>
+			</Site>
+			<CreationDate>2007-05-20T23:00:00</CreationDate>
+			<TotalNumberChannels>9</TotalNumberChannels>
+			<SelectedNumberChannels>3</SelectedNumberChannels>
+		</Station>
+		<Station code="ARHZ" startDate="2010-03-11T00:00:00" restrictedStatus="open">
+			<Description>Hawke&#39;s Bay regional seismic network</Description>
+			<Comment>
+				<Value>Location is given in WGS84</Value>
+			</Comment>
+			<Latitude datum="WGS84">-39.2631</Latitude>
+			<Longitude datum="WGS84">176.9959</Longitude>
+			<Elevation>270</Elevation>
+			<Site>
+				<Name>Aropaoanui</Name>
+				<Description>28 km north of Napier</Description>
+			</Site>
+			<CreationDate>2010-03-11T00:00:00</CreationDate>
+			<TotalNumberChannels>6</TotalNumberChannels>
+			<SelectedNumberChannels>2</SelectedNumberChannels>
+		</Station>
+	</Network>
+	</FDSNStationXML>`
 	var src FDSNStationXML
 
 	err = xml.Unmarshal([]byte(testXml), &src)
@@ -531,5 +575,210 @@ NZ ARH? * EHN*  2001-01-01T00:00:00 *`
 				t.Errorf("station %d are not equal in SelectedNumberChannels", j)
 			}
 		}
+	}
+}
+
+// test filter. Especially for nodes having no children.
+func TestDoFilter(t *testing.T) {
+	var err error
+	var fdsn FDSNStationXML
+	var query url.Values
+	var hasValue bool
+
+	//
+	// basic case
+	//
+
+	// Test network filter - match case
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "STA1", "10", "CHA1")
+	query.Set("network", "NZ")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if !hasValue {
+		t.Errorf("expected to have NZ network got empty")
+	}
+
+	// Test network filter - unmatch case
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "STA1", "10", "CHA1")
+	query.Set("network", "MC")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if hasValue {
+		t.Errorf("expected to be empty got %v", fdsn)
+	}
+
+	// Test station filter - match case
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "STA1", "10", "CHA1")
+	query.Set("network", "NZ")
+	query.Set("station", "STA1")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if !hasValue {
+		t.Errorf("expected to have STA1 station got empty")
+	}
+
+	// Test station filter - unmatch case
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "STA1", "10", "CHA1")
+	query.Set("network", "NZ")
+	query.Set("station", "STA2")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if hasValue {
+		t.Errorf("expected to be empty got %v", fdsn)
+	}
+
+	// Test channel filter - match case
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "STA1", "10", "CHA1")
+	query.Set("network", "NZ")
+	query.Set("station", "STA1")
+	query.Set("channel", "CHA1")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if !hasValue {
+		t.Errorf("expected to have CHA1 channel got empty")
+	}
+
+	// Test channel filter - unmatch case
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "STA1", "10", "CHA1")
+	query.Set("network", "NZ")
+	query.Set("station", "STA1")
+	query.Set("channel", "CHA2")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if hasValue {
+		t.Errorf("expected to be empty got %v", fdsn)
+	}
+
+	//
+	// complicated cases
+	//
+
+	// network without stations, asking level station, returns till network level
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "", "", "")
+	query.Set("network", "NZ")
+	query.Set("level", "station")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if !hasValue {
+		t.Errorf("expected to have NZ network got empty")
+	}
+	if len(fdsn.Network) != 1 || len(fdsn.Network[0].Station) != 0 {
+		t.Errorf("exepcted to have NZ network only, got %v", fdsn)
+	}
+
+	// network without stations, query contains station, should fail
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "", "", "")
+	query.Set("network", "NZ")
+	query.Set("network", "STA1")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if hasValue {
+		t.Errorf("expected to be emptyu got %v", fdsn)
+	}
+
+	// station without channels, asking level channel, returns till station level
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "STA1", "", "")
+	query.Set("network", "NZ")
+	query.Set("station", "STA1")
+	query.Set("level", "channel")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if !hasValue {
+		t.Errorf("expected to have STA1 station got empty")
+	}
+	if len(fdsn.Network) != 1 || len(fdsn.Network[0].Station) != 1 || len(fdsn.Network[0].Station[0].Channel) != 0 {
+		t.Errorf("exepcted to have NZ/STA1, got %v", fdsn)
+	}
+
+	// station without channels, query contains channel, should fail
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "STA1", "", "")
+	query.Set("network", "NZ")
+	query.Set("station", "STA1")
+	query.Set("channel", "CHA1")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if hasValue {
+		t.Errorf("expected to be emptyu got %v", fdsn)
+	}
+
+}
+
+// helper functions
+func testCase(c *FDSNStationXML, query url.Values) (bool, error) {
+	var e fdsnStationV1Search
+	var err error
+	if e, err = parseStationV1(query); err != nil {
+		return false, err
+	}
+
+	return c.doFilter([]fdsnStationV1Search{e}), nil
+}
+
+var emptyXsdDatetime = xsdDateTime(emptyDateTime)
+
+func makeTestFDSN(network, station, location, channel string) FDSNStationXML {
+	var c = FDSNStationXML{
+		Network: []NetworkType{
+			{
+				BaseNodeType: BaseNodeType{
+					Code:      network,
+					StartDate: emptyXsdDatetime,
+					EndDate:   emptyXsdDatetime,
+				},
+				Station: []StationType{},
+			},
+		},
+	}
+
+	if station != "" {
+		c.Network[0].Station = append(c.Network[0].Station, makeTestStation(station))
+
+		if channel != "" {
+			c.Network[0].Station[0].Channel = append(c.Network[0].Station[0].Channel, makeTestChannel(channel, location))
+		}
+	}
+
+	return c
+}
+
+func makeTestStation(code string) StationType {
+	return StationType{
+		BaseNodeType: BaseNodeType{
+			Code:      code,
+			StartDate: emptyXsdDatetime,
+			EndDate:   emptyXsdDatetime,
+		},
+		Channel: []ChannelType{},
+	}
+}
+
+func makeTestChannel(code, locationCode string) ChannelType {
+	return ChannelType{
+		BaseNodeType: BaseNodeType{
+			Code:      code,
+			StartDate: emptyXsdDatetime,
+			EndDate:   emptyXsdDatetime,
+		},
+		LocationCode: locationCode,
 	}
 }
