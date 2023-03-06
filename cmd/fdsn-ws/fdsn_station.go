@@ -39,6 +39,8 @@ const (
 	ONBEFOREEND  = 0
 	ONAFTERSTART = 0
 	AFTER        = 1
+
+	REGEX_ANYTHING = "^.*$"
 )
 
 var stationAbbreviations = map[string]string{
@@ -663,14 +665,20 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
 
 	if len(n.Station) == 0 {
 		// for network nodes without children (though unlikely to happen):
-		//   1. If the query parameter stops at network level, then the match is done
-		//   2. Otherwise, we're unable to get a match because of empty children (thus returning false)
+		//   If there are query parameters for furthur levels, and there's no "*" (match anything) in the parameters,
+		//     then it'll be impossible to find a match (because we don't have children)
 		for _, p := range matchedParams {
-			if p.StationReg == nil && p.ChannelReg == nil && p.LocationReg == nil {
-				return true
+			if p.StationReg != nil && !contains(p.StationReg, REGEX_ANYTHING) {
+				return false
+			}
+			if p.ChannelReg != nil && !contains(p.ChannelReg, REGEX_ANYTHING) {
+				return false
+			}
+			if p.LocationReg != nil && !contains(p.LocationReg, REGEX_ANYTHING) {
+				return false
 			}
 		}
-		return false
+		return true
 	}
 
 	for _, s := range n.Station {
@@ -715,15 +723,17 @@ func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
 
 	if len(s.Channel) == 0 {
 		// for station nodes without children:
-		//   1. If the query parameter stops at station level, then the match is done
-		//   2. Otherwise,  we're unable to get a match (thus returning false)
+		//   If there are query parameters for furthur levels, and there's no "*" (match anything) in the parameters,
+		//     then it'll be impossible to find a match (because we don't have children)
 		for _, p := range matchedParams {
-			if p.ChannelReg == nil && p.LocationReg == nil {
-				return true
+			if p.ChannelReg != nil && !contains(p.ChannelReg, REGEX_ANYTHING) {
+				return false
+			}
+			if p.LocationReg != nil && !contains(p.LocationReg, REGEX_ANYTHING) {
+				return false
 			}
 		}
-
-		return false
+		return true
 	}
 
 	for _, c := range s.Channel {
@@ -1006,4 +1016,13 @@ func (d xsdDateTime) MarshalFormatText() string {
 
 	b, _ := d.MarshalText()
 	return string(b)
+}
+
+func contains(slice []string, value string) bool {
+	for _, s := range slice {
+		if s == value {
+			return true
+		}
+	}
+	return false
 }

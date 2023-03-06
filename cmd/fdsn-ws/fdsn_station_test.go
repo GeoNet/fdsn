@@ -721,6 +721,23 @@ func TestDoFilter(t *testing.T) {
 		t.Errorf("expected to be emptyu got %v", fdsn)
 	}
 
+	// two station without children, we should see both
+	query = make(map[string][]string)
+	fdsn = makeTestFDSN("NZ", "STA1", "", "")
+	fdsn.Network[0].Station = append(fdsn.Network[0].Station, makeTestStation("STA2"))
+	query.Set("network", "NZ")
+	query.Set("station", "STA1,STA2")
+	query.Set("channel", "*")
+	if hasValue, err = testCase(&fdsn, query); err != nil {
+		t.Error(err)
+	}
+	if !hasValue {
+		t.Errorf("expected to be values got empty result")
+	}
+	// we should get 2 results
+	if len(fdsn.Network[0].Station) != 2 {
+		t.Errorf("expected to be 2 stations got %v", fdsn)
+	}
 }
 
 // helper functions
