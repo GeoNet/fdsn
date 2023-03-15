@@ -39,6 +39,8 @@ const (
 	ONBEFOREEND  = 0
 	ONAFTERSTART = 0
 	AFTER        = 1
+
+	REGEX_ANYTHING = "^.*$"
 )
 
 var stationAbbreviations = map[string]string{
@@ -575,6 +577,10 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 				net.StartDate.MarshalFormatText(), net.EndDate.MarshalFormatText(),
 				net.TotalNumberStations))
 		} else {
+			if levelVal == STATION_LEVEL_STATION && len(net.Station) == 0 {
+				// Write Network name only
+				by.WriteString(fmt.Sprintf("%s|||||||\n", net.Code))
+			}
 			for s := 0; s < len(net.Station); s++ {
 				sta := &net.Station[s]
 				if levelVal == STATION_LEVEL_STATION {
@@ -583,6 +589,10 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 						sta.Latitude.Value, sta.Longitude.Value, sta.Elevation.Value,
 						sta.Site.Name, sta.StartDate.MarshalFormatText(), sta.EndDate.MarshalFormatText()))
 				} else {
+					if len(sta.Channel) == 0 {
+						// Write Station name only
+						by.WriteString(fmt.Sprintf("%s|%s||||||\n", net.Code, sta.Code))
+					}
 					for c := 0; c < len(sta.Channel); c++ {
 						cha := &sta.Channel[c]
 						var frequency float64
@@ -610,18 +620,16 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 }
 
 func (r *FDSNStationXML) doFilter(params []fdsnStationV1Search) bool {
-	ns := make([]NetworkType, 0)
-
+	resultNetworks := make([]NetworkType, 0)
 	for _, n := range r.Network {
 		if n.doFilter(params) {
-			ns = append(ns, n)
+			resultNetworks = append(resultNetworks, n)
 		}
 	}
 
-	r.Network = ns
+	r.Network = resultNetworks
 
-	if len(ns) == 0 {
-		// No result ( no "Network" node )
+	if len(resultNetworks) == 0 {
 		return false
 	}
 
@@ -638,7 +646,7 @@ func (r *FDSNStationXML) doFilter(params []fdsnStationV1Search) bool {
 func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
 	n.TotalNumberStations = len(n.Station)
 	matchedParams := make([]fdsnStationV1Search, 0)
-	ss := make([]StationType, 0)
+	resultStations := make([]StationType, 0)
 
 	for _, p := range params {
 		if !p.validStartEnd(time.Time(n.StartDate), time.Time(n.EndDate), STATION_LEVEL_NETWORK) {
@@ -655,46 +663,40 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
 		return false
 	}
 
-	for _, s := range n.Station {
-		if s.doFilter(matchedParams) {
-			ss = append(ss, s)
-		}
-	}
-
-	if len(ss) == 0 {
-		// Special case: when requested level is deeper than this level,
-		// but no child node from this node, then we should skip this node.
-		if params[0].LevelValue > STATION_LEVEL_NETWORK {
-			return false
-		}
-
-		// NOTE: the long description under is unlikely to happen since we only got 1 network.
-		//   However I still included the logic.
-		// ---
-		// Normally this network is included since it has met the query parameters for network.
-		// However, there's another case:
-		//   e.g. "query?station=ZZZZ&level=network"
-		// This kind of query makes the network test bypassed due to no query parameter for network,
-		//   but when there's no child node for this network we should skip this network.
-		// In short:
-		//   when there's no child node and there's query parameter for station, channel or location,
-		//   this network is excluded.
-		for _, p := range params {
-			if p.StationReg != nil || p.ChannelReg != nil || p.LocationReg != nil {
+	if len(n.Station) == 0 {
+		// for network nodes without children (though unlikely to happen):
+		//   If there are query parameters for furthur levels, and there's no "*" (match anything) in the parameters,
+		//     then it'll be impossible to find a match (because we don't have children)
+		for _, p := range matchedParams {
+			if p.StationReg != nil && !contains(p.StationReg, REGEX_ANYTHING) {
+				return false
+			}
+			if p.ChannelReg != nil && !contains(p.ChannelReg, REGEX_ANYTHING) {
+				return false
+			}
+			if p.LocationReg != nil && !contains(p.LocationReg, REGEX_ANYTHING) {
 				return false
 			}
 		}
+		return true
 	}
 
-	n.SelectedNumberStations = len(ss)
-	n.Station = ss
+	for _, s := range n.Station {
+		if s.doFilter(matchedParams) {
+			resultStations = append(resultStations, s)
+		}
+	}
 
-	return true
+	n.SelectedNumberStations = len(resultStations)
+	n.Station = resultStations
+
+	// this node only valid if the children matches any query
+	return n.SelectedNumberStations > 0
 }
 
 func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
 	s.TotalNumberChannels = len(s.Channel)
-	cs := make([]ChannelType, 0)
+	resultChannels := make([]ChannelType, 0)
 
 	matchedParams := make([]fdsnStationV1Search, 0)
 
@@ -705,10 +707,10 @@ func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
 		if p.StationReg != nil && !matchAnyRegex(s.Code, p.StationReg) {
 			continue
 		}
-		if !p.validLatLng(s.Latitude.Value, s.Longitude.Value) {
+		if !p.validLatLng(s.Latitude, s.Longitude) {
 			continue
 		}
-		if !p.validBounding(s.Latitude.Value, s.Longitude.Value) {
+		if !p.validBounding(s.Latitude, s.Longitude) {
 			continue
 		}
 		matchedParams = append(matchedParams, p)
@@ -719,38 +721,32 @@ func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
 		return false
 	}
 
-	for _, c := range s.Channel {
-		if c.doFilter(matchedParams) {
-			cs = append(cs, c)
-		}
-	}
-
-	if len(cs) == 0 {
-		// Special case: when requested level is deeper than this level,
-		//   but no child node from this node, then we should skip this node.
-		if params[0].LevelValue > STATION_LEVEL_STATION {
-			return false
-		}
-
-		// Normally this stations is included since it has met the query parameters for station.
-		// However, there's another case:
-		//   e.g. "query?channel=BTT"
-		// This kind of query makes the station test bypassed due to no query parameter for station,
-		//   but when there's no child node for this station we should skip this station.
-		// In conclusion:
-		//   when there's no sub child and there's query parameter for channel or location,
-		//   this station is excluded.
-		for _, p := range params {
-			if p.ChannelReg != nil || p.LocationReg != nil {
+	if len(s.Channel) == 0 {
+		// for station nodes without children:
+		//   If there are query parameters for furthur levels, and there's no "*" (match anything) in the parameters,
+		//     then it'll be impossible to find a match (because we don't have children)
+		for _, p := range matchedParams {
+			if p.ChannelReg != nil && !contains(p.ChannelReg, REGEX_ANYTHING) {
+				return false
+			}
+			if p.LocationReg != nil && !contains(p.LocationReg, REGEX_ANYTHING) {
 				return false
 			}
 		}
+		return true
 	}
 
-	s.SelectedNumberChannels = len(cs)
-	s.Channel = cs
+	for _, c := range s.Channel {
+		if c.doFilter(matchedParams) {
+			resultChannels = append(resultChannels, c)
+		}
+	}
 
-	return true
+	s.SelectedNumberChannels = len(resultChannels)
+	s.Channel = resultChannels
+
+	// this node only valid if the children matches any query
+	return s.SelectedNumberChannels > 0
 }
 
 func (c *ChannelType) doFilter(params []fdsnStationV1Search) bool {
@@ -764,10 +760,10 @@ func (c *ChannelType) doFilter(params []fdsnStationV1Search) bool {
 		if p.LocationReg != nil && !matchAnyRegex(c.LocationCode, p.LocationReg) {
 			continue
 		}
-		if !p.validLatLng(c.Latitude.Value, c.Longitude.Value) {
+		if !p.validLatLng(c.Latitude, c.Longitude) {
 			continue
 		}
-		if !p.validBounding(c.Latitude.Value, c.Longitude.Value) {
+		if !p.validBounding(c.Latitude, c.Longitude) {
 			continue
 		}
 
@@ -827,33 +823,40 @@ func (v fdsnStationV1Search) validStartEnd(start, end time.Time, level int) bool
 	return true
 }
 
-func (v fdsnStationV1Search) validLatLng(latitude, longitude float64) bool {
-	if v.MinLatitude != math.MaxFloat64 && latitude < v.MinLatitude {
+func (v fdsnStationV1Search) validLatLng(latitude *LatitudeType, longitude *LongitudeType) bool {
+	if v.MinLatitude != math.MaxFloat64 && (latitude == nil || latitude.Value < v.MinLatitude) {
+		// request to check latitude:
+		// 1. this node doesn't have latitude -> check failed
+		// 2. the value fall outside the range -> check failed
+		// (similar logics apply for cases below)
 		return false
 	}
 
-	if v.MaxLatitude != math.MaxFloat64 && latitude > v.MaxLatitude {
+	if v.MaxLatitude != math.MaxFloat64 && (latitude == nil || latitude.Value > v.MaxLatitude) {
 		return false
 	}
 
-	if v.MinLongitude != math.MaxFloat64 && longitude < v.MinLongitude {
+	if v.MinLongitude != math.MaxFloat64 && (longitude == nil || longitude.Value < v.MinLongitude) {
 		return false
 	}
 
-	if v.MaxLongitude != math.MaxFloat64 && longitude > v.MaxLongitude {
+	if v.MaxLongitude != math.MaxFloat64 && (longitude == nil || longitude.Value > v.MaxLongitude) {
 		return false
 	}
 
 	return true
 }
 
-func (v fdsnStationV1Search) validBounding(latitude, longitude float64) bool {
+func (v fdsnStationV1Search) validBounding(latitude *LatitudeType, longitude *LongitudeType) bool {
 	if v.Latitude == math.MaxFloat64 {
 		// not using bounding circle
 		return true
 	}
-
-	d, _, err := wgs84.DistanceBearing(v.Latitude, v.Longitude, latitude, longitude)
+	if latitude == nil || longitude == nil {
+		// requested bounding circle, but this node doesn't have lat/lon
+		return false
+	}
+	d, _, err := wgs84.DistanceBearing(v.Latitude, v.Longitude, latitude.Value, longitude.Value)
 	if err != nil {
 		log.Printf("Error checking bounding:%s\n", err.Error())
 		return false
@@ -1013,4 +1016,13 @@ func (d xsdDateTime) MarshalFormatText() string {
 
 	b, _ := d.MarshalText()
 	return string(b)
+}
+
+func contains(slice []string, value string) bool {
+	for _, s := range slice {
+		if s == value {
+			return true
+		}
+	}
+	return false
 }
