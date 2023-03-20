@@ -591,7 +591,7 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 				} else {
 					if len(sta.Channel) == 0 {
 						// Write Station name only
-						by.WriteString(fmt.Sprintf("%s|%s||||||\n", net.Code, sta.Code))
+						by.WriteString(fmt.Sprintf("%s|%s|||||||||||||||\n", net.Code, sta.Code))
 					}
 					for c := 0; c < len(sta.Channel); c++ {
 						cha := &sta.Channel[c]
