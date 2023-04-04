@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- **********************************************************************
- * (C) 2016 - GFZ-Potsdam
+ * Copyright (C) 2017 by gempa GmbH
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Lesser Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
  *
  * SC3ML 0.8 to QuakeML 1.2 stylesheet converter
  * Author  : Stephan Herrnkind
  * Email   : stephan.herrnkind@gempa.de
- * Version : 2016.161.01
+ * Version : 2017.342.01
  *
  * ================
  * Usage
@@ -16,6 +29,12 @@
  *
  *   xalan -in sc3ml.xml -xsl sc3ml_0.8__quakeml_1.2.xsl -out quakeml.xml
  *   xsltproc -o quakeml.xml sc3ml_0.8__quakeml_1.2.xsl sc3ml.xml
+ *
+ * You can also modify the default ID prefix with the reverse DNS name of your
+ * institute by setting the ID_PREFIX param:
+ *
+ *   xalan -param ID_PREFIX "'smi:org.gfz-potsdam.de/geofon/'" -in sc3ml.xml -xsl sc3ml_0.8__quakeml_1.2.xsl -out quakeml.xml
+ *   xsltproc -stringparam ID_PREFIX smi:org.gfz-potsdam.de/geofon/ -o quakeml.xml sc3ml_0.8__quakeml_1.2.xsl sc3ml.xml
  *
  * ================
  * Transformation
@@ -29,6 +48,9 @@
  *    restrictions, a conversion of a SC3ML to a QuakeML ID must be performed:
  *    'sc3id' -> 'smi:org.gfz-potsdam.de/geofon/'. If no SC3ML ID is available
  *    but QuakeML enforces one, a static ID value of 'NA' is used.
+ *    If the ID starts with `smi:` or `quakeml:`, the ID is considered valid
+ *    and let untouched. This can lead to an invalid generated file but avoid
+ *    to always modify IDs, especially when converting several times.
  *  - Repositioning of nodes: In QuakeML all information is grouped under the
  *    event element. As a consequence every node not referenced by an event
  *    will be lost during the conversion.
@@ -49,40 +71,52 @@
  *  - Renaming of nodes: The following table lists the mapping of names between
  *    both schema:
  *
- *    Parent (SC3)        SC3 name           QuakeML name
- *    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
- *    seiscomp            EventParameters    eventParameters
- *    arrival             weight             timeWeight
- *                        takeOffAngle       takeoffAngle
- *    magnitude           magnitude          mag
- *    stationMagnitude    magnitude          mag
- *    amplitude           amplitude          genericAmplitude
- *    origin              uncertainty        originUncertainty
- *    waveformID          resourceURI        CDATA
- *    comment             id                 id (attribute)
+ *    Parent (SC3)     SC3 name                 QuakeML name
+ *    """""""""""""""""""""""""""""""""""""""""""""""""""""""
+ *    seiscomp         EventParameters          eventParameters
+ *    arrival          weight [copied to following fields if true]
+ *                       timeUsed               timeWeight
+ *                       horizontalSlownessUsed horizontalSlownessWeight
+ *                       backazimuthUsed        backazimuthWeight
+ *                     takeOffAngle             takeoffAngle
+ *    magnitude        magnitude                mag
+ *    stationMagnitude magnitude                mag
+ *    amplitude        amplitude                genericAmplitude
+ *    origin           uncertainty              originUncertainty
+ *    momentTensor     method                   category
+ *    waveformID       resourceURI              CDATA
+ *    comment          id                       id (attribute)
  *
  *  - Enumerations: Both schema use enumerations. Numerous mappings are applied.
  *
- *  - Unit conversion: SC3ML uses kilometer for origin depth, QuakeML uses meter
+ *  - Unit conversion: SC3ML uses kilometer for origin depth, origin
+ *    uncertainty and confidence ellipsoid, QuakeML uses meter
  *
  *  - Unmapped nodes: The following nodes can not be mapped to the QuakeML
  *    schema, thus their data is lost:
  *
- *    Parent          Element lost
+ *    Parent           Element lost
+ *    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+ *    creationInfo     modificationTime
+ *    momentTensor     method
+ *                     stationMomentTensorContribution
+ *                     status
+ *                     cmtName
+ *                     cmtVersion
+ *                     phaseSetting
+ *    eventParameters  reading
+ *    comment          start
+ *    comment          end
+ *    RealQuantity     pdf
+ *    TimeQuality      pdf
+ *
+ *  - Mandatory nodes: The following nodes is mandatory in QuakeML but not in
+ *    SC3ML:
+ *
+ *    Parent           Mandatory element
  *    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""
- *    creationInfo    modificationTime
- *    arrival         timeUsed
- *                    horizontalSlownessUsed
- *                    backazimuthUsed
- *    focalMechanism  evaluationMode
- *                    evaluationStatus
- *    momentTensor    method
- *                    stationMomentTensorContribution
- *                    status
- *                    cmtName
- *                    cmtVersion
- *                    phaseSetting
- *    eventParameters reading
+ *    Amplitude        genericAmplitude
+ *    StationMagnitude originID
  *
  *  - Restriction of data size: QuakeML restricts string length of some
  *    elements. This length restriction is _NOT_ enforced by this
@@ -92,7 +126,7 @@
  *
  * ================
  * Change log
- * ===============
+ * ================
  *
  *  * 08.09.2014: Fixed typo in event type conversion (meteo[r] impact)
  *
@@ -106,45 +140,71 @@
  *  * 04.07.2016: Version bump. No modification here, SC3 datamodel was updated
  *                on the inventory side.
  *
- * ================
- * Licence
- * ================
+ *  * 28.11.2016: Version bump. No modification here, SC3 datamodel was updated
+ *                on the inventory side.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ *  * 28.06.2017: Changed license from GPL to LGPL
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *  * 08.08.2017: Added some fixes to use this XSLT in ObsPy
+ *    - Change ID_PREFIX variable to a param
+ *    - Do not copy Amplitude if amplitude/amplitude doesn't existing
+ *    - focalMechanism/evaluationMode and focalMechanism/evaluationStatus were
+ *      not copied but can actually be mapped to the QuakeML schema
+ *    - Some event/type enumeration was mapped to `other` instead of
+ *      `other event`
+ *    - Fix origin uncertainty and confidence ellispoid units
+ *    - Rename momentTensor/method to momentTensor/category
+ *    - Fix amplitude/unit (enumeration in QuakeML, not in SC3ML)
+ *    - Don't modify id if it starts with 'smi:' or 'quakeml:'
+ *    - Fix Arrival publicID generation
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the
- * Free Software Foundation, Inc.,
- * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *  * 27.09.2017:
+ *    - Use '_' instead of '#' in arrival publicID generation
+ *    - Map SC3 arrival weight to timeWeight, horizontalSlownessWeight and
+ *      backazimuthWeight depending on timeUsed, horizontalUsed and
+ *      backzimuthUsed values
+ *
+ *  * 08.12.2017:
+ *    - Remove unmapped nodes
+ *    - Fix arrival weight mapping
+ *
+ *  * 07.12.2018: Copy picks referenced by amplitudes
+ *
+ *  * 10.12.2018: Put the non-QuakeML nodes in a custom namespace
+ *
+ *  * 04.04.2022:
+ *    - Skip originUncertaintyDescription if value is set to
+ *      'probability density function' not supported by QuakeML.
+ *
+ *  * 31.10.2022: Improve performance when processing origins with many arrivals.
+ *
+ *  * 24.03.2023:
+ *    - Do not export duplicated picks referenced by different amplitudes.
+ *
  ********************************************************************** -->
 <xsl:stylesheet version="1.0"
         xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         xmlns:scs="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.8"
         xmlns:qml="http://quakeml.org/xmlns/quakeml/1.0"
+        xmlns="http://quakeml.org/xmlns/bed/1.2"
         xmlns:q="http://quakeml.org/xmlns/quakeml/1.2"
         exclude-result-prefixes="scs qml xsl">
-    <xsl:output method="xml" encoding="UTF-8" indent="no" omit-xml-declaration="yes"/>
+    <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
     <xsl:strip-space elements="*"/>
 
-    <!-- Define some global variables -->
-    <!-- CHANGE ME: Please change the ID_PREFIX to the reverse DNS name of your
-         institute -->
-    <xsl:variable name="ID_PREFIX" select="'smi:nz.org.geonet/'"/>
+    <!-- Define parameters-->
+    <xsl:param name="ID_PREFIX" select="'smi:org.gfz-potsdam.de/geofon/'"/>
+
+    <!-- Define global variables -->
     <xsl:variable name="PID" select="'publicID'"/>
 
     <!-- Starting point: Match the root node and select the one and only
          EventParameters node -->
     <xsl:template match="/">
         <xsl:variable name="scsRoot" select="."/>
+        <q:quakeml>
             <xsl:for-each select="$scsRoot/scs:seiscomp/scs:EventParameters">
+                <eventParameters>
                     <!-- Mandatory publicID attribute -->
                     <xsl:attribute name="{$PID}">
                         <xsl:call-template name="convertOptionalID">
@@ -152,8 +212,13 @@
                         </xsl:call-template>
                     </xsl:attribute>
 
-                    <xsl:apply-templates/>
+                    <!-- Put the QuakeML nodes at the beginning -->
+                    <xsl:apply-templates select="*[not(self::scs:reading)]" />
+                    <!-- Put the non-QuakeML nodes at the end -->
+                    <xsl:apply-templates select="scs:reading" mode="scs-only" />
+                </eventParameters>
             </xsl:for-each>
+        </q:quakeml>
     </xsl:template>
 
     <!-- event -->
@@ -161,37 +226,40 @@
         <xsl:element name="{local-name()}">
             <xsl:apply-templates select="@*"/>
 
-            <!-- search origins referenced by this event -->
-            <xsl:for-each select="scs:originReference">
-                <xsl:for-each select="../../scs:origin[@publicID=current()]">
-                    <!-- stationMagnitudes and referenced amplitudes -->
-                    <xsl:for-each select="scs:stationMagnitude">
-                        <xsl:for-each select="../../scs:amplitude[@publicID=current()/scs:amplitudeID]">
+            <!-- collect origins referenced by event/originReference -->
+            <xsl:variable name="origins" select="../scs:origin[@publicID=current()/scs:originReference]" />
+
+            <!-- picks referenced via origin/stationMagnitude/amplitudeID or origin/arrival -->
+            <xsl:variable name="amplitudes" select="../scs:amplitude[@publicID=$origins/scs:stationMagnitude/scs:amplitudeID]" />
+            <xsl:variable name="picks" select="$origins/scs:arrival/scs:pickID | $amplitudes/scs:pickID" />
+            <xsl:for-each select="../scs:pick[@publicID = $picks]">
+                <xsl:call-template name="genericNode" />
+            </xsl:for-each>
+
+            <xsl:for-each select="$origins">
+
+                <!-- stationMagnitudes and referenced amplitudes -->
+                <xsl:for-each select="scs:stationMagnitude">
+                    <xsl:for-each select="../../scs:amplitude[@publicID=current()/scs:amplitudeID]">
+                        <!-- amplitude/genericAmplitude is mandatory in QuakeML -->
+                        <xsl:if test="scs:amplitude">
                             <xsl:call-template name="genericNode"/>
-                        </xsl:for-each>
-                        <xsl:apply-templates select="." mode="originMagnitude">
-                            <xsl:with-param name="oID" select="../@publicID"/>
-                        </xsl:apply-templates>
+                        </xsl:if>
                     </xsl:for-each>
-
-                    <!-- magnitudes -->
-                    <xsl:for-each select="scs:magnitude">
-                        <xsl:apply-templates select="." mode="originMagnitude">
-                            <xsl:with-param name="oID" select="../@publicID"/>
-                        </xsl:apply-templates>
-                    </xsl:for-each>
-
-                    <!-- picks, referenced by arrivals -->
-                    <xsl:for-each select="scs:arrival">
-                        <!--xsl:value-of select="scs:pickID"/-->
-                        <xsl:for-each select="../../scs:pick[@publicID=current()/scs:pickID]">
-                            <xsl:call-template name="genericNode"/>
-                        </xsl:for-each>
-                    </xsl:for-each>
-
-                    <!-- origin -->
-                    <xsl:call-template name="genericNode"/>
+                    <xsl:apply-templates select="." mode="originMagnitude">
+                        <xsl:with-param name="oID" select="../@publicID"/>
+                    </xsl:apply-templates>
                 </xsl:for-each>
+
+                <!-- magnitudes -->
+                <xsl:for-each select="scs:magnitude">
+                    <xsl:apply-templates select="." mode="originMagnitude">
+                        <xsl:with-param name="oID" select="../@publicID"/>
+                    </xsl:apply-templates>
+                </xsl:for-each>
+
+                <!-- origin -->
+                <xsl:call-template name="genericNode"/>
             </xsl:for-each>
 
             <!-- search focalMechanisms referenced by this event -->
@@ -213,26 +281,18 @@
     <!-- Delete elements -->
     <xsl:template match="scs:EventParameters/scs:pick"/>
     <xsl:template match="scs:EventParameters/scs:amplitude"/>
-    <xsl:template match="scs:EventParameters/scs:reading"/>
     <xsl:template match="scs:EventParameters/scs:origin"/>
     <xsl:template match="scs:EventParameters/scs:focalMechanism"/>
-    <xsl:template match="scs:event/scs:originReference|scs:focalMechanismReference"/>
+    <xsl:template match="scs:event/scs:originReference"/>
     <xsl:template match="scs:event/scs:focalMechanismReference"/>
-    <xsl:template match="scs:creationInfo/scs:modificationTime"/>
     <xsl:template match="scs:comment/scs:id"/>
+    <xsl:template match="scs:arrival/scs:weight"/>
     <xsl:template match="scs:arrival/scs:timeUsed"/>
     <xsl:template match="scs:arrival/scs:horizontalSlownessUsed"/>
     <xsl:template match="scs:arrival/scs:backazimuthUsed"/>
     <xsl:template match="scs:origin/scs:stationMagnitude"/>
     <xsl:template match="scs:origin/scs:magnitude"/>
-    <xsl:template match="scs:focalMechanism/scs:evaluationMode"/>
-    <xsl:template match="scs:focalMechanism/scs:evaluationStatus"/>
     <xsl:template match="scs:momentTensor/scs:method"/>
-    <xsl:template match="scs:momentTensor/scs:stationMomentTensorContribution"/>
-    <xsl:template match="scs:momentTensor/scs:status"/>
-    <xsl:template match="scs:momentTensor/scs:cmtName"/>
-    <xsl:template match="scs:momentTensor/scs:cmtVersion"/>
-    <xsl:template match="scs:momentTensor/scs:phaseSetting"/>
 
     <!-- Converts a scs magnitude/stationMagnitude to a qml
          magnitude/stationMagnitude -->
@@ -249,7 +309,8 @@
                     </xsl:call-template>
                 </originID>
             </xsl:if>
-            <xsl:apply-templates/>
+
+            <xsl:apply-templates />
         </xsl:element>
     </xsl:template>
 
@@ -263,20 +324,30 @@
                 <xsl:when test="$v='not locatable'">other event</xsl:when>
                 <xsl:when test="$v='outside of network interest'">other event</xsl:when>
                 <xsl:when test="$v='duplicate'">other event</xsl:when>
+                <xsl:when test="$v='other'">other event</xsl:when>
                 <xsl:otherwise><xsl:value-of select="$v"/></xsl:otherwise>
             </xsl:choose>
         </xsl:element>
     </xsl:template>
 
     <!-- origin depth, SC3ML uses kilometer, QML meter -->
-    <xsl:template match="scs:origin/scs:depth/scs:value|scs:origin/scs:depth/scs:uncertainty|scs:origin/scs:depth/scs:lowerUncertainty|scs:origin/scs:depth/scs:upperUncertainty">
+    <xsl:template match="scs:origin/scs:depth/scs:value
+                         | scs:origin/scs:depth/scs:uncertainty
+                         | scs:origin/scs:depth/scs:lowerUncertainty
+                         | scs:origin/scs:depth/scs:upperUncertainty
+                         | scs:origin/scs:uncertainty/scs:horizontalUncertainty
+                         | scs:origin/scs:uncertainty/scs:minHorizontalUncertainty
+                         | scs:origin/scs:uncertainty/scs:maxHorizontalUncertainty
+                         | scs:confidenceEllipsoid/scs:semiMajorAxisLength
+                         | scs:confidenceEllipsoid/scs:semiMinorAxisLength
+                         | scs:confidenceEllipsoid/scs:semiIntermediateAxisLength">
         <xsl:element name="{local-name()}">
             <xsl:value-of select="current() * 1000"/>
         </xsl:element>
     </xsl:template>
 
     <!-- evaluation status, enumeration of QML does not include 'reported' -->
-    <xsl:template match="scs:origin/scs:evaluationStatus|scs:pick/scs:evaluationStatus">
+    <xsl:template match="scs:evaluationStatus">
         <xsl:variable name="v" select="current()"/>
         <xsl:if test="$v!='reported'">
             <xsl:element name="{local-name()}">
@@ -300,7 +371,7 @@
     </xsl:template>
 
     <!-- origin uncertainty description, enumeration of QML does not include 'probability density function' -->
-    <xsl:template match="scs:origin/scs:uncertainty|scs:preferredDescription">
+    <xsl:template match="scs:origin/scs:uncertainty/scs:preferredDescription">
         <xsl:variable name="v" select="current()"/>
         <xsl:if test="$v!='probability density function'">
             <xsl:element name="{local-name()}">
@@ -309,15 +380,92 @@
         </xsl:if>
     </xsl:template>
 
-    <!-- origin arrival, since SC3ML does not include a publicID it is generated from pick and origin id -->
+    <!-- origin uncertainty description, enumeration of QML does not include 'probability density function' -->
+    <xsl:template match="scs:origin/scs:uncertainty/scs:preferredDescription">
+        <xsl:variable name="v" select="current()"/>
+        <xsl:if test="$v!='probability density function'">
+            <xsl:element name="{local-name()}">
+                <xsl:value-of select="$v"/>
+            </xsl:element>
+        </xsl:if>
+    </xsl:template>
+
+    <!-- momentTensor/method -> momentTensor/category -->
+    <xsl:template match="scs:momentTensor/scs:method">
+        <xsl:variable name="v" select="current()"/>
+        <xsl:if test="$v='teleseismic' or $v='regional'">
+            <xsl:element name="category">
+                <xsl:value-of select="$v"/>
+            </xsl:element>
+        </xsl:if>
+    </xsl:template>
+
+    <!-- amplitude/unit is an enumeration in QuakeML, not in SC3ML -->
+    <xsl:template match="scs:amplitude/scs:unit">
+        <xsl:variable name="v" select="current()"/>
+        <xsl:element name="{local-name()}">
+            <xsl:choose>
+                <xsl:when test="$v='m'
+                                or $v='s'
+                                or $v='m/s'
+                                or $v='m/(s*s)'
+                                or $v='m*s'
+                                or $v='dimensionless'">
+                    <xsl:value-of select="$v"/>
+                </xsl:when>
+                <xsl:otherwise>other</xsl:otherwise>
+            </xsl:choose>
+        </xsl:element>
+    </xsl:template>
+
+    <!-- origin arrival -->
     <xsl:template match="scs:arrival">
         <xsl:element name="{local-name()}">
+            <!-- since SC3ML does not include a publicID it is generated from pick and origin id -->
             <xsl:attribute name="{$PID}">
                 <xsl:call-template name="convertID">
-                    <xsl:with-param name="id" select="concat(scs:pickID, '#', ../@publicID)"/>
+                    <xsl:with-param name="id" select="concat(scs:pickID, '_', translate(../@publicID, ' :', '__'))"/>
                 </xsl:call-template>
             </xsl:attribute>
-            <!--comment/-->
+            <!-- mapping of weight to timeWeight, horizontalSlownessWeight and backazimuthWeight
+                 depending on timeUsed, horizontalSlownessUsed and backazimuthUsed values -->
+            <xsl:choose>
+                <xsl:when test="scs:weight">
+                    <xsl:if test="((scs:timeUsed='true') or (scs:timeUsed='1'))
+                                  or (not(scs:timeUsed|scs:horizontalSlownessUsed|scs:backazimuthUsed))">
+                        <xsl:element name="timeWeight">
+                            <xsl:value-of select="scs:weight"/>
+                        </xsl:element>
+                    </xsl:if>
+                    <xsl:if test="((scs:horizontalSlownessUsed='true') or (scs:horizontalSlownessUsed='1'))">
+                        <xsl:element name="horizontalSlownessWeight">
+                            <xsl:value-of select="scs:weight"/>
+                        </xsl:element>
+                    </xsl:if>
+                    <xsl:if test="((scs:backazimuthUsed='true') or (scs:backazimuthUsed='1'))">
+                        <xsl:element name="backazimuthWeight">
+                            <xsl:value-of select="scs:weight"/>
+                        </xsl:element>
+                    </xsl:if>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:if test="((scs:timeUsed='true') or (scs:timeUsed='1'))">
+                        <xsl:element name="timeWeight">
+                            <xsl:value-of select="'1'"/>
+                        </xsl:element>
+                    </xsl:if>
+                    <xsl:if test="((scs:horizontalSlownessUsed='true') or (scs:horizontalSlownessUsed='1'))">
+                        <xsl:element name="horizontalSlownessWeight">
+                            <xsl:value-of select="'1'"/>
+                        </xsl:element>
+                    </xsl:if>
+                    <xsl:if test="((scs:backazimuthUsed='true') or (scs:backazimuthUsed='1'))">
+                        <xsl:element name="backazimuthWeight">
+                            <xsl:value-of select="'1'"/>
+                        </xsl:element>
+                    </xsl:if>
+                </xsl:otherwise>
+            </xsl:choose>
             <xsl:apply-templates/>
         </xsl:element>
     </xsl:template>
@@ -328,13 +476,6 @@
             <xsl:apply-templates select="@*"/>
             <xsl:call-template name="valueOfIDNode"/>
         </xsl:element>
-    </xsl:template>
-
-    <!-- arrival/weight -> arrival/timeWeight-->
-    <xsl:template match="scs:arrival/scs:weight">
-        <xsl:call-template name="genericNode">
-            <xsl:with-param name="name" select="'timeWeight'"/>
-        </xsl:call-template>
     </xsl:template>
 
     <!-- arrival/takeOffAngle -> arrival/takeoffAngle -->
@@ -390,7 +531,11 @@
                     </xsl:call-template>
                 </xsl:attribute>
             </xsl:if>
-            <xsl:apply-templates/>
+
+            <!-- Put the QuakeML nodes at the beginning -->
+            <xsl:apply-templates select="*[not(self::scs:start|self::scs:end)]" />
+            <!-- Put the non-QuakeML nodes at the end -->
+            <xsl:apply-templates select="scs:start|scs:end" mode="scs-only" />
         </xsl:element>
     </xsl:template>
 
@@ -411,6 +556,60 @@
             </xsl:choose>
         </xsl:attribute>
     </xsl:template>
+
+<!--
+    ************************************************************************
+    Unmapped nodes
+    ************************************************************************
+-->
+
+    <xsl:template match="scs:creationInfo">
+        <xsl:element name="{local-name()}">
+            <xsl:apply-templates select="@*"/>
+
+            <!-- Put the QuakeML nodes at the beginning -->
+            <xsl:apply-templates select="*[not(self::scs:modificationTime)]" />
+            <!-- Put the non-QuakeML nodes at the end -->
+            <xsl:apply-templates select="scs:modificationTime" mode="scs-only" />
+        </xsl:element>
+    </xsl:template>
+
+    <xsl:template match="scs:momentTensor">
+        <xsl:element name="{local-name()}">
+            <xsl:apply-templates select="@*"/>
+
+            <!-- Put the QuakeML nodes at the beginning -->
+            <xsl:apply-templates select="*[not(self::scs:stationMomentTensorContribution
+                                               | self::scs:status
+                                               | self::scs:cmtName
+                                               | self::scs:cmtVersion
+                                               | self::scs:phaseSetting)]" />
+            <!-- Put the non-QuakeML nodes at the end -->
+            <xsl:apply-templates select="scs:stationMomentTensorContribution
+                                         | scs:status
+                                         | scs:cmtName
+                                         | scs:cmtVersion
+                                         | scs:phaseSetting" mode="scs-only" />
+        </xsl:element>
+    </xsl:template>
+
+    <xsl:template match="scs:pdf">
+        <xsl:apply-templates select="." mode="scs-only" />
+    </xsl:template>
+
+    <xsl:template match="node()|@*" mode="scs-only">
+      <xsl:copy>
+        <xsl:apply-templates select="node()|@*"/>
+      </xsl:copy>
+    </xsl:template>
+
+    <!-- Keep seiscomp namespace for unmapped node -->
+    <xsl:template match="scs:*" mode="scs-only">
+      <xsl:element name="scs:{local-name()}">
+        <xsl:apply-templates select="@*|node()" mode="scs-only" />
+      </xsl:element>
+  </xsl:template>
+
 
 <!--
     ************************************************************************
@@ -475,8 +674,17 @@
     <!-- Converts a scs id to a quakeml id -->
     <xsl:template name="convertID">
         <xsl:param name="id"/>
-        <xsl:value-of select="concat($ID_PREFIX, translate($id, ' :', '__'))"/>
+        <!-- If the id starts with 'smi:' or 'quakeml:', consider that the id
+             is already well formated -->
+        <xsl:choose>
+            <xsl:when test="starts-with($id, 'smi:')
+                            or starts-with($id, 'quakeml:')">
+                <xsl:value-of select="$id"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="concat($ID_PREFIX, translate($id, ' :', '__'))"/>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
 </xsl:stylesheet>
-
