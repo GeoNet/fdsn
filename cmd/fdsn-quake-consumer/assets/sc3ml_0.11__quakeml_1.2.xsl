@@ -192,14 +192,14 @@
         xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
         xmlns:scs="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.11"
         xmlns:qml="http://quakeml.org/xmlns/quakeml/1.0"
-        xmlns="http://quakeml.org/xmlns/bed/1.2"
+        xmlns:bed="http://quakeml.org/xmlns/bed/1.2"
         xmlns:q="http://quakeml.org/xmlns/quakeml/1.2"
-        exclude-result-prefixes="scs qml xsl">
-    <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
+        exclude-result-prefixes="scs qml xsl bed">
+    <xsl:output method="xml" encoding="UTF-8" indent="no" omit-xml-declaration="yes"/>
     <xsl:strip-space elements="*"/>
 
     <!-- Define parameters-->
-    <xsl:param name="ID_PREFIX" select="'smi:org.gfz-potsdam.de/geofon/'"/>
+    <xsl:param name="ID_PREFIX" select="'smi:nz.org.geonet/'"/>
 
     <!-- Define global variables -->
     <xsl:variable name="PID" select="'publicID'"/>
@@ -208,9 +208,7 @@
          EventParameters node -->
     <xsl:template match="/">
         <xsl:variable name="scsRoot" select="."/>
-        <q:quakeml>
             <xsl:for-each select="$scsRoot/scs:seiscomp/scs:EventParameters">
-                <eventParameters>
                     <!-- Mandatory publicID attribute -->
                     <xsl:attribute name="{$PID}">
                         <xsl:call-template name="convertOptionalID">
@@ -222,9 +220,7 @@
                     <xsl:apply-templates select="*[not(self::scs:reading)]" />
                     <!-- Put the non-QuakeML nodes at the end -->
                     <xsl:apply-templates select="scs:reading" mode="scs-only" />
-                </eventParameters>
             </xsl:for-each>
-        </q:quakeml>
     </xsl:template>
 
     <!-- event -->
