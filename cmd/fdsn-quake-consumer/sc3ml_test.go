@@ -29,11 +29,11 @@ func TestEventUnmarshal(t *testing.T) {
 		}
 
 		if !strings.HasPrefix(e.Quakeml12Event, `<event publicID="smi:nz.org.geonet/2015p768477">`) {
-			t.Error("quakeml fragment should start with <event...")
+			t.Errorf("%s: quakeml fragment should start with <event...", input)
 		}
 
 		if !strings.HasSuffix(e.Quakeml12Event, `</event>`) {
-			t.Error("quakeml fragment should end with </event>")
+			t.Errorf("%s: quakeml fragment should end with </event>", input)
 		}
 
 		c := event{
@@ -130,11 +130,11 @@ func TestToQuakeMLEvent(t *testing.T) {
 		}
 
 		if !strings.HasPrefix(e, `<event publicID="smi:nz.org.geonet/2015p768477">`) {
-			t.Error("quakeml fragment should start with <event...")
+			t.Errorf("%s: quakeml fragment should start with <event...", input)
 		}
 
 		if !strings.HasSuffix(e, `</event>`) {
-			t.Error("quakeml fragment should end with </event>")
+			t.Errorf("%s: quakeml fragment should end with </event>", input)
 		}
 	}
 
