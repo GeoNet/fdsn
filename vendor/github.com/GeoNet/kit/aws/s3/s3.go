@@ -78,7 +78,26 @@ func getConfig() (aws.Config, error) {
 	if os.Getenv("AWS_REGION") == "" {
 		return aws.Config{}, errors.New("AWS_REGION is not set")
 	}
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+
+	var cfg aws.Config
+	var err error
+
+	if awsEndpoint := os.Getenv("CUSTOM_AWS_ENDPOINT_URL"); awsEndpoint != "" {
+		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+			return aws.Endpoint{
+				PartitionID:       "aws",
+				URL:               awsEndpoint,
+				HostnameImmutable: true,
+			}, nil
+		})
+
+		cfg, err = config.LoadDefaultConfig(
+			context.TODO(),
+			config.WithEndpointResolverWithOptions(customResolver))
+	} else {
+		cfg, err = config.LoadDefaultConfig(context.TODO())
+	}
+
 	if err != nil {
 		return aws.Config{}, err
 	}
@@ -170,6 +189,22 @@ func (s *S3) GetMeta(bucket, key, version string) (Meta, error) {
 	}
 
 	return res.Metadata, nil
+}
+
+// GetContentSize returns the content length and last modified time of the specified key
+func (s *S3) GetContentSizeTime(bucket, key string) (int64, time.Time, error) {
+	var size int64
+	var mt time.Time
+	input := s3.HeadObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	}
+
+	o, err := s.client.HeadObject(context.TODO(), &input)
+	if err != nil {
+		return size, mt, err
+	}
+	return o.ContentLength, *o.LastModified, nil
 }
 
 // Put puts the object in bucket using specified key.
@@ -378,5 +413,18 @@ func (s *S3) Delete(bucket, key string) error {
 	}
 
 	_, err := s.client.DeleteObject(context.TODO(), &input)
+	return err
+}
+
+// Copy copies from the source to the bucket with key as the new name.
+// source should include the bucket name eg: "mybucket/objectkey.pdf"
+func (s *S3) Copy(bucket, key, source string) error {
+	input := s3.CopyObjectInput{
+		Bucket:     aws.String(bucket),
+		Key:        aws.String(key),
+		CopySource: aws.String(source),
+	}
+	_, err := s.client.CopyObject(context.TODO(), &input)
+
 	return err
 }

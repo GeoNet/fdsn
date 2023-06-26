@@ -162,7 +162,8 @@ func checkCSP(respCsp, expectedCsp map[string]string) error {
 	for k, v := range expectedCsp {
 		v1 := respCsp[k]
 		if k == "script-src" && strings.Contains(v1, "nonce-") { //check nonce
-			pattern := fmt.Sprintf(noncePattern, v)
+			escapedV := strings.Replace(v, "*", "\\*", -1) // escape wildcards to avoid regex clash
+			pattern := fmt.Sprintf(noncePattern, escapedV)
 			if !patternMatch(pattern, v1) {
 				return fmt.Errorf("## Response CSP %s=%s doesn't match expected %s=%s", k, v1, k, v)
 			}

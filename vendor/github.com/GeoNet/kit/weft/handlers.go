@@ -5,13 +5,14 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
-	"github.com/GeoNet/kit/metrics"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 	"runtime"
 	"strings"
 	"sync"
+
+	"github.com/GeoNet/kit/metrics"
 )
 
 var bufferPool = sync.Pool{
@@ -58,29 +59,15 @@ var compressibleMimes = map[string]bool{
 
 var defaultCsp = map[string]string{
 	"default-src":     "'none'",
-	"img-src":         "'self' *.geonet.org.nz data: https://www.google-analytics.com https://stats.g.doubleclick.net",
+	"img-src":         "'self' *.geonet.org.nz data: https://*.google-analytics.com https://*.googletagmanager.com",
 	"font-src":        "'self' https://fonts.gstatic.com",
 	"style-src":       "'self'",
 	"script-src":      "'self'",
-	"connect-src":     "'self' https://*.geonet.org.nz https://www.google-analytics.com https://stats.g.doubleclick.net",
+	"connect-src":     "'self' https://*.geonet.org.nz https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
 	"frame-src":       "'self' https://www.youtube.com https://www.google.com",
-	"form-action":     "'self'",
+	"form-action":     "'self' https://*.geonet.org.nz",
 	"base-uri":        "'none'",
 	"frame-ancestors": "'self'",
-	"object-src":      "'none'",
-}
-
-var strictCsp = map[string]string{
-	"default-src":     "'none'",
-	"img-src":         "'self'",
-	"font-src":        "'none'",
-	"style-src":       "'none'",
-	"script-src":      "'none'",
-	"connect-src":     "'none'",
-	"frame-src":       "'none'",
-	"form-action":     "'none'",
-	"base-uri":        "'none'",
-	"frame-ancestors": "'none'",
 	"object-src":      "'none'",
 }
 
@@ -102,7 +89,7 @@ type DirectRequestHandler func(r *http.Request, w http.ResponseWriter) (int64, e
 
 // ErrorHandler should write the error for err into b and adjust h as required.
 // err can be nil
-type ErrorHandler func(err error, h http.Header, b *bytes.Buffer) error
+type ErrorHandler func(err error, h http.Header, b *bytes.Buffer, nonce string) error
 
 // MakeDirectHandler executes rh.  The caller should write directly to w for success (200) only.
 // In the case of an rh returning an error ErrorHandler is executed and the response written to the client.
@@ -112,25 +99,41 @@ func MakeDirectHandler(rh DirectRequestHandler, eh ErrorHandler) http.HandlerFun
 	return func(w http.ResponseWriter, r *http.Request) {
 		b := bufferPool.Get().(*bytes.Buffer)
 		defer bufferPool.Put(b)
+
+		name := name(rh)
+
 		b.Reset()
+
+		// run the RequestHandler with timing.  If this returns an error then use the
+		// ErrorHandler to set the error content and header.
+		t := metrics.Start()
+		// note: the ending `writeResponseAndLogMetrics` calls t.Track which will stop the metric timer, too
+		//set csp headers
+		SetBestPracticeHeaders(w, r, nil, "")
+		//run request handler
 		n, err := rh(r, w)
 		if err == nil { //all good, return
 			metrics.StatusOK()
+			metrics.Request()
 			metrics.Written(n)
+
+			if er := t.Track(name + "." + r.Method); er != nil {
+				logger.Printf("error tracking metric : %s", er.Error())
+			}
+
 			return
 		}
 
-		//set csp headers
-		setBestPracticeHeaders(w, r, nil, "")
+		//everything below are for error responses
 		logRequest(r)
+		t.Stop()
+
 		//run error handler
-		e := eh(err, w.Header(), b)
+		e := eh(err, w.Header(), b, "")
 		if e != nil {
 			logger.Printf("setting error: %s", e.Error())
 		}
-
 		//write error response and log metrics
-		name := name(rh)
 		writeResponseAndLogMetrics(err, w, r, b, name, nil)
 	}
 }
@@ -157,14 +160,13 @@ func MakeHandlerWithCsp(rh RequestHandler, eh ErrorHandler, customCsp map[string
 		err := rh(r, w.Header(), b)
 		if err != nil {
 			//run error handler
-			e := eh(err, w.Header(), b)
+			e := eh(err, w.Header(), b, "")
 			if e != nil {
 				logger.Printf("2 error from error handler: %s", e.Error())
 			}
-			//set strict csp for error page
-			setBestPracticeHeaders(w, r, strictCsp, "")
+			SetBestPracticeHeaders(w, r, defaultCsp, "")
 		} else {
-			setBestPracticeHeaders(w, r, customCsp, "")
+			SetBestPracticeHeaders(w, r, customCsp, "")
 		}
 
 		logRequest(r)
@@ -207,14 +209,13 @@ func MakeHandlerWithCspNonce(rh RequestHandlerWithNonce, eh ErrorHandler, custom
 		}
 		if err != nil {
 			//run error handler
-			e := eh(err, w.Header(), b)
+			e := eh(err, w.Header(), b, nonce)
 			if e != nil {
 				logger.Printf("2 error from error handler: %s", e.Error())
 			}
-			//set strict csp for error page
-			setBestPracticeHeaders(w, r, strictCsp, nonce)
+			SetBestPracticeHeaders(w, r, defaultCsp, nonce)
 		} else {
-			setBestPracticeHeaders(w, r, customCsp, nonce)
+			SetBestPracticeHeaders(w, r, customCsp, nonce)
 		}
 
 		logRequest(r)
@@ -311,7 +312,7 @@ func writeResponseAndLogMetrics(err error, w http.ResponseWriter, r *http.Reques
  * NOTE: customCsp should include the whole set of an item as it override that in defaultCsp
  * @param nonce: string to be added to script CSP, refer: https://csp.withgoogle.com/docs/strict-csp.html
  */
-func setBestPracticeHeaders(w http.ResponseWriter, r *http.Request, customCsp map[string]string, nonce string) {
+func SetBestPracticeHeaders(w http.ResponseWriter, r *http.Request, customCsp map[string]string, nonce string) {
 	var csp strings.Builder
 	for k, v := range defaultCsp {
 		s := v
@@ -360,7 +361,7 @@ func logRequest(r *http.Request) {
 // Headers are set for intermediate caches.
 //
 // Implements ErrorHandler
-func TextError(e error, h http.Header, b *bytes.Buffer) error {
+func TextError(e error, h http.Header, b *bytes.Buffer, nonce string) error {
 	if b == nil {
 		return errors.New("nil *bytes.Buffer")
 	}
@@ -411,7 +412,7 @@ func TextError(e error, h http.Header, b *bytes.Buffer) error {
 // The content of b is not changed.
 //
 // Implements ErrorHandler
-func UseError(e error, h http.Header, b *bytes.Buffer) error {
+func UseError(e error, h http.Header, b *bytes.Buffer, nonce string) error {
 	switch Status(e) {
 	case http.StatusOK:
 	case http.StatusNoContent:
@@ -442,7 +443,7 @@ func UseError(e error, h http.Header, b *bytes.Buffer) error {
 // Headers are set for intermediate caches.
 //
 // Implements ErrorHandler
-func HTMLError(e error, h http.Header, b *bytes.Buffer) error {
+func HTMLError(e error, h http.Header, b *bytes.Buffer, nonce string) error {
 	if b == nil {
 		return errors.New("nil *bytes.Buffer")
 	}
@@ -545,4 +546,14 @@ func Soh(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	b.Write([]byte("<html><head></head><body>ok</body></html>"))
 
 	return nil
+}
+
+// ReturnDefaultCSP returns the default Content Security Policy used
+// by handlers. This is a copy of the map, so can be changed safely if needed.
+func ReturnDefaultCSP() map[string]string {
+	copy := make(map[string]string)
+	for k, v := range defaultCsp {
+		copy[k] = v
+	}
+	return copy
 }

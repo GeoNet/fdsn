@@ -1,5 +1,7 @@
 github.com/GeoNet/kit v0.0.0-20220629232654-4b4c51b3443f h1:ZkDeDciYiXdUy6ZAF6btyC1qR6hNXjUKnAPw1num56Y=
 github.com/GeoNet/kit v0.0.0-20220629232654-4b4c51b3443f/go.mod h1:OnSDRHdXNzh4C2YSgoqug9225ciUWGx+Liht4xYPD3A=
+github.com/GeoNet/kit v0.0.0-20230614012800-bd1eeec838f2 h1:WQQa+Xztd7Em0+d12QrtGFxoH6Xsd0yYiqsy4Cu5A1s=
+github.com/GeoNet/kit v0.0.0-20230614012800-bd1eeec838f2/go.mod h1:yc5CLny5lcAiZeNmJvIKbTwQrLHriKvcMX1suqsilhc=
 github.com/aws/aws-sdk-go-v2 v1.16.2 h1:fqlCk6Iy3bnCumtrLz9r3mJ/2gUT0pJ0wLFVIdWh+JA=
 github.com/aws/aws-sdk-go-v2 v1.16.2/go.mod h1:ytwTPBG6fXTZLxxeeCCWj2/EMYp/xDUgX+OET6TLNNU=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.1 h1:SdK4Ppk5IzLs64ZMvr6MrSficMtjY2oS0WOORXTlxwU=
@@ -76,7 +78,6 @@ google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp0
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.27.1 h1:SnqbnDw1V7RiZcXPx5MEeqPv2s79L9i7BJUlG/+RurQ=
 google.golang.org/protobuf v1.27.1/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
-gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/inf.v0 v0.9.1/go.mod h1:cWUDdTG/fYaXco+Dcufb5Vnc6Gp2YChqWtbxRZE0mXw=
 gopkg.in/yaml.v2 v2.2.8 h1:obN1ZagJSUGI0Ek/LBmuj4SNLPfIny3KsKFopxRdj10=
