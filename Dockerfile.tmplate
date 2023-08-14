@@ -1,11 +1,11 @@
-ARG BUILDER_IMAGE=quay.io/geonet/golang:1.16-alpine
-ARG RUNNER_IMAGE=quay.io/geonet/go-scratch:latest
+ARG BUILDER_IMAGE=ghcr.io/geonet/base-images/go:1.16
+ARG RUNNER_IMAGE=ghcr.io/geonet/base-images/static:latest
 ARG RUN_USER=nobody
 # Only support image based on AlpineLinux
 FROM ${BUILDER_IMAGE} as builder
 
 # Obtain ca-cert and tzdata, which we will add to the container
-RUN apk add --update ca-certificates tzdata gcc make musl-dev
+RUN apk add --no-cache --update gcc make musl-dev
 
 # Project to build
 ARG BUILD
@@ -13,9 +13,11 @@ ARG BUILD
 # Git commit SHA
 ARG GIT_COMMIT_SHA
 
-COPY ./ /repo
-
 WORKDIR /repo
+COPY go.* /repo/
+COPY internal /repo/internal
+COPY vendor /repo/vendor
+COPY cmd/$BUILD /repo/cmd/$BUILD
 
 # Set a bunch of go env flags
 ENV GOBIN /repo/gobin
@@ -23,8 +25,6 @@ ENV GOPATH /usr/src/go
 ENV GOFLAGS -mod=vendor
 ENV GOOS linux
 ENV GOARCH amd64
-
-RUN echo 'nobody:x:65534:65534:Nobody:/:\' > /passwd
 RUN CGO_ENABLED=0 go install -a -ldflags "-X main.Prefix=${BUILD}/${GIT_COMMIT_SHA} -extldflags -static" /repo/cmd/${BUILD}
 
 FROM ${RUNNER_IMAGE}
@@ -34,7 +34,6 @@ EXPOSE $EXPOSE_PORT
 
 # Add common resource for ssl and timezones from the build container
 # Create a nobody user
-COPY --from=builder /passwd /etc/passwd
 # Same ARG as before
 ARG BUILD
 # Need to make this an env for it to be interpolated by the shell

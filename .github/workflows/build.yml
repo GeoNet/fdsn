@@ -1,0 +1,118 @@
+name: fdsn
+on:
+  push: {}
+  release:
+    types: [published]
+  workflow_dispatch: {}
+permissions:
+  packages: write
+  contents: write
+  pull-requests: write
+  id-token: write
+env:
+  FOLDER: ./cmd
+  # doesn't have an ECR by that name; EXCLUDE is regex and is '|' separated (e.g: a|b|c)
+  EXCLUDE: s3-notify
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      git-rev: ${{ steps.git-rev.outputs.git-rev }}
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: GeoNet/yq@bbe305500687a5fe8498d74883c17f0f06431ac4 # master
+      - id: git-rev
+        env:
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          echo "git-rev=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - id: set
+        run: |
+          echo "matrix=$(find $FOLDER -mindepth 1 -maxdepth 1 -type d | grep -Ewv "$EXCLUDE" - | xargs -n 1 basename | xargs | yq 'split(" ")|.[]|{"target":.,"folder":env(FOLDER)+"/"+.}' -ojson | jq -rcM -s '{"include":.}')" >> $GITHUB_OUTPUT
+      - name: check output
+        run: |
+          jq . <<< '${{ steps.set.outputs.matrix }}'
+  build:
+    needs: prepare
+    strategy:
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    uses: GeoNet/Actions/.github/workflows/reusable-docker-build.yml@main
+    with:
+      setup: |
+        # this is an anti-pattern
+        mkdir -p "${{ fromJSON(toJSON(matrix)).folder }}/assets"
+        DOCKERFILE="${{ fromJSON(toJSON(matrix)).folder }}/${{ fromJSON(toJSON(matrix)).target }}.Dockerfile"
+        if [ -f "${{ fromJSON(toJSON(matrix)).folder }}/Dockerfile" ]; then
+          echo "using existing"
+          cp "${{ fromJSON(toJSON(matrix)).folder }}/Dockerfile" "$DOCKERFILE"
+        else
+          echo "copy-editing template"
+          cp ./Dockerfile.tmplate "$DOCKERFILE"
+          cat << EOF >> "$DOCKERFILE"
+        CMD ["/${{ fromJSON(toJSON(matrix)).target }}"]
+        EOF
+        fi
+      context: .
+      buildArgs: |
+        BUILD=${{ fromJSON(toJSON(matrix)).target }}
+        GIT_COMMIT_SHA=${{ needs.prepare.outputs.git-rev }}
+        ASSET_DIR=${{ fromJSON(toJSON(matrix)).folder }}/assets
+      dockerfile: ${{ fromJSON(toJSON(matrix)).folder }}/${{ fromJSON(toJSON(matrix)).target }}.Dockerfile
+      imageName: ${{ fromJSON(toJSON(matrix)).target }}
+      platforms: linux/amd64
+      push: ${{ github.ref == 'refs/heads/main' }}
+      tags: latest,git-${{ needs.prepare.outputs.git-rev }}
+      registryOverride: 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com
+      aws-region: ap-southeast-2
+      aws-role-arn-to-assume: arn:aws:iam::862640294325:role/github-actions-geonet-ecr-push
+      aws-role-duration-seconds: "3600"
+  go-build:
+    if: ${{ contains(fromJSON('["workflow_call", "push", "pull_request"]'), github.event_name) && startsWith(github.repository, 'GeoNet/') != false }}
+    uses: GeoNet/Actions/.github/workflows/reusable-go-build-smoke-test.yml@main
+    with:
+      paths: ${{ inputs.paths }}
+  gofmt:
+    if: ${{ contains(fromJSON('["workflow_call", "push", "pull_request"]'), github.event_name) && startsWith(github.repository, 'GeoNet/') != false }}
+    uses: GeoNet/Actions/.github/workflows/reusable-gofmt.yml@main
+  golangci-lint:
+    if: ${{ contains(fromJSON('["workflow_call", "push", "pull_request"]'), github.event_name) && startsWith(github.repository, 'GeoNet/') != false }}
+    uses: GeoNet/Actions/.github/workflows/reusable-golangci-lint.yml@main
+  go-vet:
+    if: ${{ contains(fromJSON('["workflow_call", "push", "pull_request"]'), github.event_name) && startsWith(github.repository, 'GeoNet/') != false }}
+    uses: GeoNet/Actions/.github/workflows/reusable-go-vet.yml@main
+  go-test:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ap-southeast-2
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+          check-latest: true
+      - name: setup
+        run: |
+          sudo apt-get -yq update
+          sudo apt-get install -y xsltproc
+          docker \
+            run -d \
+            -p 5432:5432 \
+            -e POSTGRES_PASSWORD=test \
+            -e POSTGRES_USER=fdsn_w \
+            -e POSTGRES_DB=fdsn \
+            --name postgres \
+            docker.io/postgis/postgis:15-3.3-alpine
+          echo "Waiting until Postgres is ready..."
+          until nc -zv -w 1 127.0.0.1 5432; do
+          sleep 1s
+          done
+          sleep 5s
+          docker logs postgres
+          echo "Postgres is ready"
+          psql postgresql://fdsn_w:test@127.0.0.1/fdsn --file=./etc/ddl/drop-create.ddl
+          psql postgresql://fdsn_w:test@127.0.0.1/fdsn --file=./etc/ddl/create-users.ddl
+      - name: test
+        run: |
+          ./all.sh
