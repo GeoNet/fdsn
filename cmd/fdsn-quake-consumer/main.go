@@ -129,6 +129,8 @@ func (n *notification) Process(msg []byte) error {
 		if err := e.save(); err != nil {
 			return fmt.Errorf("error saving SC3ML %s %s: %w", v.S3.Bucket.Name, v.S3.Object.Key, err)
 		}
+
+		log.Println("saved", e.PublicID)
 	}
 
 	return nil

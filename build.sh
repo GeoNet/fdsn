@@ -15,10 +15,6 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-# code will be compiled in this container
-BUILDER_IMAGE='quay.io/geonet/golang:1.16-alpine'
-RUNNER_IMAGE='quay.io/geonet/go-scratch:latest'
-
 VERSION='git-'$(git rev-parse --short HEAD)
 ACCOUNT=$(aws sts get-caller-identity --output text --query 'Account')
 
@@ -39,8 +35,6 @@ for i in "$@"; do
 
   docker build \
     --build-arg=BUILD="$i" \
-    --build-arg=RUNNER_IMAGE="$RUNNER_IMAGE" \
-    --build-arg=BUILDER_IMAGE="$BUILDER_IMAGE" \
     --build-arg=GIT_COMMIT_SHA="$VERSION" \
     --build-arg=ASSET_DIR="./cmd/$i/assets" \
     -t "${ACCOUNT}.dkr.ecr.ap-southeast-2.amazonaws.com/${i}:$VERSION" \
