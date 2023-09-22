@@ -539,15 +539,16 @@ func (r *FDSNStationXML) trimLevel(level int) {
 			}
 			for c := 0; c < len(st.Channel); c++ {
 				ch := &st.Channel[c]
-				if level < STATION_LEVEL_RESPONSE {
+				if r := ch.Response; level < STATION_LEVEL_RESPONSE && r != nil {
 					// ch.Response is a pointer to source struct so we want to keep the source intact
 					res := &ResponseType{
-						ResourceId:            ch.Response.ResourceId,
-						Items:                 ch.Response.Items,
-						InstrumentSensitivity: ch.Response.InstrumentSensitivity,
-						InstrumentPolynomial:  ch.Response.InstrumentPolynomial,
+						ResourceId:            r.ResourceId,
+						Items:                 r.Items,
+						InstrumentSensitivity: r.InstrumentSensitivity,
+						InstrumentPolynomial:  r.InstrumentPolynomial,
 						Stage:                 nil,
 					}
+
 					ch.Response = res
 					continue
 				}
@@ -595,19 +596,30 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 					}
 					for c := 0; c < len(sta.Channel); c++ {
 						cha := &sta.Channel[c]
-						var frequency float64
-						if cha.Response.InstrumentSensitivity.Frequency != nil {
-							frequency = *cha.Response.InstrumentSensitivity.Frequency
+						var frequency string
+						var value string
+						var unitsName string
+
+						if cha.Response != nil {
+							if s := cha.Response.InstrumentSensitivity; s != nil {
+								if s.Frequency != nil {
+									frequency = fmt.Sprintf("%f", *s.Frequency)
+								}
+								value = fmt.Sprintf("%f", s.Value)
+								if s.InputUnits != nil {
+									unitsName = s.InputUnits.Name
+								}
+							}
 						}
 
-						by.WriteString(fmt.Sprintf("%s|%s|%s|%s|%f|%f|%f|%f|%f|%f|%s|%f|%f|%s|%f|%s|%s\n",
+						by.WriteString(fmt.Sprintf("%s|%s|%s|%s|%f|%f|%f|%f|%f|%f|%s|%s|%s|%s|%f|%s|%s\n",
 							net.Code, sta.Code, cha.LocationCode, cha.Code,
 							cha.Latitude.Value, cha.Longitude.Value, cha.Elevation.Value,
 							cha.Depth.Value, cha.Azimuth.Value, cha.Dip.Value,
 							cha.Sensor.Type,
-							cha.Response.InstrumentSensitivity.Value,
+							value,
 							frequency,
-							cha.Response.InstrumentSensitivity.InputUnits.Name,
+							unitsName,
 							cha.SampleRate.Value,
 							cha.StartDate.MarshalFormatText(), cha.EndDate.MarshalFormatText()))
 
