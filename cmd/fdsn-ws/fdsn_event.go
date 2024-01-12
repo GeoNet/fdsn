@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
@@ -110,7 +109,7 @@ func init() {
 	}
 	fdsnEventWadlFile = b.Bytes()
 
-	fdsnEventIndex, err = ioutil.ReadFile("assets/fdsn-ws-event.html")
+	fdsnEventIndex, err = os.ReadFile("assets/fdsn-ws-event.html")
 	if err != nil {
 		log.Printf("error reading assets/fdsn-ws-event.html: %s", err.Error())
 	}
@@ -119,9 +118,10 @@ func init() {
 /*
 parses the time in text as per the FDSN spec.  Pads text for parsing with
 time.RFC3339Nano.  Accepted formats are (UTC):
-   YYYY-MM-DDTHH:MM:SS.ssssss
-   YYYY-MM-DDTHH:MM:SS
-   YYYY-MM-DD
+
+	YYYY-MM-DDTHH:MM:SS.ssssss
+	YYYY-MM-DDTHH:MM:SS
+	YYYY-MM-DD
 
 Implements the encoding.TextUnmarshaler interface.
 */

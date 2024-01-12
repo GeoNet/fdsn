@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -61,7 +60,7 @@ func init() {
 	}
 	fdsnDataselectWadlFile = b.Bytes()
 
-	fdsnDataselectIndex, err = ioutil.ReadFile("assets/fdsn-ws-dataselect.html")
+	fdsnDataselectIndex, err = os.ReadFile("assets/fdsn-ws-dataselect.html")
 	if err != nil {
 		log.Printf("error reading assets/fdsn-ws-dataselect.html: %s", err.Error())
 	}

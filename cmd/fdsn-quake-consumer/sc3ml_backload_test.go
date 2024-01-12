@@ -1,16 +1,17 @@
+//go:build backload
 // +build backload
 
 package main
 
 import (
 	"database/sql"
-	"github.com/GeoNet/kit/cfg"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"sync"
 	"testing"
+
+	"github.com/GeoNet/kit/cfg"
 )
 
 // TestBackload can be used to load SC3ML into the FDSN database.  Files are read
@@ -37,7 +38,7 @@ func TestBackload(t *testing.T) {
 
 	var dir = "/work/seiscompml07-to-load"
 
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,7 +71,7 @@ func TestBackload(t *testing.T) {
 			defer wg.Done()
 
 			for f = range in {
-				b, err = ioutil.ReadFile(f)
+				b, err = os.ReadFile(f)
 				if err != nil {
 					log.Println(err)
 					continue

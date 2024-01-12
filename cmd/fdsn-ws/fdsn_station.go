@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
@@ -127,7 +126,7 @@ func init() {
 	}
 	fdsnStationWadlFile = b.Bytes()
 
-	fdsnStationIndex, err = ioutil.ReadFile("assets/fdsn-ws-station.html")
+	fdsnStationIndex, err = os.ReadFile("assets/fdsn-ws-station.html")
 	if err != nil {
 		log.Printf("error reading assets/fdsn-ws-station.html: %s", err.Error())
 	}
@@ -482,7 +481,7 @@ func fdsnStationV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error
 		}
 		params = []fdsnStationV1Search{p}
 	case "POST":
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, timestamp: tm, url: r.URL.String()}
 		}

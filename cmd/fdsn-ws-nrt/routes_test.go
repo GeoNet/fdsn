@@ -2,12 +2,13 @@ package main
 
 import (
 	"database/sql"
-	wt "github.com/GeoNet/kit/weft/wefttest"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	wt "github.com/GeoNet/kit/weft/wefttest"
 )
 
 var testServer *httptest.Server
@@ -77,7 +78,7 @@ func setup(t *testing.T) {
 	// Silence the logging unless running with
 	// go test -v
 	if !testing.Verbose() {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 }
 

@@ -4,17 +4,17 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/kit/metrics"
-	"github.com/GeoNet/kit/weft"
-	"github.com/golang/groupcache"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"regexp"
 	"text/template"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/kit/metrics"
+	"github.com/GeoNet/kit/weft"
+	"github.com/golang/groupcache"
 )
 
 const NO_DATA = 204
@@ -38,7 +38,7 @@ func init() {
 	}
 	fdsnDataselectWadlFile = b.Bytes()
 
-	fdsnDataselectIndex, err = ioutil.ReadFile("assets/fdsn-ws-dataselect.html")
+	fdsnDataselectIndex, err = os.ReadFile("assets/fdsn-ws-dataselect.html")
 	if err != nil {
 		log.Printf("error reading assets/fdsn-ws-dataselect.html: %s", err.Error())
 	}
