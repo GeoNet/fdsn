@@ -21,7 +21,6 @@ jobs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-      - uses: GeoNet/yq@bbe305500687a5fe8498d74883c17f0f06431ac4 # master
       - id: git-rev
         env:
           GIT_SHA: ${{ github.sha }}
