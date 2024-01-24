@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http/httptest"
 	"os"
@@ -68,7 +68,7 @@ func setup(t *testing.T) {
 	// Silence the logging unless running with
 	// go test -v
 	if !testing.Verbose() {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 }
 

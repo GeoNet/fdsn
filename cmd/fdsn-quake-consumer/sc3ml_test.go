@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"database/sql"
-	"io/ioutil"
+	"io"
 	"os"
 	"reflect"
 	"runtime"
@@ -17,7 +17,7 @@ var versions = []string{"2015p768477_0.7.xml", "2015p768477_0.8.xml", "2015p7684
 
 func TestEventUnmarshal(t *testing.T) {
 	for _, input := range versions {
-		b, err := ioutil.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -97,7 +97,7 @@ func TestEventType(t *testing.T) {
 		// input test file is sc3ml 0.7 change the version string below to test each
 		// sc3ml version that is supported.
 		for _, input := range versions {
-			b, err := ioutil.ReadFile("etc/" + input)
+			b, err := os.ReadFile("etc/" + input)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -119,7 +119,7 @@ func TestEventType(t *testing.T) {
 
 func TestToQuakeMLEvent(t *testing.T) {
 	for _, input := range versions {
-		b, err := ioutil.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -148,7 +148,7 @@ func TestToQuakeMLEvent(t *testing.T) {
 	}
 	defer f.Close()
 
-	if b, err = ioutil.ReadAll(f); err != nil {
+	if b, err = io.ReadAll(f); err != nil {
 		t.Fatal(err)
 	}
 
@@ -173,7 +173,7 @@ func TestEventSave(t *testing.T) {
 	}
 	defer f.Close()
 
-	if b, err = ioutil.ReadAll(f); err != nil {
+	if b, err = io.ReadAll(f); err != nil {
 		t.Fatal(err)
 	}
 
