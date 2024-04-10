@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/GeoNet/fdsn/internal/holdings"
-	wt "github.com/GeoNet/kit/weft/wefttest"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/holdings"
+	wt "github.com/GeoNet/kit/weft/wefttest"
 )
 
 // setup() adds event 2015p768477 to the DB.
@@ -15,6 +16,7 @@ var routes = wt.Requests{
 
 	// fdsn-ws-event
 	{ID: wt.L(), URL: "/fdsnws/event/1", Content: "text/html"},
+	{ID: wt.L(), URL: "/fdsnws/event/1/", Content: "text/html"},
 	{ID: wt.L(), URL: "/fdsnws/event/1/query?eventid=2015p768477", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/event/1/version", Content: "text/plain"},
 	{ID: wt.L(), URL: "/fdsnws/event/1/catalogs", Content: "application/xml"},
@@ -23,6 +25,7 @@ var routes = wt.Requests{
 
 	// fdsn-ws-dataselect
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1", Content: "text/html"},
+	{ID: wt.L(), URL: "/fdsnws/dataselect/1/", Content: "text/html"},
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/version", Content: "text/plain"},
 	// an invalid network or no files matching query should give 404 (could also give 204 as per spec)
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1/query?starttime=2016-01-09T00:00:00&endtime=2016-01-09T23:00:00&network=INVALID_NETWORK&station=CHST&location=01&channel=LOG",
@@ -37,6 +40,7 @@ var routes = wt.Requests{
 
 	// fdsn-ws-station
 	{ID: wt.L(), URL: "/fdsnws/station/1", Content: "text/html"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/", Content: "text/html"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/version", Content: "text/plain"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/application.wadl", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query", Content: "application/xml"},
