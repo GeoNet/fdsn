@@ -6,7 +6,6 @@ github.com/GeoNet/kit/cfg
 github.com/GeoNet/kit/metrics
 github.com/GeoNet/kit/sc3ml
 github.com/GeoNet/kit/seis/ms
-github.com/GeoNet/kit/seis/sl
 github.com/GeoNet/kit/weft
 github.com/GeoNet/kit/weft/wefttest
 github.com/GeoNet/kit/wgs84
@@ -122,16 +121,6 @@ github.com/aws/smithy-go/time
 github.com/aws/smithy-go/transport/http
 github.com/aws/smithy-go/transport/http/internal/io
 github.com/aws/smithy-go/waiter
-# github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
-## explicit
-github.com/golang/groupcache
-github.com/golang/groupcache/consistenthash
-github.com/golang/groupcache/groupcachepb
-github.com/golang/groupcache/lru
-github.com/golang/groupcache/singleflight
-# github.com/golang/protobuf v1.5.2
-## explicit; go 1.9
-github.com/golang/protobuf/proto
 # github.com/gorilla/schema v1.2.0
 ## explicit
 github.com/gorilla/schema
@@ -143,32 +132,3 @@ github.com/jmespath/go-jmespath
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
-# google.golang.org/protobuf v1.27.1
-## explicit; go 1.9
-google.golang.org/protobuf/encoding/prototext
-google.golang.org/protobuf/encoding/protowire
-google.golang.org/protobuf/internal/descfmt
-google.golang.org/protobuf/internal/descopts
-google.golang.org/protobuf/internal/detrand
-google.golang.org/protobuf/internal/encoding/defval
-google.golang.org/protobuf/internal/encoding/messageset
-google.golang.org/protobuf/internal/encoding/tag
-google.golang.org/protobuf/internal/encoding/text
-google.golang.org/protobuf/internal/errors
-google.golang.org/protobuf/internal/filedesc
-google.golang.org/protobuf/internal/filetype
-google.golang.org/protobuf/internal/flags
-google.golang.org/protobuf/internal/genid
-google.golang.org/protobuf/internal/impl
-google.golang.org/protobuf/internal/order
-google.golang.org/protobuf/internal/pragma
-google.golang.org/protobuf/internal/set
-google.golang.org/protobuf/internal/strs
-google.golang.org/protobuf/internal/version
-google.golang.org/protobuf/proto
-google.golang.org/protobuf/reflect/protodesc
-google.golang.org/protobuf/reflect/protoreflect
-google.golang.org/protobuf/reflect/protoregistry
-google.golang.org/protobuf/runtime/protoiface
-google.golang.org/protobuf/runtime/protoimpl
-google.golang.org/protobuf/types/descriptorpb

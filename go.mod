@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	github.com/GeoNet/kit v0.0.0-20220629232654-4b4c51b3443f
-	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 	github.com/gorilla/schema v1.2.0
 	github.com/lib/pq v1.10.3
 )
@@ -29,7 +28,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.3 // indirect
 	github.com/aws/smithy-go v1.11.2 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 )

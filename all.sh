@@ -16,10 +16,6 @@ if [ ! -f all.sh ]; then
 	exit 1
 fi
 
-# Build the C libraries required by our vendored go wrappers
-#make -C vendor/github.com/GeoNet/kit/cvendor/libmseed
-#make -C vendor/github.com/GeoNet/kit/cvendor/libslink
-
 projects=`ls cmd`
 
 
