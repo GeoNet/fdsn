@@ -3,7 +3,6 @@ package sc3ml
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"time"
 )
 
@@ -106,7 +105,7 @@ func (q *Quake) Manual() bool {
 func FromSC3ML(r io.Reader) (Quake, error) {
 	var s Seiscomp
 
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return Quake{}, err
 	}

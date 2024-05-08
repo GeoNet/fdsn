@@ -3,10 +3,11 @@ package weft
 
 import (
 	"errors"
-	"github.com/GeoNet/kit/metrics"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/GeoNet/kit/metrics"
 )
 
 // QueryValidator returns an error for any invalid query parameter values.
@@ -111,7 +112,7 @@ func CheckQuery(r *http.Request, method, required, optional []string) error {
 		return StatusError{Code: http.StatusMethodNotAllowed, Err: errors.New("method not allowed")}
 	}
 
-	if strings.Contains(r.URL.Path, ";") {
+	if strings.Contains(r.URL.RawQuery, ";") {
 		return StatusError{Code: http.StatusBadRequest, Err: errors.New("found a cache buster")}
 	}
 

@@ -16,6 +16,7 @@ const (
 	sc3ml09 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.9`
 	sc3ml10 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.10`
 	sc3ml11 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.11`
+	sc3ml13 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.13`
 )
 
 type Seiscomp struct {
@@ -156,6 +157,7 @@ func Unmarshal(b []byte, s *Seiscomp) error {
 	case sc3ml09:
 	case sc3ml10:
 	case sc3ml11:
+	case sc3ml13:
 	default:
 		return errors.New("unsupported SC3ML version")
 	}

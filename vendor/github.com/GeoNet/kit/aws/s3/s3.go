@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -52,6 +53,17 @@ func NewWithMaxRetries(maxRetries int) (S3, error) {
 	return S3{client: client}, nil
 }
 
+// NewWithOptions returns the same as New(), but with the additional option functions
+// applied.
+func NewWithOptions(optFns ...func(*s3.Options)) (S3, error) {
+	cfg, err := getConfig()
+	if err != nil {
+		return S3{}, err
+	}
+	client := s3.NewFromConfig(cfg, optFns...)
+	return S3{client: client}, nil
+}
+
 // AddUploader creates an s3manager uploader and sets it to the S3 struct's
 // uploader field. This can be used for streaming uploading.
 func (s3 *S3) AddUploader() error {
@@ -78,7 +90,26 @@ func getConfig() (aws.Config, error) {
 	if os.Getenv("AWS_REGION") == "" {
 		return aws.Config{}, errors.New("AWS_REGION is not set")
 	}
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+
+	var cfg aws.Config
+	var err error
+
+	if awsEndpoint := os.Getenv("CUSTOM_AWS_ENDPOINT_URL"); awsEndpoint != "" {
+		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+			return aws.Endpoint{
+				PartitionID:       "aws",
+				URL:               awsEndpoint,
+				HostnameImmutable: true,
+			}, nil
+		})
+
+		cfg, err = config.LoadDefaultConfig(
+			context.TODO(),
+			config.WithEndpointResolverWithOptions(customResolver))
+	} else {
+		cfg, err = config.LoadDefaultConfig(context.TODO())
+	}
+
 	if err != nil {
 		return aws.Config{}, err
 	}
@@ -91,11 +122,34 @@ func (s *S3) Ready() bool {
 }
 
 // Get gets the object referred to by key and version from bucket and writes it into b.
-// Version can be zero.
+// Version can be empty.
 func (s *S3) Get(bucket, key, version string, b *bytes.Buffer) error {
 	input := s3.GetObjectInput{
 		Key:    aws.String(key),
 		Bucket: aws.String(bucket),
+	}
+	if version != "" {
+		input.VersionId = aws.String(version)
+	}
+	result, err := s.client.GetObject(context.TODO(), &input)
+	if err != nil {
+		return err
+	}
+	defer result.Body.Close()
+
+	_, err = b.ReadFrom(result.Body)
+
+	return err
+}
+
+// GetByteRange gets the specified byte range of an object referred to by key and version
+// from bucket and writes it into b. Version can be empty.
+// See https://www.rfc-editor.org/rfc/rfc9110.html#name-byte-ranges for examples
+func (s *S3) GetByteRange(bucket, key, version, byteRange string, b *bytes.Buffer) error {
+	input := s3.GetObjectInput{
+		Key:    aws.String(key),
+		Bucket: aws.String(bucket),
+		Range:  aws.String(byteRange),
 	}
 	if version != "" {
 		input.VersionId = aws.String(version)
@@ -150,7 +204,7 @@ func (s *S3) LastModified(bucket, key, version string) (time.Time, error) {
 	return aws.ToTime(result.LastModified), nil
 }
 
-// GetMeta returns the metadata for an object. Version can be zero.
+// GetMeta returns the metadata for an object. Version can be empty.
 func (s *S3) GetMeta(bucket, key, version string) (Meta, error) {
 	input := s3.HeadObjectInput{
 		Bucket: aws.String(bucket),
@@ -162,14 +216,34 @@ func (s *S3) GetMeta(bucket, key, version string) (Meta, error) {
 
 	res, err := s.client.HeadObject(context.TODO(), &input)
 	if err != nil {
-		var nf *types.NotFound
-		if errors.As(err, &nf) {
-			return Meta{}, nil
+		if err != nil {
+			var ae smithy.APIError
+			if errors.As(err, &ae) {
+				if ae.ErrorCode() == "NotFound" {
+					return Meta{}, nil
+				}
+			}
+			return Meta{}, err
 		}
-		return Meta{}, err
 	}
 
 	return res.Metadata, nil
+}
+
+// GetContentSize returns the content length and last modified time of the specified key
+func (s *S3) GetContentSizeTime(bucket, key string) (int64, time.Time, error) {
+	var size int64
+	var mt time.Time
+	input := s3.HeadObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	}
+
+	o, err := s.client.HeadObject(context.TODO(), &input)
+	if err != nil {
+		return size, mt, err
+	}
+	return aws.ToInt64(o.ContentLength), aws.ToTime(o.LastModified), nil
 }
 
 // Put puts the object in bucket using specified key.
@@ -223,19 +297,15 @@ func (s *S3) Exists(bucket, key string) (bool, error) {
 // It will not return more than the specified max number of keys.
 // Keys are in alphabetical order.
 func (s *S3) List(bucket, prefix string, max int32) ([]string, error) {
-	input := s3.ListObjectsV2Input{
-		Bucket:  aws.String(bucket),
-		Prefix:  aws.String(prefix),
-		MaxKeys: max,
-	}
 
-	out, err := s.client.ListObjectsV2(context.TODO(), &input)
+	objects, err := s.ListObjects(bucket, prefix, max)
 	if err != nil {
 		return nil, err
 	}
 
 	result := make([]string, 0)
-	for _, o := range out.Contents {
+
+	for _, o := range objects {
 		result = append(result, aws.ToString(o.Key))
 	}
 	return result, nil
@@ -245,38 +315,26 @@ func (s *S3) List(bucket, prefix string, max int32) ([]string, error) {
 // Keys are in alphabetical order.
 func (s *S3) ListAll(bucket, prefix string) ([]string, error) {
 
+	objects, err := s.ListAllObjects(bucket, prefix)
+	if err != nil {
+		return nil, err
+	}
+
 	result := make([]string, 0)
 
-	var continuationToken *string
-
-	for {
-		input := s3.ListObjectsV2Input{
-			Bucket:            aws.String(bucket),
-			Prefix:            aws.String(prefix),
-			ContinuationToken: continuationToken,
-		}
-
-		out, err := s.client.ListObjectsV2(context.TODO(), &input)
-		if err != nil {
-			return nil, err
-		}
-		for _, o := range out.Contents {
-			result = append(result, aws.ToString(o.Key))
-		}
-		// When result is not truncated, it means all matching keys have been found.
-		if !out.IsTruncated {
-			return result, nil
-		}
-		continuationToken = out.NextContinuationToken
+	for _, o := range objects {
+		result = append(result, aws.ToString(o.Key))
 	}
+	return result, nil
 }
 
 // Returns whether there is an object in bucket with specified prefix.
 func (s *S3) PrefixExists(bucket, prefix string) (bool, error) {
+	maxKeys := int32(1)
 	input := s3.ListObjectsV2Input{
 		Bucket:  aws.String(bucket),
 		Prefix:  aws.String(prefix),
-		MaxKeys: 1,
+		MaxKeys: &maxKeys,
 	}
 	out, err := s.client.ListObjectsV2(context.TODO(), &input)
 	if err != nil {
@@ -311,18 +369,20 @@ func (s *S3) ListCommonPrefixes(bucket, prefix, delimiter string) ([]string, err
 			result = append(result, aws.ToString(o.Prefix))
 		}
 		// When result is not truncated, it means all common prefixes have been found.
-		if !out.IsTruncated {
+		if !(*out.IsTruncated) {
 			return result, nil
 		}
 		continuationToken = out.NextContinuationToken
 	}
 }
 
-// ListObjects returns a list of objects (up to 1000) that match the provided prefix.
-func (s *S3) ListObjects(bucket, prefix string) ([]types.Object, error) {
+// ListObjects returns a list of objects that match the provided prefix.
+// It will not return more than the specified max number of keys.
+func (s *S3) ListObjects(bucket, prefix string, max int32) ([]types.Object, error) {
 	input := s3.ListObjectsV2Input{
-		Bucket: aws.String(bucket),
-		Prefix: aws.String(prefix),
+		Bucket:  aws.String(bucket),
+		Prefix:  aws.String(prefix),
+		MaxKeys: &max,
 	}
 
 	out, err := s.client.ListObjectsV2(context.TODO(), &input)
@@ -331,6 +391,106 @@ func (s *S3) ListObjects(bucket, prefix string) ([]types.Object, error) {
 	}
 
 	return out.Contents, nil
+}
+
+// ListAllObjects returns a list of ALL objects that match the provided prefix.
+// Keys are in alphabetical order.
+func (s *S3) ListAllObjects(bucket, prefix string) ([]types.Object, error) {
+
+	result := make([]types.Object, 0)
+
+	var continuationToken *string
+
+	for {
+		input := s3.ListObjectsV2Input{
+			Bucket:            aws.String(bucket),
+			Prefix:            aws.String(prefix),
+			ContinuationToken: continuationToken,
+		}
+
+		out, err := s.client.ListObjectsV2(context.TODO(), &input)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, out.Contents...)
+
+		// When result is not truncated, it means all matching keys have been found.
+		if !(*out.IsTruncated) {
+			return result, nil
+		}
+		continuationToken = out.NextContinuationToken
+	}
+}
+
+// ListAllObjectsConcurrently returns a list of ALL objects that match the provided prefixes.
+// Keys are NOT in alphabetical order.
+func (s *S3) ListAllObjectsConcurrently(bucket string, prefixes []string) ([]types.Object, error) {
+
+	type work struct {
+		index  int // Used to retain order.
+		bucket string
+		prefix string
+		result []types.Object
+		err    error
+	}
+
+	input := make(chan work, len(prefixes))
+	output := make(chan work)
+
+	workerCount := 20
+	var wg sync.WaitGroup
+	wg.Add(workerCount)
+
+	// Workers take work from the input channel. work contains a prefix to List from S3.
+	// The result of the list is set, then sent to the output channel.
+	worker := func(s *S3, input <-chan work, output chan<- work, wg *sync.WaitGroup) {
+		defer wg.Done()
+
+		for w := range input {
+			w.result, w.err = s.ListAllObjects(w.bucket, w.prefix)
+			output <- w
+		}
+	}
+	// Create workers
+	for i := 0; i < workerCount; i++ {
+		go worker(s, input, output, &wg)
+	}
+	// Send prefixes to list to the workers.
+	for i, prefix := range prefixes {
+		input <- work{index: i, bucket: bucket, prefix: prefix}
+	}
+	close(input)
+
+	go func() {
+		wg.Wait()
+		close(output)
+	}()
+
+	// Read results and errors from output channel.
+	results := make([][]types.Object, len(prefixes))
+	errorList := make([]error, 0)
+	for w := range output {
+		if w.err != nil {
+			errorList = append(errorList, w.err)
+		}
+		results[w.index] = w.result
+	}
+
+	// If errors found, concatenate and return as error.
+	if len(errorList) > 0 {
+		var errorMessage string
+		for _, e := range errorList {
+			errorMessage += e.Error() + "\n"
+		}
+		return nil, errors.New(errorMessage)
+	}
+
+	// Append results into single slice before returning.
+	finalResult := make([]types.Object, 0)
+	for _, r := range results {
+		finalResult = append(finalResult, r...)
+	}
+	return finalResult, nil
 }
 
 // PutStream puts the data stream to key in bucket.
@@ -378,5 +538,18 @@ func (s *S3) Delete(bucket, key string) error {
 	}
 
 	_, err := s.client.DeleteObject(context.TODO(), &input)
+	return err
+}
+
+// Copy copies from the source to the bucket with key as the new name.
+// source should include the bucket name eg: "mybucket/objectkey.pdf"
+func (s *S3) Copy(bucket, key, source string) error {
+	input := s3.CopyObjectInput{
+		Bucket:     aws.String(bucket),
+		Key:        aws.String(key),
+		CopySource: aws.String(source),
+	}
+	_, err := s.client.CopyObject(context.TODO(), &input)
+
 	return err
 }
