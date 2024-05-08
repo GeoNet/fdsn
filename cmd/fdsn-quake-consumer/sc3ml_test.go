@@ -72,6 +72,63 @@ func TestEventUnmarshal(t *testing.T) {
 	}
 }
 
+func TestEventUnmarshalSC13(t *testing.T) {
+	for _, input := range []string{"2024p344188_0.13.xml"} {
+		b, err := os.ReadFile("etc/" + input)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var e event
+
+		if err = unmarshal(b, &e); err != nil {
+			t.Error(err)
+		}
+		if !strings.HasPrefix(e.Quakeml12Event, `<event publicID="smi:nz.org.geonet/2024p344188">`) {
+			t.Log(e.Quakeml12Event[:1000])
+			t.Errorf("%s: quakeml fragment should start with <event...", input)
+		}
+
+		if !strings.HasSuffix(e.Quakeml12Event, `</event>`) {
+			t.Errorf("%s: quakeml fragment should end with </event>", input)
+		}
+
+		c := event{
+			PublicID:              "2024p344188",
+			EventType:             "other",
+			Longitude:             176.2128674424493,
+			Latitude:              -38.62063477317881,
+			Depth:                 5.1162109375,
+			EvaluationMethod:      "NonLinLoc",
+			EarthModel:            "nz3drx",
+			EvaluationMode:        "automatic",
+			EvaluationStatus:      "",
+			UsedPhaseCount:        10,
+			UsedStationCount:      10,
+			OriginError:           0.13178423630674604,
+			AzimuthalGap:          76.05025526639076,
+			MinimumDistance:       0.0752301603770797,
+			Magnitude:             1.4089917745797527,
+			MagnitudeUncertainty:  0,
+			MagnitudeType:         "M",
+			MagnitudeStationCount: 5,
+			Deleted:               false,
+			Sc3ml:                 string(b),
+		}
+
+		c.ModificationTime, _ = time.Parse(time.RFC3339Nano, "2024-05-07T22:58:22.37962Z")
+		c.OriginTime, _ = time.Parse(time.RFC3339Nano, "2024-05-07T08:24:09.853066Z")
+
+		if c.Quakeml12Event, err = toQuakeMLEvent(b); err != nil {
+			t.Error(err)
+		}
+
+		if !reflect.DeepEqual(e, c) {
+			t.Errorf("c not equal to e, expected: %+v", e)
+		}
+	}
+}
+
 // TestEventType tests that the remapping of SC3ML event type to QuakeML is correct.
 // The bug in the sc3ml_*_quakeml_1.2.xsl conversion (inserting "other" instead of "other event"
 // has been fixed locally and reported upstream.  GMC 12 Sept 2017
