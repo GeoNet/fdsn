@@ -78,7 +78,7 @@ type fdsnError struct {
 	timestamp time.Time
 }
 
-func fdsnErrorHandler(err error, h http.Header, b *bytes.Buffer) error {
+func fdsnErrorHandler(err error, h http.Header, b *bytes.Buffer, nounce string) error {
 	switch e := err.(type) {
 	case fdsnError:
 		var ver string
@@ -109,5 +109,5 @@ func fdsnErrorHandler(err error, h http.Header, b *bytes.Buffer) error {
 		return nil
 	}
 
-	return weft.TextError(err, h, b)
+	return weft.TextError(err, h, b, nounce)
 }
