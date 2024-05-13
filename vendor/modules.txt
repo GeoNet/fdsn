@@ -1,4 +1,4 @@
-# github.com/GeoNet/kit v0.0.0-20240508212647-07ea4fa66a5b
+# github.com/GeoNet/kit v0.0.0-20240512234353-4d4493144f60
 ## explicit; go 1.21
 github.com/GeoNet/kit/aws/s3
 github.com/GeoNet/kit/aws/sqs

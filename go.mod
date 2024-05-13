@@ -3,7 +3,7 @@ module github.com/GeoNet/fdsn
 go 1.21
 
 require (
-	github.com/GeoNet/kit v0.0.0-20240508212647-07ea4fa66a5b
+	github.com/GeoNet/kit v0.0.0-20240512234353-4d4493144f60
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 	github.com/gorilla/schema v1.2.0
 	github.com/lib/pq v1.10.3

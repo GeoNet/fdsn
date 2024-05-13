@@ -11,11 +11,13 @@ import (
 )
 
 const (
+	sc3ml06 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.6`
 	sc3ml07 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.7`
 	sc3ml08 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.8`
 	sc3ml09 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.9`
 	sc3ml10 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.10`
 	sc3ml11 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.11`
+	sc3ml12 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.12`
 	sc3ml13 = `http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.13`
 )
 
@@ -144,7 +146,7 @@ type Amplitude struct {
 // the objects referenced by ID in the SeisComPML e.g., PreferredOrigin,
 // PreferredMagnitude etc.
 //
-// Supported SC3ML versions are 0.7, 0.8, 0.9, 0.10, 0.11
+// Supported SC3ML versions are 0.6, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13
 // Any other versions will result in a error.
 func Unmarshal(b []byte, s *Seiscomp) error {
 	if err := xml.Unmarshal(b, s); err != nil {
@@ -152,11 +154,13 @@ func Unmarshal(b []byte, s *Seiscomp) error {
 	}
 
 	switch s.XMLns {
+	case sc3ml06:
 	case sc3ml07:
 	case sc3ml08:
 	case sc3ml09:
 	case sc3ml10:
 	case sc3ml11:
+	case sc3ml12:
 	case sc3ml13:
 	default:
 		return errors.New("unsupported SC3ML version")
