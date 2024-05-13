@@ -72,8 +72,64 @@ func TestEventUnmarshal(t *testing.T) {
 	}
 }
 
-func TestEventUnmarshalSC13(t *testing.T) {
-	for _, input := range []string{"2024p344188_0.13.xml"} {
+func TestEventUnmarshalSC06(t *testing.T) {
+	for _, input := range []string{"2801727_0.6.xml"} {
+		b, err := os.ReadFile("etc/" + input)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var e event
+		if err = unmarshal(b, &e); err != nil {
+			t.Error(err)
+		}
+		if !strings.HasPrefix(e.Quakeml12Event, `<event publicID="smi:nz.org.geonet/2801727">`) {
+			t.Errorf("%s: quakeml fragment should start with <event...", input)
+		}
+
+		if !strings.HasSuffix(e.Quakeml12Event, `</event>`) {
+			t.Errorf("%s: quakeml fragment should end with </event>", input)
+		}
+
+		c := event{
+			PublicID:              "2801727",
+			EventType:             "outside of network interest",
+			Longitude:             164.175,
+			Latitude:              -49.10301,
+			Depth:                 10,
+			DepthType:             "operator assigned",
+			EvaluationMethod:      "GROPE",
+			EarthModel:            "nz1dr",
+			EvaluationMode:        "",
+			EvaluationStatus:      "reviewed",
+			UsedPhaseCount:        14,
+			UsedStationCount:      10,
+			OriginError:           0.29521,
+			AzimuthalGap:          334,
+			MinimumDistance:       3.39,
+			Magnitude:             4.9,
+			MagnitudeUncertainty:  0,
+			MagnitudeType:         "Mw",
+			MagnitudeStationCount: 0,
+			Deleted:               false,
+			Sc3ml:                 string(b),
+		}
+
+		c.ModificationTime, _ = time.Parse(time.RFC3339Nano, "2012-05-21T16:04:00Z")
+		c.OriginTime, _ = time.Parse(time.RFC3339Nano, "2007-10-01T13:35:26.69Z")
+
+		if c.Quakeml12Event, err = toQuakeMLEvent(b); err != nil {
+			t.Error(err)
+		}
+
+		if !reflect.DeepEqual(e, c) {
+			t.Errorf("c not equal to e, expected: %+v", e)
+		}
+	}
+}
+
+func TestEventUnmarshalSC12_13(t *testing.T) {
+	for _, input := range []string{"2024p344188_0.12.xml", "2024p344188_0.13.xml"} {
 		b, err := os.ReadFile("etc/" + input)
 		if err != nil {
 			t.Fatal(err)
@@ -85,7 +141,6 @@ func TestEventUnmarshalSC13(t *testing.T) {
 			t.Error(err)
 		}
 		if !strings.HasPrefix(e.Quakeml12Event, `<event publicID="smi:nz.org.geonet/2024p344188">`) {
-			t.Log(e.Quakeml12Event[:1000])
 			t.Errorf("%s: quakeml fragment should start with <event...", input)
 		}
 
