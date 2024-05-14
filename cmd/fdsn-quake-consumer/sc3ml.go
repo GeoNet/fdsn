@@ -14,11 +14,14 @@ import (
 
 const deleted = `not existing`
 
+var sc3ml06 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.6" version="0.6">`)
 var sc3ml07 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.7" version="0.7">`)
 var sc3ml08 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.8" version="0.8">`)
 var sc3ml09 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.9" version="0.9">`)
 var sc3ml10 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.10" version="0.10">`)
 var sc3ml11 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.11" version="0.11">`)
+var sc3ml12 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.12" version="0.12">`)
+var sc3ml13 = []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.13" version="0.13">`)
 
 // event is for saving information to the db.
 // field names must match the column names in fdsn.event and the field names must be exported.
@@ -55,39 +58,43 @@ type event struct {
 toQuakeMLEvent converts seisComPML to a QuakeML event fragment using an XSLT.
 Supported versions of SC3ML are
 
-   * 0.7
-   * 0.8
-   * 0.9
-   * 0.10
-   * 0.11
+  - 0.6
+  - 0.7
+  - 0.8
+  - 0.9
+  - 0.10
+  - 0.11
+  - 0.12
+  - 0.13
 
 The xslt source is from http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.7/sc3ml_0.7__quakeml_1.2.xsl
 It has been edited to output only an Event fragment without the parent elements and namespaces.  e.g.,
 
-    129d128
-    <         xmlns="http://quakeml.org/xmlns/bed/1.2"
-    132c131
-    <     <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
-    ---
-    >     <xsl:output method="xml" encoding="UTF-8" indent="no" omit-xml-declaration="yes"/>
-    138c137
-    <     <xsl:variable name="ID_PREFIX" select="'smi:org.gfz-potsdam.de/geofon/'"/>
-    ---
-    >     <xsl:variable name="ID_PREFIX" select="'smi:nz.org.geonet/'"/>
-    145d143
-    <         <q:quakeml>
-    147d144
-    <                 <eventParameters>
-    156d152
-    <                 </eventParameters>
-    158d153
-    <         </q:quakeml>
-
+	129d128
+	<         xmlns="http://quakeml.org/xmlns/bed/1.2"
+	132c131
+	<     <xsl:output method="xml" encoding="UTF-8" indent="yes"/>
+	---
+	>     <xsl:output method="xml" encoding="UTF-8" indent="no" omit-xml-declaration="yes"/>
+	138c137
+	<     <xsl:variable name="ID_PREFIX" select="'smi:org.gfz-potsdam.de/geofon/'"/>
+	---
+	>     <xsl:variable name="ID_PREFIX" select="'smi:nz.org.geonet/'"/>
+	145d143
+	<         <q:quakeml>
+	147d144
+	<                 <eventParameters>
+	156d152
+	<                 </eventParameters>
+	158d153
+	<         </q:quakeml>
 */
 func toQuakeMLEvent(seisComPML []byte) (string, error) {
 	cmd := exec.Command("/usr/bin/xsltproc")
 
 	switch {
+	case bytes.Contains(seisComPML, sc3ml06):
+		cmd.Args = append(cmd.Args, "assets/sc3ml_0.6__quakeml_1.2.xsl")
 	case bytes.Contains(seisComPML, sc3ml07):
 		cmd.Args = append(cmd.Args, "assets/sc3ml_0.7__quakeml_1.2.xsl")
 	case bytes.Contains(seisComPML, sc3ml08):
@@ -98,6 +105,10 @@ func toQuakeMLEvent(seisComPML []byte) (string, error) {
 		cmd.Args = append(cmd.Args, "assets/sc3ml_0.10__quakeml_1.2.xsl")
 	case bytes.Contains(seisComPML, sc3ml11):
 		cmd.Args = append(cmd.Args, "assets/sc3ml_0.11__quakeml_1.2.xsl")
+	case bytes.Contains(seisComPML, sc3ml12):
+		cmd.Args = append(cmd.Args, "assets/sc3ml_0.12__quakeml_1.2.xsl")
+	case bytes.Contains(seisComPML, sc3ml13):
+		cmd.Args = append(cmd.Args, "assets/sc3ml_0.13__quakeml_1.2.xsl")
 
 	default:
 		return "", fmt.Errorf("found no %s", "XSLT")

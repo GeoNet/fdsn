@@ -1,0 +1,4092 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.6" version="0.6">
+  <EventParameters>
+    <pick publicID="8332305">
+      <time>
+        <value>2007-10-01T13:37:14.115Z</value>
+        <lowerUncertainty>0.5</lowerUncertainty>
+        <upperUncertainty>1.0</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WHZ" networkCode="NZ"/>
+      <phaseHint>Sn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332309">
+      <time>
+        <value>2007-10-01T13:36:39.215Z</value>
+        <lowerUncertainty>0.1</lowerUncertainty>
+        <upperUncertainty>0.25</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="TUZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332312">
+      <time>
+        <value>2007-10-01T13:36:56.648Z</value>
+        <lowerUncertainty>0.25</lowerUncertainty>
+        <upperUncertainty>0.5</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="LBZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="5157482">
+      <time>
+        <value>2007-10-01T13:36:43.948Z</value>
+        <lowerUncertainty>0.25</lowerUncertainty>
+        <upperUncertainty>0.5</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="EAZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8693800">
+      <time>
+        <value>2007-10-01T13:37:06.348Z</value>
+        <lowerUncertainty>0.5</lowerUncertainty>
+        <upperUncertainty>1.0</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="FOZ" networkCode="NZ"/>
+      <onset>emergent</onset>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332308">
+      <time>
+        <value>2007-10-01T13:36:36.319Z</value>
+        <lowerUncertainty>0.1</lowerUncertainty>
+        <upperUncertainty>0.25</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MLZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332311">
+      <time>
+        <value>2007-10-01T13:36:47.248Z</value>
+        <lowerUncertainty>0.25</lowerUncertainty>
+        <upperUncertainty>0.5</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="EHZ" stationCode="HHSZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332306">
+      <time>
+        <value>2007-10-01T13:36:30.348Z</value>
+        <upperUncertainty>0.1</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="SYZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332300">
+      <time>
+        <value>2007-10-01T13:36:55.958Z</value>
+        <lowerUncertainty>0.5</lowerUncertainty>
+        <upperUncertainty>1.0</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="APZ" networkCode="NZ"/>
+      <phaseHint>Sn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332301">
+      <time>
+        <value>2007-10-01T13:36:18.328Z</value>
+        <lowerUncertainty>0.1</lowerUncertainty>
+        <upperUncertainty>0.25</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="PYZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332299">
+      <time>
+        <value>2007-10-01T13:36:19.308Z</value>
+        <lowerUncertainty>0.1</lowerUncertainty>
+        <upperUncertainty>0.25</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="APZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332313">
+      <time>
+        <value>2007-10-01T13:36:53.753Z</value>
+        <lowerUncertainty>0.1</lowerUncertainty>
+        <upperUncertainty>0.25</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="ODZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332302">
+      <time>
+        <value>2007-10-01T13:36:57.078Z</value>
+        <lowerUncertainty>0.5</lowerUncertainty>
+        <upperUncertainty>1.0</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="PYZ" networkCode="NZ"/>
+      <phaseHint>Sn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332304">
+      <time>
+        <value>2007-10-01T13:36:28.615Z</value>
+        <lowerUncertainty>0.1</lowerUncertainty>
+        <upperUncertainty>0.25</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WHZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332310">
+      <time>
+        <value>2007-10-01T13:36:44.578Z</value>
+        <lowerUncertainty>0.1</lowerUncertainty>
+        <upperUncertainty>0.25</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MSZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332307">
+      <time>
+        <value>2007-10-01T13:37:14.978Z</value>
+        <lowerUncertainty>0.5</lowerUncertainty>
+        <upperUncertainty>1.0</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="SYZ" networkCode="NZ"/>
+      <phaseHint>Sn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332314">
+      <time>
+        <value>2007-10-01T13:36:55.798Z</value>
+        <lowerUncertainty>0.25</lowerUncertainty>
+        <upperUncertainty>0.5</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="JCZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="5157486">
+      <time>
+        <value>2007-10-01T13:36:47.768Z</value>
+        <lowerUncertainty>0.25</lowerUncertainty>
+        <upperUncertainty>0.5</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WKZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <pick publicID="8332303">
+      <time>
+        <value>2007-10-01T13:36:29.508Z</value>
+        <lowerUncertainty>0.25</lowerUncertainty>
+        <upperUncertainty>0.5</upperUncertainty>
+      </time>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="DCZ" networkCode="NZ"/>
+      <phaseHint>Pn</phaseHint>
+      <evaluationMode>manual</evaluationMode>
+      <evaluationStatus>confirmed</evaluationStatus>
+    </pick>
+    <amplitude publicID="15006934">
+      <type>A</type>
+      <amplitude>
+        <value>15791.842000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:01.548Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006935">
+      <type>A</type>
+      <amplitude>
+        <value>0.003077</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:01.498Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006936">
+      <type>A</type>
+      <amplitude>
+        <value>0.000030</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:01.528Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006937">
+      <type>A</type>
+      <amplitude>
+        <value>0.000883</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:02.338Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006938">
+      <type>A</type>
+      <amplitude>
+        <value>22119.730000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:02.168Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006939">
+      <type>A</type>
+      <amplitude>
+        <value>0.002846</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:07.058Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006940">
+      <type>A</type>
+      <amplitude>
+        <value>0.000030</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:02.148Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006941">
+      <type>A</type>
+      <amplitude>
+        <value>0.001177</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:02.188Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006942">
+      <type>A</type>
+      <amplitude>
+        <value>17865.887000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:00.778Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006943">
+      <type>A</type>
+      <amplitude>
+        <value>0.003729</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:06.598Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006944">
+      <type>A</type>
+      <amplitude>
+        <value>0.000030</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:05.588Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006945">
+      <type>A</type>
+      <amplitude>
+        <value>0.001079</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:06.228Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="APZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006946">
+      <type>A</type>
+      <amplitude>
+        <value>7950.392000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:01.928Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006947">
+      <type>A</type>
+      <amplitude>
+        <value>0.000945</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:09.658Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006948">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:01.908Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006949">
+      <type>A</type>
+      <amplitude>
+        <value>0.000490</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:02.438Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006950">
+      <type>A</type>
+      <amplitude>
+        <value>19598.932000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:02.018Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006951">
+      <type>A</type>
+      <amplitude>
+        <value>0.002128</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:59.978Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006952">
+      <type>A</type>
+      <amplitude>
+        <value>0.000030</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:01.998Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006953">
+      <type>A</type>
+      <amplitude>
+        <value>0.000785</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:00.538Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006954">
+      <type>A</type>
+      <amplitude>
+        <value>22252.059000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:04.178Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006955">
+      <type>A</type>
+      <amplitude>
+        <value>0.002360</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:09.468Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006956">
+      <type>A</type>
+      <amplitude>
+        <value>0.000030</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:04.168Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006957">
+      <type>A</type>
+      <amplitude>
+        <value>0.001079</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:04.018Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="PYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006958">
+      <type>A</type>
+      <amplitude>
+        <value>2803.844000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:34.358Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006959">
+      <type>A</type>
+      <amplitude>
+        <value>0.000749</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:33.218Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006960">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:39.888Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006961">
+      <type>A</type>
+      <amplitude>
+        <value>0.000392</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:19.468Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006962">
+      <type>A</type>
+      <amplitude>
+        <value>2619.984000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:39.268Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006963">
+      <type>A</type>
+      <amplitude>
+        <value>0.000658</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:43.208Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006964">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:38.448Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006965">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:54.708Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006966">
+      <type>A</type>
+      <amplitude>
+        <value>3113.887000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:24.818Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006967">
+      <type>A</type>
+      <amplitude>
+        <value>0.000735</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:30.618Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006968">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:38.288Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006969">
+      <type>A</type>
+      <amplitude>
+        <value>0.000392</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:36.968Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="DCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006970">
+      <type>A</type>
+      <amplitude>
+        <value>7193.177000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:34.225Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006971">
+      <type>A</type>
+      <amplitude>
+        <value>0.001097</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:25.805Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006972">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:19.175Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006973">
+      <type>A</type>
+      <amplitude>
+        <value>0.000588</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:32.735Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006974">
+      <type>A</type>
+      <amplitude>
+        <value>9361.325000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:17.875Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006975">
+      <type>A</type>
+      <amplitude>
+        <value>0.001875</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:18.315Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006976">
+      <type>A</type>
+      <amplitude>
+        <value>0.000020</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:18.355Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006977">
+      <type>A</type>
+      <amplitude>
+        <value>0.000588</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:08.875Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006978">
+      <type>A</type>
+      <amplitude>
+        <value>11355.102000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:18.835Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006979">
+      <type>A</type>
+      <amplitude>
+        <value>0.002472</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:27.105Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006980">
+      <type>A</type>
+      <amplitude>
+        <value>0.000020</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:27.115Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006981">
+      <type>A</type>
+      <amplitude>
+        <value>0.000588</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:18.775Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WHZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006982">
+      <type>A</type>
+      <amplitude>
+        <value>6070.126000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:23.798Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006983">
+      <type>A</type>
+      <amplitude>
+        <value>0.001251</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:34.198Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006984">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:20.408Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006985">
+      <type>A</type>
+      <amplitude>
+        <value>0.000490</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:20.398Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006986">
+      <type>A</type>
+      <amplitude>
+        <value>10761.311000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:21.278Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006987">
+      <type>A</type>
+      <amplitude>
+        <value>0.001601</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:45.448Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006988">
+      <type>A</type>
+      <amplitude>
+        <value>0.000020</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:19.778Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006989">
+      <type>A</type>
+      <amplitude>
+        <value>0.000981</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:21.288Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006990">
+      <type>A</type>
+      <amplitude>
+        <value>10973.473000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:20.818Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006991">
+      <type>A</type>
+      <amplitude>
+        <value>0.001577</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:30.318Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006992">
+      <type>A</type>
+      <amplitude>
+        <value>0.000020</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:20.428Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006993">
+      <type>A</type>
+      <amplitude>
+        <value>0.000686</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:21.528Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="SYZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006994">
+      <type>A</type>
+      <amplitude>
+        <value>2506.183000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:47.198Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006995">
+      <type>A</type>
+      <amplitude>
+        <value>0.000851</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:03.128Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006996">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:58.958Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006997">
+      <type>A</type>
+      <amplitude>
+        <value>0.000490</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:37.478Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006998">
+      <type>A</type>
+      <amplitude>
+        <value>4548.091000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:47.498Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15006999">
+      <type>A</type>
+      <amplitude>
+        <value>0.001140</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:04.888Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007000">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:04.838Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007001">
+      <type>A</type>
+      <amplitude>
+        <value>0.000686</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:37.458Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007002">
+      <type>A</type>
+      <amplitude>
+        <value>3011.631000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:47.608Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007003">
+      <type>A</type>
+      <amplitude>
+        <value>0.001024</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:07.738Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007004">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:08.188Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007005">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:50.038Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="EAZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007006">
+      <type>A</type>
+      <amplitude>
+        <value>3597.236000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:39.089Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007007">
+      <type>A</type>
+      <amplitude>
+        <value>0.000813</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:33.389Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007008">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:33.209Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007009">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:39.099Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007010">
+      <type>A</type>
+      <amplitude>
+        <value>6671.221000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:34.689Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007011">
+      <type>A</type>
+      <amplitude>
+        <value>0.001677</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:53.469Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007012">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:44.289Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007013">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:34.189Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007014">
+      <type>A</type>
+      <amplitude>
+        <value>7963.777000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:32.369Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007015">
+      <type>A</type>
+      <amplitude>
+        <value>0.001402</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:43.039Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007016">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:32.049Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007017">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:32.419Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007018">
+      <type>A</type>
+      <amplitude>
+        <value>4280.168000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:36.605Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007019">
+      <type>A</type>
+      <amplitude>
+        <value>0.000964</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:36.735Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007020">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:36.765Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007021">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:36.615Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007022">
+      <type>A</type>
+      <amplitude>
+        <value>4295.908000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:37.235Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007023">
+      <type>A</type>
+      <amplitude>
+        <value>0.000963</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:45.485Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007024">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:35.215Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007025">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:37.255Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007026">
+      <type>A</type>
+      <amplitude>
+        <value>4503.840000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:38.225Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007027">
+      <type>A</type>
+      <amplitude>
+        <value>0.000919</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:52.915Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007028">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:52.935Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007029">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:37.625Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="TUZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007030">
+      <type>A</type>
+      <amplitude>
+        <value>2006.952000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:53.168Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007031">
+      <type>A</type>
+      <amplitude>
+        <value>0.000589</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:56.128Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007032">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:54.818Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007033">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:36:49.748Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007034">
+      <type>A</type>
+      <amplitude>
+        <value>3908.407000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:53.248Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007035">
+      <type>A</type>
+      <amplitude>
+        <value>0.001085</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:01.838Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007036">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:58.428Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007037">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:50.788Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007038">
+      <type>A</type>
+      <amplitude>
+        <value>4820.082000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:49.558Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007039">
+      <type>A</type>
+      <amplitude>
+        <value>0.000799</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:50.868Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007040">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:50.878Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007041">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:50.848Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007042">
+      <type>A</type>
+      <amplitude>
+        <value>2002.592000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:52.558Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007043">
+      <type>A</type>
+      <amplitude>
+        <value>0.001176</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:05.388Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007044">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:05.818Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007045">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:52.418Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007046">
+      <type>A</type>
+      <amplitude>
+        <value>2780.773000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:56.918Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007047">
+      <type>A</type>
+      <amplitude>
+        <value>0.001433</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:05.258Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007048">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:05.268Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007049">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:53.268Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007050">
+      <type>A</type>
+      <amplitude>
+        <value>2939.486000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:52.398Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007051">
+      <type>A</type>
+      <amplitude>
+        <value>0.001194</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:58.958Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007052">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:15.738Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007053">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:53.978Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WKZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007054">
+      <type>A</type>
+      <amplitude>
+        <value>217.302000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:10.918Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHZ" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007055">
+      <type>A</type>
+      <amplitude>
+        <value>0.000644</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:00.348Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHZ" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007056">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:40:28.818Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHZ" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007057">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:52.388Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHZ" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007058">
+      <type>A</type>
+      <amplitude>
+        <value>579.681000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:11.828Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHN" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007059">
+      <type>A</type>
+      <amplitude>
+        <value>0.001293</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:06.378Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHN" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007060">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:48.428Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHN" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007061">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:11.898Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHN" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007062">
+      <type>A</type>
+      <amplitude>
+        <value>428.727000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:56.898Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHE" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007063">
+      <type>A</type>
+      <amplitude>
+        <value>0.000980</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:09.638Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHE" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007064">
+      <type>A</type>
+      <amplitude>
+        <value>0.000020</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:19.188Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHE" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007065">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:50.878Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="EHE" stationCode="HHSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007066">
+      <type>A</type>
+      <amplitude>
+        <value>635.255000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:09.198Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="LBZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007067">
+      <type>A</type>
+      <amplitude>
+        <value>0.000661</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:45.928Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="LBZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007068">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:46.508Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="LBZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007069">
+      <type>A</type>
+      <amplitude>
+        <value>571.836000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:11.268Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="LBZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007070">
+      <type>A</type>
+      <amplitude>
+        <value>0.000667</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:37.848Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="LBZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007071">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:38.508Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="LBZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007072">
+      <type>A</type>
+      <amplitude>
+        <value>848.029000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:08.358Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="LBZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007073">
+      <type>A</type>
+      <amplitude>
+        <value>0.000463</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:35.388Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="LBZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007074">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:29.518Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="LBZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007075">
+      <type>A</type>
+      <amplitude>
+        <value>575.486000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:15.163Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="ODZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007076">
+      <type>A</type>
+      <amplitude>
+        <value>0.000343</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:51.983Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="ODZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007077">
+      <type>A</type>
+      <amplitude>
+        <value>1022.309000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:19.323Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="ODZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007078">
+      <type>A</type>
+      <amplitude>
+        <value>0.000625</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:35.723Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="ODZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007079">
+      <type>A</type>
+      <amplitude>
+        <value>755.271000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:14.233Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="ODZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007080">
+      <type>A</type>
+      <amplitude>
+        <value>0.000449</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:38.703Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="ODZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007081">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:40:43.883Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="ODZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007082">
+      <type>A</type>
+      <amplitude>
+        <value>502.001000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:15.238Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="FOZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007083">
+      <type>A</type>
+      <amplitude>
+        <value>0.000209</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:25.758Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="FOZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007084">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:27.168Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="FOZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007085">
+      <type>A</type>
+      <amplitude>
+        <value>842.595000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:27.768Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="FOZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007086">
+      <type>A</type>
+      <amplitude>
+        <value>0.000261</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:09.208Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="FOZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007087">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:50.928Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="FOZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007088">
+      <type>A</type>
+      <amplitude>
+        <value>736.294000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:31.268Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="FOZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007089">
+      <type>A</type>
+      <amplitude>
+        <value>0.000397</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:50.088Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="FOZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007090">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:39.258Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="FOZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007091">
+      <type>A</type>
+      <amplitude>
+        <value>2186.478000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:31.879Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="RPZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007092">
+      <type>A</type>
+      <amplitude>
+        <value>0.000276</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:01.019Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="RPZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007093">
+      <type>A</type>
+      <amplitude>
+        <value>3040.505000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:41.809Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HH1" stationCode="RPZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007094">
+      <type>A</type>
+      <amplitude>
+        <value>0.000380</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:16.129Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HH1" stationCode="RPZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007095">
+      <type>A</type>
+      <amplitude>
+        <value>2347.059000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:32.619Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HH2" stationCode="RPZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007096">
+      <type>A</type>
+      <amplitude>
+        <value>0.000427</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:18.799Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HH2" stationCode="RPZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007097">
+      <type>A</type>
+      <amplitude>
+        <value>2460.564000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:03.138Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007098">
+      <type>A</type>
+      <amplitude>
+        <value>0.000588</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:03.058Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007099">
+      <type>A</type>
+      <amplitude>
+        <value>0.000588</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:42.568Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007100">
+      <type>A</type>
+      <amplitude>
+        <value>3847.675000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:14.728Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007101">
+      <type>A</type>
+      <amplitude>
+        <value>0.001132</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:12.488Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007102">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:21.858Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007103">
+      <type>A</type>
+      <amplitude>
+        <value>0.000392</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:41.818Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007104">
+      <type>A</type>
+      <amplitude>
+        <value>5656.970000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:09.888Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007105">
+      <type>A</type>
+      <amplitude>
+        <value>0.000917</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:44.208Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007106">
+      <type>A</type>
+      <amplitude>
+        <value>0.000010</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:09.878Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/s</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007107">
+      <type>A</type>
+      <amplitude>
+        <value>0.000392</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:43.498Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="JCZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007108">
+      <type>A</type>
+      <amplitude>
+        <value>84.788000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:50.619Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MQZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007109">
+      <type>A</type>
+      <amplitude>
+        <value>0.000184</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:45.379Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MQZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007110">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:41:01.879Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="MQZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007111">
+      <type>A</type>
+      <amplitude>
+        <value>126.100000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:00.579Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MQZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007112">
+      <type>A</type>
+      <amplitude>
+        <value>0.000210</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:40.629Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="MQZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007113">
+      <type>A</type>
+      <amplitude>
+        <value>114.736000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:56.519Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MQZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007114">
+      <type>A</type>
+      <amplitude>
+        <value>0.000198</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:40:08.239Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="MQZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007115">
+      <type>A</type>
+      <amplitude>
+        <value>320.041000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:01.249Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="CRLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007116">
+      <type>A</type>
+      <amplitude>
+        <value>0.000264</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:49.179Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="CRLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007117">
+      <type>A</type>
+      <amplitude>
+        <value>333.546000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:42.239Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="CRLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007118">
+      <type>A</type>
+      <amplitude>
+        <value>0.000393</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:40:05.879Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="CRLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007119">
+      <type>A</type>
+      <amplitude>
+        <value>0.000686</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:44.859Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="CRLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007120">
+      <type>A</type>
+      <amplitude>
+        <value>433.410000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:44.689Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="CRLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007121">
+      <type>A</type>
+      <amplitude>
+        <value>0.000366</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:44.319Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="CRLZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007122">
+      <type>A</type>
+      <amplitude>
+        <value>285.890000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:36.061Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WVZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007123">
+      <type>A</type>
+      <amplitude>
+        <value>0.000200</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:30.201Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WVZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007124">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:32.271Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="WVZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007125">
+      <type>A</type>
+      <amplitude>
+        <value>348.347000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:52.941Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WVZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007126">
+      <type>A</type>
+      <amplitude>
+        <value>0.000259</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:27.251Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WVZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007127">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:35.961Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="WVZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007128">
+      <type>A</type>
+      <amplitude>
+        <value>350.942000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:50.001Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WVZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007129">
+      <type>A</type>
+      <amplitude>
+        <value>0.000300</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:01.571Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WVZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007130">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:35.931Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="WVZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007131">
+      <type>A</type>
+      <amplitude>
+        <value>218.220000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:35.229Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="LTZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007132">
+      <type>A</type>
+      <amplitude>
+        <value>0.000143</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:40:10.679Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="LTZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007133">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:03.549Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="LTZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007134">
+      <type>A</type>
+      <amplitude>
+        <value>146.840000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:12.489Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="LTZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007135">
+      <type>A</type>
+      <amplitude>
+        <value>0.000158</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:40:10.609Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="LTZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007136">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:36.259Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="LTZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007137">
+      <type>A</type>
+      <amplitude>
+        <value>180.583000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:16.749Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="LTZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007138">
+      <type>A</type>
+      <amplitude>
+        <value>0.000317</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:58.399Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="LTZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007139">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:36.259Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="LTZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007151">
+      <type>A</type>
+      <amplitude>
+        <value>356.869000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:44.281Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="DSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007152">
+      <type>A</type>
+      <amplitude>
+        <value>0.000220</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:48.851Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="DSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007153">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:06.831Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="DSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007154">
+      <type>A</type>
+      <amplitude>
+        <value>469.824000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:49.251Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="DSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007155">
+      <type>A</type>
+      <amplitude>
+        <value>0.000342</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:51.231Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="DSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007156">
+      <type>A</type>
+      <amplitude>
+        <value>0.000294</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:06.821Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="DSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007157">
+      <type>A</type>
+      <amplitude>
+        <value>335.907000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:44.931Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="DSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007158">
+      <type>A</type>
+      <amplitude>
+        <value>0.000314</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:19.431Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="DSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007159">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:02.621Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="DSZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007160">
+      <type>A</type>
+      <amplitude>
+        <value>282.206000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:50.591Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="THZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007161">
+      <type>A</type>
+      <amplitude>
+        <value>0.000103</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:59.321Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="THZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007162">
+      <type>A</type>
+      <amplitude>
+        <value>110.747000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:38:14.881Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="THZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007163">
+      <type>A</type>
+      <amplitude>
+        <value>0.000090</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:02.171Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="THZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007164">
+      <type>A</type>
+      <amplitude>
+        <value>160.240000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:50.871Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="THZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007165">
+      <type>A</type>
+      <amplitude>
+        <value>0.000100</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:37:58.341Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="THZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007166">
+      <type>A</type>
+      <amplitude>
+        <value>101.654000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:50.377Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="NNZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007167">
+      <type>A</type>
+      <amplitude>
+        <value>0.000171</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:54.317Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="NNZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007168">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:51.077Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHZ" stationCode="NNZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007169">
+      <type>A</type>
+      <amplitude>
+        <value>120.571000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:48.577Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="NNZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007170">
+      <type>A</type>
+      <amplitude>
+        <value>0.000185</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:40:39.377Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="NNZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007171">
+      <type>A</type>
+      <amplitude>
+        <value>0.000098</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:40:14.337Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHN" stationCode="NNZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007172">
+      <type>A</type>
+      <amplitude>
+        <value>124.098000</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:58.887Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="NNZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=dimensionless</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007173">
+      <type>A</type>
+      <amplitude>
+        <value>0.000202</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:40:26.967Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="NNZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m</text>
+      </comment>
+    </amplitude>
+    <amplitude publicID="15007174">
+      <type>A</type>
+      <amplitude>
+        <value>0.000196</value>
+      </amplitude>
+      <timeWindow>
+        <reference>2007-10-01T13:39:52.137Z</reference>
+        <begin>0</begin>
+        <end>0</end>
+      </timeWindow>
+      <waveformID locationCode="10" channelCode="HHE" stationCode="NNZ" networkCode="NZ"/>
+      <evaluationMode>automatic</evaluationMode>
+      <comment>
+        <text>unit=m/(s*s)</text>
+      </comment>
+    </amplitude>
+    <origin publicID="372332/GROPE">
+      <time>
+        <value>2007-10-01T13:35:26.690Z</value>
+      </time>
+      <latitude>
+        <value>-49.10301</value>
+      </latitude>
+      <longitude>
+        <value>164.175</value>
+      </longitude>
+      <depth>
+        <value>10</value>
+      </depth>
+      <depthType>operator assigned</depthType>
+      <timeFixed>true</timeFixed>
+      <epicenterFixed>true</epicenterFixed>
+      <referenceSystemID>smi:ogc.def.crs/EPSG/4272</referenceSystemID>
+      <methodID>GROPE</methodID>
+      <earthModelID>nz1dr</earthModelID>
+      <quality>
+        <usedPhaseCount>14</usedPhaseCount>
+        <usedStationCount>10</usedStationCount>
+        <standardError>0.29521</standardError>
+        <azimuthalGap>334</azimuthalGap>
+        <maximumDistance>5.413</maximumDistance>
+        <minimumDistance>3.390</minimumDistance>
+      </quality>
+      <evaluationStatus>reviewed</evaluationStatus>
+      <creationInfo>
+        <agencyID>NEIC</agencyID>
+        <author>BGF</author>
+        <creationTime>2011-10-18T11:30:00.000Z</creationTime>
+        <modificationTime>2012-03-19T08:52:00.000Z</modificationTime>
+      </creationInfo>
+      <arrival>
+        <pickID>5157486</pickID>
+        <phase>Pn</phase>
+        <azimuth>40</azimuth>
+        <distance>5.409</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>1.435</timeResidual>
+        <weight>0.04</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332301</pickID>
+        <phase>Pn</phase>
+        <azimuth>31</azimuth>
+        <distance>3.390</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>-0.432</timeResidual>
+        <weight>0.23</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332300</pickID>
+        <phase>Sn</phase>
+        <azimuth>50</azimuth>
+        <distance>3.424</distance>
+        <takeOffAngle>134</takeOffAngle>
+        <timeResidual>-2.848</timeResidual>
+        <weight>0.16</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332302</pickID>
+        <phase>Sn</phase>
+        <azimuth>31</azimuth>
+        <distance>3.390</distance>
+        <takeOffAngle>134</takeOffAngle>
+        <timeResidual>-0.922</timeResidual>
+        <weight>0.3</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332303</pickID>
+        <phase>Pn</phase>
+        <azimuth>30</azimuth>
+        <distance>4.165</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>0.172</timeResidual>
+        <weight>0.69</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332309</pickID>
+        <phase>Pn</phase>
+        <azimuth>52</azimuth>
+        <distance>4.855</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>0.454</timeResidual>
+        <weight>0.51</weight>
+      </arrival>
+      <arrival>
+        <pickID>5157482</pickID>
+        <phase>Pn</phase>
+        <azimuth>44</azimuth>
+        <distance>5.219</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>0.219</timeResidual>
+        <weight>0.31</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332306</pickID>
+        <phase>Pn</phase>
+        <azimuth>54</azimuth>
+        <distance>4.215</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>0.33</timeResidual>
+        <weight>0.65</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332308</pickID>
+        <phase>Pn</phase>
+        <azimuth>37</azimuth>
+        <distance>4.601</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>1.019</timeResidual>
+        <weight>0.28</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332311</pickID>
+        <phase>Pn</phase>
+        <azimuth>56</azimuth>
+        <distance>5.413</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>0.865</timeResidual>
+        <weight>0.13</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332307</pickID>
+        <phase>Sn</phase>
+        <azimuth>54</azimuth>
+        <distance>4.215</distance>
+        <takeOffAngle>134</takeOffAngle>
+        <timeResidual>-2.846</timeResidual>
+        <weight>0.28</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332299</pickID>
+        <phase>Pn</phase>
+        <azimuth>50</azimuth>
+        <distance>3.424</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>0.091</timeResidual>
+        <weight>0.82</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332304</pickID>
+        <phase>Pn</phase>
+        <azimuth>40</azimuth>
+        <distance>4.104</distance>
+        <takeOffAngle>137</takeOffAngle>
+        <timeResidual>0.11</timeResidual>
+        <weight>0.32</weight>
+      </arrival>
+      <arrival>
+        <pickID>8332305</pickID>
+        <phase>Sn</phase>
+        <azimuth>40</azimuth>
+        <distance>4.104</distance>
+        <takeOffAngle>134</takeOffAngle>
+        <timeResidual>-1.045</timeResidual>
+        <weight>0.25</weight>
+      </arrival>
+      <magnitude publicID="372332/GROPE/MW">
+        <magnitude>
+          <value>4.9</value>
+        </magnitude>
+        <type>Mw</type>
+        <originID>372332/GROPE</originID>
+        <creationInfo>
+          <agencyID>NEIC</agencyID>
+          <author>BGF</author>
+          <creationTime>2011-10-18T11:30:00.000Z</creationTime>
+          <modificationTime>2012-05-21T16:04:00.000Z</modificationTime>
+        </creationInfo>
+      </magnitude>
+      <magnitude publicID="372332/GROPE/MS">
+        <magnitude>
+          <value>5</value>
+        </magnitude>
+        <type>MS</type>
+        <originID>372332/GROPE</originID>
+      </magnitude>
+      <magnitude publicID="372332/GROPE/MB">
+        <magnitude>
+          <value>5</value>
+        </magnitude>
+        <type>Mb</type>
+        <originID>372332/GROPE</originID>
+      </magnitude>
+    </origin>
+    <event publicID="2801727">
+      <preferredOriginID>372332/GROPE</preferredOriginID>
+      <originReference>372332/GROPE</originReference>
+      <preferredMagnitudeID>372332/GROPE/MW</preferredMagnitudeID>
+      <type>outside of network interest</type>
+      <creationInfo>
+        <agencyID>WEL(CUSP_Catalogue)</agencyID>
+      </creationInfo>
+    </event>
+  </EventParameters>
+</seiscomp>
