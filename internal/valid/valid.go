@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"time"
 )
 
 var (
@@ -40,4 +41,17 @@ func PublicID(s string) error {
 	}
 
 	return Error{Code: http.StatusBadRequest, Err: fmt.Errorf("invalid publicID: %s", s)}
+}
+
+func ParseDate(s string) (time.Time, error) {
+	if s == "" {
+		return time.Now().UTC(), nil
+	}
+
+	d, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return time.Time{}, Error{Code: http.StatusBadRequest, Err: fmt.Errorf("invalid date: %s", s)}
+	}
+
+	return d, nil
 }

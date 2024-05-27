@@ -891,6 +891,7 @@ func downloadStationXML(since time.Time) (by *bytes.Buffer, modified time.Time, 
 		return
 	}
 
+	log.Println("downloadStationXML from ", s3Bucket, s3Meta)
 	tp, err := s3Client.LastModified(s3Bucket, s3Meta, "")
 	if err != nil {
 		return

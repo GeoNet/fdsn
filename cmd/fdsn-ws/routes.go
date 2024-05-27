@@ -33,6 +33,9 @@ func init() {
 	mux.HandleFunc("/fdsnws/station/1/version", weft.MakeHandler(fdsnStationVersion, weft.TextError))
 	mux.HandleFunc("/fdsnws/station/1/application.wadl", weft.MakeHandler(fdsnStationWadl, weft.TextError))
 
+	mux.HandleFunc("/fdsnws/station", weft.MakeHandler(sensorStaionsHandler, weft.TextError))
+	mux.HandleFunc("/fdsnws/sensor", weft.MakeHandler(sensorHandler, weft.TextError))
+
 	// This service implements the dataselect spec from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf.
 	mux.HandleFunc("/fdsnws/dataselect/1/", weft.MakeHandler(fdsnDataselectV1Index, weft.TextError))
 	mux.HandleFunc("/fdsnws/dataselect/1/query", weft.MakeDirectHandler(fdsnDataselectV1Handler, fdsnErrorHandler))
