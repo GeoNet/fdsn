@@ -6,19 +6,19 @@ import (
 	"strings"
 	"testing"
 
+	_ "github.com/GeoNet/fdsn/internal/fdsn"
 	wt "github.com/GeoNet/kit/weft/wefttest"
 )
 
 // NOTE: To run the test, please export :
 // STATION_XML_META_KEY=fdsn-station-test.xml
 
-func init() {
-}
-
 func TestStationFilter(t *testing.T) {
 	var e fdsnStationV1Search
 	var err error
 
+	setup(t)
+	defer teardown()
 	// Filter test
 	var v url.Values = make(map[string][]string)
 
@@ -207,13 +207,16 @@ Testdata timeline
 
 Station 1:
 2007-05-20T23   2011-03-06T22   2011-06-20T04
-     |------3 cha----|
-                      |-----3 cha----|
-                                      |-----3 cha----------->
+
+	|------3 cha----|
+	                 |-----3 cha----|
+	                                 |-----3 cha----------->
+
 Station 2:
-                     2010-03-11T21   2012-01-19T22
-                          |-----3 cha----|
-                                          |-----3 cha------->
+
+	2010-03-11T21   2012-01-19T22
+	     |-----3 cha----|
+	                     |-----3 cha------->
 */
 func TestStartEnd(t *testing.T) {
 	var e fdsnStationV1Search
@@ -408,10 +411,11 @@ NZ|ARAZ|-38.627690|176.120060|420.000000|Aratiatia Landcorp Farm|2007-05-20T23:0
 }
 
 // To profiling, you'll have to use full fdsn-station xml as data source:
-// 1. Put full fdsn-station.xml in etc/.
-// 2. export FDSN_STATION_XML_META_KEY=fdsn-station.xml
-// 3. Run `go test -bench=StationQuery -benchmem -run=^$`.
-//    Note: You must specify -run=^$ to skip test functions since you're not using test fdsn-station xml.
+//  1. Put full fdsn-station.xml in etc/.
+//  2. export FDSN_STATION_XML_META_KEY=fdsn-station.xml
+//  3. Run `go test -bench=StationQuery -benchmem -run=^$`.
+//     Note: You must specify -run=^$ to skip test functions since you're not using test fdsn-station xml.
+//
 // Currently the benchmark result for my MacBookPro 2017 is:
 // BenchmarkStationQuery/post-4               20000             74472 ns/op           78376 B/op        706 allocs/op
 func BenchmarkStationQuery(b *testing.B) {
@@ -585,6 +589,8 @@ func TestDoFilter(t *testing.T) {
 	var query url.Values
 	var hasValue bool
 
+	setup(t)
+	defer teardown()
 	//
 	// basic case
 	//
@@ -747,7 +753,6 @@ func testCase(c *FDSNStationXML, query url.Values) (bool, error) {
 	if e, err = parseStationV1(query); err != nil {
 		return false, err
 	}
-
 	return c.doFilter([]fdsnStationV1Search{e}), nil
 }
 

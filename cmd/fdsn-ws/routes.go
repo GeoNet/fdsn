@@ -12,7 +12,7 @@ import (
 
 var mux *http.ServeMux
 
-func init() {
+func initRoutes() {
 	mux = http.NewServeMux()
 
 	mux.HandleFunc("/", weft.MakeHandler(weft.NoMatch, weft.TextError))

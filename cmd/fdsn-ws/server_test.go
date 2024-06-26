@@ -7,12 +7,22 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/joho/godotenv"
 )
 
 var ts *httptest.Server
 
 func setup(t *testing.T) {
 	var err error
+
+	err = godotenv.Load("env.list")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	initStationXML()
+	initRoutes()
 
 	S3_BUCKET = os.Getenv("S3_BUCKET")
 

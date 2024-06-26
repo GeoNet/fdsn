@@ -1,11 +1,12 @@
 package holdings_test
 
 import (
-	"github.com/GeoNet/fdsn/internal/holdings"
 	"os"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/holdings"
 )
 
 type result struct {

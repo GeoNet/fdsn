@@ -1,10 +1,12 @@
+//go:build integration
 // +build integration
 
 package main
 
 import (
-	wt "github.com/GeoNet/kit/weft/wefttest"
 	"testing"
+
+	wt "github.com/GeoNet/kit/weft/wefttest"
 )
 
 var routesIntegration = wt.Requests{
@@ -19,7 +21,6 @@ var routesIntegration = wt.Requests{
 // Run using:
 // go test -tags integration -v -run TestRoutesIntegration
 func TestRoutesIntegration(t *testing.T) {
-	setup(t)
 	setup(t)
 	defer teardown()
 

@@ -95,7 +95,7 @@ var validEventTypes = strings.Split(
 		", ", ","),
 	",") // remove spaces after comma
 
-func init() {
+func initEventTemplate() {
 	var err error
 	var b bytes.Buffer
 

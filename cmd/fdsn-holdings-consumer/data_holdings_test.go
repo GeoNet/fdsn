@@ -2,9 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"github.com/GeoNet/fdsn/internal/holdings"
 	"testing"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/holdings"
 )
 
 func TestSaveHoldings(t *testing.T) {

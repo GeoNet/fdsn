@@ -24,7 +24,9 @@ func init() {
 	flag.StringVar(&keyPrefix, "key-prefix", "", "Key prefix to search in the S3 bucket.")
 	flag.StringVar(&sqsUrl, "sqs-url", "", "SQS queue url to send notifications to. Omit this parameter to show the list of matched keys only.")
 	flag.Parse()
+}
 
+func initAWS() {
 	var err error
 	s3c, err := s3.NewWithMaxRetries(100)
 	if err != nil {
@@ -50,6 +52,7 @@ func main() {
 		fmt.Println("Send to SQS:", sqsUrl)
 	}
 
+	initAWS()
 	keys, err := s3Client.ListAll(bucketName, keyPrefix)
 	if err != nil {
 		log.Fatalf("error listing S3 objects: %s", err)
