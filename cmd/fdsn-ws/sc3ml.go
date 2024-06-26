@@ -2,9 +2,10 @@ package main
 
 import (
 	"bytes"
+	"net/http"
+
 	"github.com/GeoNet/fdsn/internal/valid"
 	"github.com/GeoNet/kit/weft"
-	"net/http"
 )
 
 func s3ml(r *http.Request, h http.Header, b *bytes.Buffer) error {

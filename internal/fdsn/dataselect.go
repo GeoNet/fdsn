@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/gorilla/schema"
 	"io"
 	"net/url"
 	"reflect"
@@ -13,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gorilla/schema"
 )
 
 var decoder = schema.NewDecoder()
@@ -71,9 +72,10 @@ func init() {
 /*
 parses the time in text as per the FDSN spec.  Pads text for parsing with
 time.RFC3339Nano.  Accepted formats are (UTC):
-   YYYY-MM-DDTHH:MM:SS.ssssss
-   YYYY-MM-DDTHH:MM:SS
-   YYYY-MM-DD
+
+	YYYY-MM-DDTHH:MM:SS.ssssss
+	YYYY-MM-DDTHH:MM:SS
+	YYYY-MM-DD
 
 Implements the encoding.TextUnmarshaler interface.
 */
@@ -119,7 +121,7 @@ func ParseDataSelectPost(r io.Reader, d *[]DataSelect) error {
 					}
 
 					if noData != 204 && noData != 404 {
-						return errors.New("nodata must be 204 or 404.")
+						return errors.New("nodata must be 204 or 404")
 					}
 				}
 			}
@@ -186,7 +188,7 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 			return DataSelect{}, fmt.Errorf("\"%s\" is not supported", key)
 		}
 		if len(val[0]) == 0 {
-			return DataSelect{}, fmt.Errorf("Invalid %s value", key)
+			return DataSelect{}, fmt.Errorf("invalid %s value", key)
 		}
 	}
 
@@ -196,15 +198,15 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 	}
 
 	if e.Format != "miniseed" {
-		return DataSelect{}, fmt.Errorf("Only \"miniseed\" format is supported.")
+		return DataSelect{}, fmt.Errorf("only \"miniseed\" format is supported")
 	}
 
 	if e.LongestOnly {
-		return DataSelect{}, fmt.Errorf("Query for longest only is not supported.")
+		return DataSelect{}, fmt.Errorf("query for longest only is not supported")
 	}
 
 	if e.NoData != 204 && e.NoData != 404 {
-		return DataSelect{}, errors.New("nodata must be 204 or 404.")
+		return DataSelect{}, errors.New("nodata must be 204 or 404")
 	}
 
 	// Defaults: as per spec we need to include any valid files in the search so use wildcards and broad time range
@@ -234,22 +236,22 @@ func ParseDataSelectGet(v url.Values) (DataSelect, error) {
 func (d *DataSelect) Regexp() (DataSearch, error) {
 	ne, err := toPattern(d.Network, false)
 	if err != nil {
-		return DataSearch{}, fmt.Errorf("Invalid network parameter: %s", err.Error())
+		return DataSearch{}, fmt.Errorf("invalid network parameter: %s", err.Error())
 	}
 
 	st, err := toPattern(d.Station, false)
 	if err != nil {
-		return DataSearch{}, fmt.Errorf("Invalid station parameter: %s", err.Error())
+		return DataSearch{}, fmt.Errorf("invalid station parameter: %s", err.Error())
 	}
 
 	ch, err := toPattern(d.Channel, false)
 	if err != nil {
-		return DataSearch{}, fmt.Errorf("Invalid channel parameter: %s", err.Error())
+		return DataSearch{}, fmt.Errorf("invalid channel parameter: %s", err.Error())
 	}
 
 	lo, err := toPattern(d.Location, true)
 	if err != nil {
-		return DataSearch{}, fmt.Errorf("Invalid location parameter: %s", err.Error())
+		return DataSearch{}, fmt.Errorf("invalid location parameter: %s", err.Error())
 	}
 
 	return DataSearch{
@@ -290,7 +292,7 @@ func GenRegex(input []string, emptyDash bool, allowSpace bool) ([]string, error)
 			matched = nslcReg.MatchString(s)
 		}
 		if !matched {
-			return nil, fmt.Errorf("Invalid parameter:'%s'", s)
+			return nil, fmt.Errorf("invalid parameter:'%s'", s)
 		}
 
 		var r string

@@ -247,6 +247,7 @@ type NetworkType struct {
 }
 
 // May be one of NOMINAL, CALCULATED
+//
 //nolint:deadcode,unused	// Struct based on FDSN spec so keep it
 type NominalType string
 
@@ -364,6 +365,7 @@ type SampleRateType struct {
 }
 
 // A time value in seconds.
+//
 //nolint:deadcode,unused	// Struct based on FDSN spec so keep it
 type SecondType struct {
 	Value      float64  `xml:",chardata"`
