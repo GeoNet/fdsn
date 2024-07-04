@@ -8,9 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"reflect"
 	"regexp"
-	"strings"
 	"text/template"
 	"time"
 
@@ -41,12 +39,7 @@ type dataSelect struct {
 	keys []string
 }
 
-func init() {
-	// Handle comma separated parameters (eg: net, sta, loc, cha, etc)
-	decoder.RegisterConverter([]string{}, func(input string) reflect.Value {
-		return reflect.ValueOf(strings.Split(input, ","))
-	})
-
+func initDataselectTemplate() {
 	var err error
 	var b bytes.Buffer
 

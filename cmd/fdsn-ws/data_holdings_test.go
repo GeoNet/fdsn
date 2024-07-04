@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/GeoNet/fdsn/internal/fdsn"
-	"github.com/GeoNet/fdsn/internal/holdings"
-	"github.com/lib/pq"
 	"log"
 	"testing"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
+	"github.com/GeoNet/fdsn/internal/holdings"
+	"github.com/lib/pq"
 )
 
 // http://www.postgresql.org/docs/9.4/static/errcodes-appendix.html

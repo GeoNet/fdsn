@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/GeoNet/kit/metrics"
 	"log"
 	"os"
+
+	"github.com/GeoNet/kit/metrics"
 )
 
 var Prefix string

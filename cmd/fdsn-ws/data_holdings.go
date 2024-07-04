@@ -2,8 +2,9 @@ package main
 
 import (
 	"database/sql"
-	"github.com/GeoNet/fdsn/internal/fdsn"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
 )
 
 type metric struct {

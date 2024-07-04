@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/GeoNet/kit/cfg"
@@ -13,19 +15,24 @@ import (
 )
 
 var (
-	db           *sql.DB
-	decoder      = schema.NewDecoder() // decoder for URL queries.
-	S3_BUCKET    string                // the S3 bucket storing the miniseed files used by dataselect
-	LOG_EXTRA    bool                  // Whether POST body is logged.
-	zeroDateTime time.Time
+	db        *sql.DB
+	decoder   = newDecoder() // decoder for URL queries.
+	S3_BUCKET string         // the S3 bucket storing the miniseed files used by dataselect
+	LOG_EXTRA bool           // Whether POST body is logged.
 )
 
 var stationVersion = "1.1"
 var eventVersion = "1.2"
 var dataselectVersion = "1.1"
+var zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 
-func init() {
-	zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+func newDecoder() *schema.Decoder {
+	decoder := schema.NewDecoder()
+	// Handle comma separated parameters (eg: net, sta, loc, cha, etc)
+	decoder.RegisterConverter([]string{}, func(input string) reflect.Value {
+		return reflect.ValueOf(strings.Split(input, ","))
+	})
+	return decoder
 }
 
 func main() {
@@ -59,6 +66,12 @@ func main() {
 	if err = db.Ping(); err != nil {
 		log.Println("ERROR: problem pinging DB - is it up and contactable? 500s will be served")
 	}
+
+	initDataselectTemplate()
+	initEventTemplate()
+	initStationTemplate()
+	initStationXML()
+	initRoutes()
 
 	setupStationXMLUpdater()
 

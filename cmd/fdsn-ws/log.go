@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/GeoNet/kit/metrics"
-	"github.com/GeoNet/kit/weft"
 	"log"
 	"os"
+
+	"github.com/GeoNet/kit/metrics"
+	"github.com/GeoNet/kit/weft"
 )
 
 var Prefix string

@@ -1,11 +1,12 @@
 package valid_test
 
 import (
-	"github.com/GeoNet/fdsn/internal/valid"
 	"net/http"
 	"runtime"
 	"strconv"
 	"testing"
+
+	"github.com/GeoNet/fdsn/internal/valid"
 )
 
 var bad = &valid.Error{Code: http.StatusBadRequest}

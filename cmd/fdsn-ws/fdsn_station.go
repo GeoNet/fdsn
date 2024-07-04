@@ -106,13 +106,13 @@ var (
 	fdsnStationWadlFile []byte
 	fdsnStationIndex    []byte
 	fdsnStations        fdsnStationObj
-	emptyDateTime       time.Time
+	emptyDateTime       = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
 	errNotModified      = fmt.Errorf("Not modified.")
 	s3Bucket            string
 	s3Meta              string
 )
 
-func init() {
+func initStationTemplate() {
 	var err error
 	var b bytes.Buffer
 
@@ -130,9 +130,10 @@ func init() {
 	if err != nil {
 		log.Printf("error reading assets/fdsn-ws-station.html: %s", err.Error())
 	}
+}
 
-	emptyDateTime = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
-
+func initStationXML() {
+	var err error
 	s3Bucket = os.Getenv("STATION_XML_BUCKET")
 	s3Meta = os.Getenv("STATION_XML_META_KEY")
 
@@ -193,7 +194,7 @@ func parseStationV1Post(body string) ([]fdsnStationV1Search, error) {
 			case "format":
 				format = strings.TrimSpace(tokens[1])
 				if format != "xml" && format != "text" {
-					return ret, errors.New("Invalid format")
+					return ret, errors.New("invalid format")
 				}
 			}
 		} else if tokens := strings.Fields(line); len(tokens) == 6 {
@@ -220,12 +221,12 @@ func parseStationV1Post(body string) ([]fdsnStationV1Search, error) {
 			}
 			ret = append(ret, p)
 		} else {
-			return ret, fmt.Errorf("Invalid query format (POST).")
+			return ret, fmt.Errorf("invalid query format (POST)")
 		}
 	}
 
 	if level == "response" && format == "text" {
-		return []fdsnStationV1Search{}, fmt.Errorf("Text formats are only supported when level is net|sta|cha.")
+		return []fdsnStationV1Search{}, fmt.Errorf("text formats are only supported when level is net|sta|cha")
 	}
 
 	return ret, nil
@@ -269,7 +270,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 
 	for key, val := range v {
 		if len(val[0]) == 0 {
-			return fdsnStationV1Search{}, fmt.Errorf("Invalid %s value", key)
+			return fdsnStationV1Search{}, fmt.Errorf("invalid %s value", key)
 		}
 	}
 
@@ -280,11 +281,11 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 
 	// Only xml and text is allowed.
 	if p.Format != "xml" && p.Format != "text" {
-		return fdsnStationV1Search{}, fmt.Errorf("Invalid format.")
+		return fdsnStationV1Search{}, fmt.Errorf("invalid format")
 	}
 
 	if p.Level == "response" && p.Format == "text" {
-		return fdsnStationV1Search{}, fmt.Errorf("Text formats are only supported when level is net|sta|cha.")
+		return fdsnStationV1Search{}, fmt.Errorf("text formats are only supported when level is net|sta|cha")
 	}
 
 	count := 0
@@ -303,7 +304,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		p.StartTime = p.StartBefore
 	}
 	if count > 1 {
-		return fdsnStationV1Search{}, fmt.Errorf("Only one of 'starttime', 'startafter', and 'startbefore' is allowed.")
+		return fdsnStationV1Search{}, fmt.Errorf("only one of 'starttime', 'startafter', and 'startbefore' is allowed")
 	}
 
 	count = 0
@@ -325,23 +326,23 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	}
 
 	if count > 1 {
-		return fdsnStationV1Search{}, fmt.Errorf("Only one of 'endtime', 'endafter', and 'endbefore' is allowed.")
+		return fdsnStationV1Search{}, fmt.Errorf("only one of 'endtime', 'endafter', and 'endbefore' is allowed")
 	}
 
 	if p.IncludeAvailability {
-		return fdsnStationV1Search{}, errors.New("include availability is not supported.")
+		return fdsnStationV1Search{}, errors.New("include availability is not supported")
 	}
 
 	if !p.IncludeRestricted {
-		return fdsnStationV1Search{}, errors.New("exclude restricted is not supported.")
+		return fdsnStationV1Search{}, errors.New("exclude restricted is not supported")
 	}
 
 	if p.MatchTimeSeries {
-		return fdsnStationV1Search{}, errors.New("match time series is not supported.")
+		return fdsnStationV1Search{}, errors.New("match time series is not supported")
 	}
 
 	if p.NoData != 204 && p.NoData != 404 {
-		return fdsnStationV1Search{}, errors.New("nodata must be 204 or 404.")
+		return fdsnStationV1Search{}, errors.New("nodata must be 204 or 404")
 	}
 
 	ne, err := fdsn.GenRegex(p.Network, false, false)
@@ -397,7 +398,7 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	// Now validate longitude, latitude, and radius
 	if p.Longitude != math.MaxFloat64 || p.Latitude != math.MaxFloat64 {
 		if p.Longitude == math.MaxFloat64 || p.Latitude == math.MaxFloat64 {
-			err = fmt.Errorf("parameter latitude and longitude must both present.")
+			err = fmt.Errorf("parameter latitude and longitude must both present")
 			return s, err
 		}
 
@@ -412,17 +413,17 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		}
 
 		if p.MaxRadius < 0 || p.MaxRadius > 180.0 {
-			err = fmt.Errorf("invalid maxradius value.")
+			err = fmt.Errorf("invalid maxradius value")
 			return s, err
 		}
 
 		if p.MinRadius < 0 || p.MinRadius > 180.0 {
-			err = fmt.Errorf("invalid minradius value.")
+			err = fmt.Errorf("invalid minradius value")
 			return s, err
 		}
 
 		if p.MinRadius > p.MaxRadius {
-			err = fmt.Errorf("minradius or maxradius range error.")
+			err = fmt.Errorf("minradius or maxradius range error")
 			return s, err
 		}
 	}
