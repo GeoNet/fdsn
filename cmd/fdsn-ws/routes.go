@@ -104,8 +104,11 @@ func fdsnErrorHandler(err error, h http.Header, b *bytes.Buffer, nounce string) 
 		default:
 		}
 
-		msg := fmt.Sprintf(FDSN_ERR_FORMAT, e.Code, http.StatusText(e.Code), e.Err, e.url, e.timestamp.Format(time.RFC3339), ver)
-		b.WriteString(msg)
+		// "no content" can't have a http body
+		if e.Code != http.StatusNoContent && e.Code != http.StatusNotFound {
+			msg := fmt.Sprintf(FDSN_ERR_FORMAT, e.Code, http.StatusText(e.Code), e.Err, e.url, e.timestamp.Format(time.RFC3339), ver)
+			b.WriteString(msg)
+		}
 		return nil
 	}
 
