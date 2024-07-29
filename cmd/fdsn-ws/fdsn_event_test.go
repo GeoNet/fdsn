@@ -430,7 +430,7 @@ func TestEventTypes(t *testing.T) {
 		{"e*", false, []interface{}{"earthquake", "explosion", "experimental explosion"}},
 		{"z*", true, nil}, // no such match, expected value doesn't matter
 		{"experimental explosion", false, []interface{}{"experimental explosion"}},
-		{"e*,a*", false, []interface{}{"earthquake", "anthropogenic event", "explosion", "accidental explosion", "experimental explosion", "atmospheric event", "acoustic noise", "avalanche"}},
+		{"e*,a*", false, []interface{}{"earthquake", "explosion", "anthropogenic event", "accidental explosion", "experimental explosion", "atmospheric event", "acoustic noise", "avalanche", "artillery strike", "atmospheric meteor explosion"}},
 		{"unknown", false, []interface{}{""}}, // specify "unknown" means query for empty value
 	}
 	for _, c := range queryCases {
