@@ -186,9 +186,12 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 		if !d.End.After(d.Start) {
 			return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: fmt.Errorf("endtime must be after starttime")}, url: r.URL.String(), timestamp: tm}
 		}
-		// we only do "NZ"
-		if m, err := regexp.MatchString(d.Network, "NZ"); err != nil || !m {
-			continue
+		// We reject all queries for network not "NZ", except special case IU/SNZO.
+		// Note: IU/SNZO won't matched by wildcard queries.
+		if d.Network != "IU" && d.Station != "SNZO" {
+			if m, err := regexp.MatchString(d.Network, "NZ"); err != nil || !m {
+				continue
+			}
 		}
 		// only run query when the pattern contains only uppercase alphabetic, numbers, wildcard chars
 		// if the pattern string is out of this range, we knew it won't produce results
