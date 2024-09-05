@@ -188,7 +188,9 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 		}
 		// We reject all queries for network not "NZ", except special case IU/SNZO.
 		// Note: IU/SNZO won't matched by wildcard queries.
-		if d.Network != "IU" && d.Station != "SNZO" {
+		if d.Network == "^IU$" && d.Station == "^SNZO$" {
+			// let it pass
+		} else {
 			if m, err := regexp.MatchString(d.Network, "NZ"); err != nil || !m {
 				continue
 			}
