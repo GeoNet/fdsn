@@ -14,7 +14,7 @@ func getNibble(word []byte, index int) uint8 {
 	return res
 }
 
-//value must be 0, 1, 2 or 3, the nibble must not have been previously set
+// value must be 0, 1, 2 or 3, the nibble must not have been previously set
 func writeNibble(word []byte, index int, value uint8) {
 	b := word[index/4]
 	i := index % 4
@@ -23,7 +23,7 @@ func writeNibble(word []byte, index int, value uint8) {
 }
 
 /*
-	Takes v: an integer where only the first numbits bits are used to represent the number and returns an int32
+Takes v: an integer where only the first numbits bits are used to represent the number and returns an int32
 */
 func uintVarToInt32(v uint32, numbits uint8) int32 {
 	neg := (v & (0x1 << (numbits - 1))) != 0 //check positive/negative

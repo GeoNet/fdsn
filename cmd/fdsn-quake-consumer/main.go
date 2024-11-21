@@ -5,18 +5,32 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/GeoNet/kit/aws/s3"
 	"github.com/GeoNet/kit/aws/sqs"
 	"github.com/GeoNet/kit/cfg"
+	"github.com/GeoNet/kit/health"
 	"github.com/GeoNet/kit/metrics"
+	"github.com/GeoNet/kit/slogger"
+)
+
+const (
+	healthCheckAged    = 5 * time.Minute  //need to have a good heartbeat within this time (depends on tilde-bundle)
+	healthCheckStartup = 5 * time.Minute  //ignore heartbeat messages for this time after starting
+	healthCheckTimeout = 30 * time.Second //health check timeout
+	healthCheckService = ":7777"          //end point to listen to for SOH checks
+	healthCheckPath    = "/soh"
 )
 
 var (
@@ -24,6 +38,8 @@ var (
 	s3Client  s3.S3
 	sqsClient sqs.SQS
 	db        *sql.DB
+
+	sLogger = slogger.NewSmartLogger(10*time.Minute, "") // log repeated error messages
 )
 
 type notification struct {
@@ -31,6 +47,12 @@ type notification struct {
 }
 
 func main() {
+	//check health
+	if health.RunningHealthCheck() {
+		healthCheck()
+	}
+
+	//run as normal service
 	p, err := cfg.PostgresEnv()
 	if err != nil {
 		log.Fatalf("error reading DB config from the environment vars: %s", err)
@@ -45,11 +67,16 @@ func main() {
 	db.SetMaxIdleConns(p.MaxIdle)
 	db.SetMaxOpenConns(p.MaxOpen)
 
+	// provide a soh heartbeat
+	health := health.New(healthCheckService, healthCheckAged, healthCheckStartup)
+
 ping:
 	for {
 		err = db.Ping()
 		if err != nil {
 			log.Println("problem pinging DB sleeping and retrying")
+			health.Ok() //send heartbeat
+
 			time.Sleep(time.Second * 30)
 			continue ping
 		}
@@ -71,17 +98,36 @@ ping:
 	var r sqs.Raw
 	var n notification
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+loop1:
 	for {
-		r, err = sqsClient.Receive(queueURL, 600)
+		r, err = sqsClient.ReceiveWithContext(ctx, queueURL, 600)
 		if err != nil {
-			log.Printf("problem receiving message, backing off: %s", err)
-			time.Sleep(time.Second * 20)
+			switch {
+			case sqs.Cancelled(err): //stoped
+				log.Println("##1 system stop... ")
+				break loop1
+			case sqs.IsNoMessagesError(err):
+				n := sLogger.Log(err)
+				if n%100 == 0 { //don't log all repeated error messages
+					log.Printf("no message received for %d times ", n)
+				}
+			default:
+				slog.Warn("problem receiving message, backing off", "err", err)
+				time.Sleep(time.Second * 20)
+			}
+			// update soh
+			health.Ok()
 			continue
 		}
 
 		err = metrics.DoProcess(&n, []byte(r.Body))
 		if err != nil {
 			log.Printf("problem processing message, skipping deletion for redelivery: %s", err)
+			// update soh
+			health.Ok()
 			continue
 		}
 
@@ -89,7 +135,24 @@ ping:
 		if err != nil {
 			log.Printf("problem deleting message, continuing: %s", err)
 		}
+		// update soh
+		health.Ok()
 	}
+}
+
+// check health by calling the http soh endpoint
+// cmd: ./fdsn-quake-consumer  -check
+func healthCheck() {
+	ctx, cancel := context.WithTimeout(context.Background(), healthCheckTimeout)
+	defer cancel()
+
+	msg, err := health.Check(ctx, healthCheckService+healthCheckPath, healthCheckTimeout)
+	if err != nil {
+		log.Printf("status: %v", err)
+		os.Exit(1)
+	}
+	log.Printf("status: %s", string(msg))
+	os.Exit(0)
 }
 
 // Process implements msg.Processor for event.

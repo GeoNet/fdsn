@@ -1,11 +1,13 @@
-# github.com/GeoNet/kit v0.0.0-20240512234353-4d4493144f60
+# github.com/GeoNet/kit v0.0.0-20241117195712-f2c17e5af268
 ## explicit; go 1.21
 github.com/GeoNet/kit/aws/s3
 github.com/GeoNet/kit/aws/sqs
 github.com/GeoNet/kit/cfg
+github.com/GeoNet/kit/health
 github.com/GeoNet/kit/metrics
 github.com/GeoNet/kit/sc3ml
 github.com/GeoNet/kit/seis/ms
+github.com/GeoNet/kit/slogger
 github.com/GeoNet/kit/weft
 github.com/GeoNet/kit/weft/wefttest
 github.com/GeoNet/kit/wgs84

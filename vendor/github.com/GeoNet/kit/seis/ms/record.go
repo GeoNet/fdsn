@@ -44,7 +44,7 @@ type Record struct {
 }
 
 // NewMSRecord decodes and unpacks the record samples from a byte slice and returns a Record pointer,
-//or an empty pointer and an error if it could not be decoded.
+// or an empty pointer and an error if it could not be decoded.
 func NewRecord(buf []byte) (*Record, error) {
 
 	var r Record
