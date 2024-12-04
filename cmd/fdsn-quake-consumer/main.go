@@ -22,11 +22,10 @@ import (
 	"github.com/GeoNet/kit/cfg"
 	"github.com/GeoNet/kit/health"
 	"github.com/GeoNet/kit/metrics"
-	"github.com/GeoNet/kit/slogger"
 )
 
 const (
-	healthCheckAged    = 5 * time.Minute  //need to have a good heartbeat within this time (depends on tilde-bundle)
+	healthCheckAged    = 5 * time.Minute  //need to have a good heartbeat within this time
 	healthCheckStartup = 5 * time.Minute  //ignore heartbeat messages for this time after starting
 	healthCheckTimeout = 30 * time.Second //health check timeout
 	healthCheckService = ":7777"          //end point to listen to for SOH checks
@@ -38,12 +37,32 @@ var (
 	s3Client  s3.S3
 	sqsClient sqs.SQS
 	db        *sql.DB
-
-	sLogger = slogger.NewSmartLogger(10*time.Minute, "") // log repeated error messages
 )
 
 type notification struct {
 	s3.Event
+}
+
+// init and check aws clients
+func initAwsClients() {
+	queueURL = os.Getenv("SQS_QUEUE_URL")
+	if queueURL == "" {
+		log.Fatal("SQS_QUEUE_URL is not set")
+	}
+
+	var err error
+	s3Client, err = s3.NewWithMaxRetries(100)
+	if err != nil {
+		log.Fatalf("creating S3 client: %s", err)
+	}
+
+	sqsClient, err = sqs.NewWithMaxRetries(100)
+	if err != nil {
+		log.Fatalf("creating SQS client: %s", err)
+	}
+	if err = sqsClient.CheckQueue(queueURL); err != nil {
+		log.Fatalf("error checking queueURL %s:  %s", queueURL, err.Error())
+	}
 }
 
 func main() {
@@ -53,6 +72,8 @@ func main() {
 	}
 
 	//run as normal service
+	initAwsClients()
+
 	p, err := cfg.PostgresEnv()
 	if err != nil {
 		log.Fatalf("error reading DB config from the environment vars: %s", err)
@@ -83,16 +104,6 @@ ping:
 		break ping
 	}
 
-	s3Client, err = s3.NewWithMaxRetries(100)
-	if err != nil {
-		log.Fatalf("creating S3 client: %s", err)
-	}
-
-	sqsClient, err = sqs.NewWithMaxRetries(100)
-	if err != nil {
-		log.Fatalf("creating SQS client: %s", err)
-	}
-
 	log.Println("listening for messages")
 
 	var r sqs.Raw
@@ -103,31 +114,26 @@ ping:
 
 loop1:
 	for {
+		health.Ok() // update soh
+
 		r, err = sqsClient.ReceiveWithContext(ctx, queueURL, 600)
 		if err != nil {
 			switch {
+			case sqs.IsNoMessagesError(err):
+				continue
 			case sqs.Cancelled(err): //stoped
 				log.Println("##1 system stop... ")
 				break loop1
-			case sqs.IsNoMessagesError(err):
-				n := sLogger.Log(err)
-				if n%100 == 0 { //don't log all repeated error messages
-					log.Printf("no message received for %d times ", n)
-				}
 			default:
 				slog.Warn("problem receiving message, backing off", "err", err)
 				time.Sleep(time.Second * 20)
 			}
-			// update soh
-			health.Ok()
 			continue
 		}
 
 		err = metrics.DoProcess(&n, []byte(r.Body))
 		if err != nil {
 			log.Printf("problem processing message, skipping deletion for redelivery: %s", err)
-			// update soh
-			health.Ok()
 			continue
 		}
 
@@ -135,8 +141,6 @@ loop1:
 		if err != nil {
 			log.Printf("problem deleting message, continuing: %s", err)
 		}
-		// update soh
-		health.Ok()
 	}
 }
 
