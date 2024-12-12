@@ -42,7 +42,7 @@ var (
 	db           *sql.DB
 	queueURL     string
 	sqsClient    sqs.SQS
-	s3Client     *s3.S3
+	s3Client     s3.S3
 	saveHoldings *sql.Stmt
 )
 
@@ -66,12 +66,10 @@ func initAwsClient() {
 		log.Fatalf("error checking queueURL %s:  %s", queueURL, err.Error())
 	}
 
-	s3c, err := s3.NewWithMaxRetries(3)
+	s3Client, err = s3.NewWithMaxRetries(3)
 	if err != nil {
 		log.Fatalf("error creating S3 client: %s", err)
 	}
-	s3Client = &s3c
-
 }
 
 func main() {
@@ -132,7 +130,6 @@ ping:
 		err = db.Ping()
 		if err != nil {
 			log.Println("problem pinging DB sleeping and retrying")
-			health.Ok() //send heartbeat
 			time.Sleep(time.Second * 30)
 			continue ping
 		}

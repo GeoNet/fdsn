@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,6 +16,8 @@ import (
 	"github.com/gorilla/schema"
 	_ "github.com/lib/pq"
 )
+
+const servicePort = ":8080" //http service port
 
 var (
 	db        *sql.DB
@@ -85,7 +88,7 @@ func main() {
 
 	log.Println("starting server")
 	server := &http.Server{
-		Addr:         ":8080",
+		Addr:         servicePort,
 		Handler:      mux,
 		ReadTimeout:  1 * time.Minute,
 		WriteTimeout: 10 * time.Minute,
@@ -100,7 +103,7 @@ func healthCheck() {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	msg, err := health.Check(ctx, ":8080/soh", timeout)
+	msg, err := health.Check(ctx, fmt.Sprintf("%s/soh", servicePort), timeout)
 	if err != nil {
 		log.Printf("status: %v", err)
 		os.Exit(1)

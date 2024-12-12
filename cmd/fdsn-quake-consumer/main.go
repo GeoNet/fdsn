@@ -96,8 +96,6 @@ ping:
 		err = db.Ping()
 		if err != nil {
 			log.Println("problem pinging DB sleeping and retrying")
-			health.Ok() //send heartbeat
-
 			time.Sleep(time.Second * 30)
 			continue ping
 		}
