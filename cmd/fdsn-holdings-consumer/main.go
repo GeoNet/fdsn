@@ -62,9 +62,9 @@ func initAwsClient() {
 	if err != nil {
 		log.Fatalf("error creating SQS client: %s", err)
 	}
-	if err = sqsClient.CheckQueue(queueURL); err != nil {
-		log.Fatalf("error checking queueURL %s:  %s", queueURL, err.Error())
-	}
+	// if err = sqsClient.CheckQueue(queueURL); err != nil {
+	// 	log.Fatalf("error checking queueURL %s:  %s", queueURL, err.Error())
+	// }
 
 	s3Client, err = s3.NewWithMaxRetries(3)
 	if err != nil {

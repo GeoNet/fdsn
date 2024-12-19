@@ -60,9 +60,9 @@ func initAwsClients() {
 	if err != nil {
 		log.Fatalf("creating SQS client: %s", err)
 	}
-	if err = sqsClient.CheckQueue(queueURL); err != nil {
-		log.Fatalf("error checking queueURL %s:  %s", queueURL, err.Error())
-	}
+	// if err = sqsClient.CheckQueue(queueURL); err != nil {
+	// 	log.Fatalf("error checking queueURL %s:  %s", queueURL, err.Error())
+	// }
 }
 
 func main() {
