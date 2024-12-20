@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,9 +12,12 @@ import (
 	"time"
 
 	"github.com/GeoNet/kit/cfg"
+	"github.com/GeoNet/kit/health"
 	"github.com/gorilla/schema"
 	_ "github.com/lib/pq"
 )
+
+const servicePort = ":8080" //http service port
 
 var (
 	db        *sql.DB
@@ -36,6 +41,12 @@ func newDecoder() *schema.Decoder {
 }
 
 func main() {
+	//check health if flagged in cmd
+	if health.RunningHealthCheck() {
+		healthCheck()
+	}
+
+	//run as normal service
 	var err error
 	if S3_BUCKET = os.Getenv("S3_BUCKET"); S3_BUCKET == "" {
 		log.Fatal("ERROR: S3_BUCKET environment variable is not set")
@@ -77,10 +88,26 @@ func main() {
 
 	log.Println("starting server")
 	server := &http.Server{
-		Addr:         ":8080",
+		Addr:         servicePort,
 		Handler:      mux,
 		ReadTimeout:  1 * time.Minute,
 		WriteTimeout: 10 * time.Minute,
 	}
 	log.Fatal(server.ListenAndServe())
+}
+
+// check health by calling the http soh endpoint
+// cmd: ./fdsn-ws  -check
+func healthCheck() {
+	timeout := 30 * time.Second
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	msg, err := health.Check(ctx, fmt.Sprintf("%s/soh", servicePort), timeout)
+	if err != nil {
+		log.Printf("status: %v", err)
+		os.Exit(1)
+	}
+	log.Printf("status: %s", string(msg))
+	os.Exit(0)
 }

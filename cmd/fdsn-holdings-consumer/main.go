@@ -10,26 +10,39 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/GeoNet/kit/aws/s3"
 	"github.com/GeoNet/kit/aws/sqs"
 	"github.com/GeoNet/kit/cfg"
+	"github.com/GeoNet/kit/health"
 	"github.com/GeoNet/kit/metrics"
+)
+
+const (
+	healthCheckAged    = 5 * time.Minute  //need to have a good heartbeat within this time
+	healthCheckStartup = 5 * time.Minute  //ignore heartbeat messages for this time after starting
+	healthCheckTimeout = 30 * time.Second //health check timeout
+	healthCheckService = ":7777"          //end point to listen to for SOH checks
+	healthCheckPath    = "/soh"
 )
 
 var (
 	db           *sql.DB
-	queueURL     = os.Getenv("SQS_QUEUE_URL")
+	queueURL     string
 	sqsClient    sqs.SQS
-	s3Client     *s3.S3
+	s3Client     s3.S3
 	saveHoldings *sql.Stmt
 )
 
@@ -37,7 +50,36 @@ type event struct {
 	s3.Event
 }
 
+// init and check aws variables
+func initAwsClient() {
+	queueURL = os.Getenv("SQS_QUEUE_URL")
+	if queueURL == "" {
+		log.Fatal("SQS_QUEUE_URL is not set")
+	}
+
+	var err error
+	sqsClient, err = sqs.NewWithMaxRetries(100)
+	if err != nil {
+		log.Fatalf("error creating SQS client: %s", err)
+	}
+	// if err = sqsClient.CheckQueue(queueURL); err != nil {
+	// 	log.Fatalf("error checking queueURL %s:  %s", queueURL, err.Error())
+	// }
+
+	s3Client, err = s3.NewWithMaxRetries(3)
+	if err != nil {
+		log.Fatalf("error creating S3 client: %s", err)
+	}
+}
+
 func main() {
+	//check health
+	if health.RunningHealthCheck() {
+		healthCheck()
+	}
+
+	//run as normal service
+	initAwsClient()
 	p, err := cfg.PostgresEnv()
 	if err != nil {
 		log.Fatalf("error reading DB config from the environment vars: %s", err)
@@ -80,6 +122,9 @@ func main() {
 	db.SetMaxIdleConns(p.MaxIdle)
 	db.SetMaxOpenConns(p.MaxOpen)
 
+	// provide a soh heartbeat
+	health := health.New(healthCheckService, healthCheckAged, healthCheckStartup)
+
 ping:
 	for {
 		err = db.Ping()
@@ -91,27 +136,29 @@ ping:
 		break ping
 	}
 
-	sqsClient, err = sqs.NewWithMaxRetries(100)
-	if err != nil {
-		log.Fatalf("error creating SQS client: %s", err)
-	}
-
-	s3c, err := s3.NewWithMaxRetries(3)
-	if err != nil {
-		log.Fatalf("error creating S3 client: %s", err)
-	}
-	s3Client = &s3c
-
 	log.Println("listening for messages")
 
 	var r sqs.Raw
 	var e event
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+loop1:
 	for {
-		r, err = sqsClient.Receive(queueURL, 600)
+		health.Ok() // update soh
+		r, err = sqsClient.ReceiveWithContext(ctx, queueURL, 600)
 		if err != nil {
-			log.Printf("problem receiving message, backing off: %s", err)
-			time.Sleep(time.Second * 20)
+			switch {
+			case sqs.IsNoMessagesError(err):
+				continue
+			case sqs.Cancelled(err): //stoped
+				log.Println("##1 system stop... ")
+				break loop1
+			default:
+				slog.Warn("problem receiving message, backing off", "err", err)
+				time.Sleep(time.Second * 20)
+			}
 			continue
 		}
 
@@ -120,12 +167,26 @@ ping:
 			log.Printf("problem processing message, skipping deletion for redelivery: %s", err)
 			continue
 		}
-
 		err = sqsClient.Delete(queueURL, r.ReceiptHandle)
 		if err != nil {
 			log.Printf("problem deleting message, continuing: %s", err)
 		}
 	}
+}
+
+// check health by calling the http soh endpoint
+// cmd: ./fdsn-holdings-consumer  -check
+func healthCheck() {
+	ctx, cancel := context.WithTimeout(context.Background(), healthCheckTimeout)
+	defer cancel()
+
+	msg, err := health.Check(ctx, healthCheckService+healthCheckPath, healthCheckTimeout)
+	if err != nil {
+		log.Printf("status: %v", err)
+		os.Exit(1)
+	}
+	log.Printf("status: %s", string(msg))
+	os.Exit(0)
 }
 
 // Process implements msg.Processor for event.

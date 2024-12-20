@@ -63,6 +63,10 @@ func initDataselectTemplate() {
 		log.Fatalf("error creating S3 client: %s", err)
 	}
 	s3Client = &s3c
+
+	if err = s3Client.CheckBucket(S3_BUCKET); err != nil {
+		log.Fatalf("error checking S3_BUCKET %s:  %s", S3_BUCKET, err.Error())
+	}
 }
 
 // fdsnDataMetricsV1Handler handles all datametrics queries.

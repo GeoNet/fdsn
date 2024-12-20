@@ -94,7 +94,7 @@ func getConfig() (aws.Config, error) {
 	var cfg aws.Config
 	var err error
 
-	if awsEndpoint := os.Getenv("CUSTOM_AWS_ENDPOINT_URL"); awsEndpoint != "" {
+	if awsEndpoint := os.Getenv("AWS_ENDPOINT_URL"); awsEndpoint != "" {
 		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 			return aws.Endpoint{
 				PartitionID:       "aws",
@@ -268,6 +268,15 @@ func (s *S3) PutWithMetadata(bucket, key string, object []byte, metadata Meta) e
 	}
 
 	_, err := s.client.PutObject(context.TODO(), &input)
+	return err
+}
+
+// CheckBucket checks if the given S3 bucket exists and is accessible.
+func (s *S3) CheckBucket(bucket string) error {
+	_, err := s.client.HeadBucket(context.TODO(), &s3.HeadBucketInput{
+		Bucket: aws.String(bucket),
+	})
+
 	return err
 }
 
