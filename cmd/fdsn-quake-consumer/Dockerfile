@@ -1,4 +1,4 @@
-ARG BUILDER_IMAGE=ghcr.io/geonet/base-images/go:1.21
+ARG BUILDER_IMAGE=ghcr.io/geonet/base-images/golang:1.23.5-alpine3.21
 
 FROM ${BUILDER_IMAGE} as builder
 # Obtain ca-cert and tzdata, which we will add to the container
