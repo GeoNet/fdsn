@@ -241,7 +241,8 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 				return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 			}
 			if !exist {
-				return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusNoContent, Err: fmt.Errorf("miniSEED file not found")}, url: r.URL.String(), timestamp: tm}
+				log.Printf("miniSEED file not found, key: %s", k)
+				continue
 			}
 
 			buf := &bytes.Buffer{}
