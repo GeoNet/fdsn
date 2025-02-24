@@ -234,11 +234,18 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 	for _, v := range request {
 		for _, k := range v.keys {
-
 			log.Printf("files=%d request_length=%f", len(v.keys), v.d.End.Sub(v.d.Start).Seconds())
+			//check key exists in S3
+			exist, err := s3Client.Exists(S3_BUCKET, k)
+			if err != nil {
+				return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
+			}
+			if !exist {
+				return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusNoContent, Err: fmt.Errorf("miniSEED file not found")}, url: r.URL.String(), timestamp: tm}
+			}
 
 			buf := &bytes.Buffer{}
-			err := s3Client.Get(S3_BUCKET, k, "", buf)
+			err = s3Client.Get(S3_BUCKET, k, "", buf)
 			if err != nil {
 				return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 			}
