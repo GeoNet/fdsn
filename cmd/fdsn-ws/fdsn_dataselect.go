@@ -277,6 +277,9 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 			}
 		}
 	}
+	if written == 0 {
+		return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusNoContent, Err: fmt.Errorf("%s", "no results for specified query")}, url: r.URL.String(), timestamp: tm}
+	}
 
 	return int64(written), nil
 }
