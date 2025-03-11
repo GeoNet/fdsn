@@ -73,28 +73,43 @@ func init() {
 parses the time in text as per the FDSN spec.  Pads text for parsing with
 time.RFC3339Nano.  Accepted formats are (UTC):
 
-	YYYY-MM-DDTHH:MM:SS.ssssss
-	YYYY-MM-DDTHH:MM:SS
-	YYYY-MM-DD
+	YYYY-MM-DDTHH:MM:SS.ssssss[Z]  // length 26(27)
+	YYYY-MM-DDTHH:MM:SS[Z]	// length 19(20)
+	YYYY-MM-DD	// length 10
 
 Implements the encoding.TextUnmarshaler interface.
 */
+
 func (t *Time) UnmarshalText(text []byte) (err error) {
 	s := string(text)
 	l := len(s)
-	if len(s) < 10 {
-		return fmt.Errorf("invalid time format: %s", s)
+
+	if l <= 10 {
+		// date only
+		t.Time, err = time.Parse("2006-01-02", s)
+		if err != nil {
+			return fmt.Errorf("invalid time format: %s", s)
+		}
+		return nil
 	}
 
-	if l >= 19 && l <= 26 && l != 20 { // length 20: "YYYY-MM-DDTHH:MM:SS." invalid
-		s = s + ".000000000Z"[(l-19):] // "YYYY-MM-DDTHH:MM:SS" append to nano
-	} else if l == 10 {
-		s = s + "T00:00:00.000000000Z" // YYYY-MM-DD
-	} else {
+	if !strings.HasSuffix(s, "Z") {
+		s = s + "Z"
+	}
+
+	t.Time, err = time.Parse(time.RFC3339Nano, s)
+	if err != nil {
 		return fmt.Errorf("invalid time format: %s", s)
 	}
-	t.Time, err = time.Parse(time.RFC3339Nano, s)
-	return
+	return nil
+}
+
+// This function helps to expose the unmarshaler to the public
+// it's returning time.Time instead of fdsn.Time
+func UnmarshalTime(text []byte) (time.Time, error) {
+	t := Time{}
+	err := t.UnmarshalText(text)
+	return t.Time, err
 }
 
 // ParesDataSelectGet parses the FDSN dataselect parameters in r from a

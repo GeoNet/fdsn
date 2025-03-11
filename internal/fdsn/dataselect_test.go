@@ -191,3 +191,36 @@ func TestWillBeEmpty(t *testing.T) {
 		t.Error("expected to false got true")
 	}
 }
+
+func TestUnmarshalTime(t *testing.T) {
+	tests := []struct {
+		ts       string
+		expected string
+		pass     bool
+	}{
+		{ts: "2020-01-01T00:00:00", expected: "2020-01-01T00:00:00Z", pass: true},
+		{ts: "2020-01-01T00:00:00Z", expected: "2020-01-01T00:00:00Z", pass: true},
+		{ts: "2020-01-01T00:00:00.123456Z", expected: "2020-01-01T00:00:00.123456Z", pass: true},
+		{ts: "2020-01-01T00:00:00.123456", expected: "2020-01-01T00:00:00.123456Z", pass: true},
+		{ts: "2020-01-01", expected: "2020-01-01T00:00:00Z", pass: true},
+		// make some invalid cases
+		{ts: "2020-01-01T00:00:00.abcZ", expected: "", pass: false},
+		{ts: "2020-01-01T00:00:00.Z", expected: "", pass: false},
+		{ts: "2020-01-01Z", expected: "", pass: false},
+	}
+
+	for _, test := range tests {
+		tm, err := fdsn.UnmarshalTime([]byte(test.ts))
+		if !test.pass && err == nil {
+			t.Errorf("expected to be failed for %s", test.ts)
+		} else if test.pass {
+			if err != nil {
+				t.Errorf("expected no error for %s, got %s", test.ts, err)
+			}
+			if tm.Format(time.RFC3339Nano) != test.expected {
+				t.Errorf("expected %s got %s", test.expected, tm.Format(time.RFC3339Nano))
+			}
+		}
+
+	}
+}

@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
 )
 
 type AngleType struct {
@@ -455,4 +457,14 @@ func _unmarshalTime(text []byte, t *time.Time, format string) (err error) {
 		*t, err = time.Parse(format+"Z07:00", s)
 	}
 	return err
+}
+
+// for decoder.Decode
+func (t *Time) UnmarshalText(text []byte) (err error) {
+	tm, err := fdsn.UnmarshalTime(text)
+	if err != nil {
+		return err
+	}
+	t.Time = tm
+	return nil
 }
