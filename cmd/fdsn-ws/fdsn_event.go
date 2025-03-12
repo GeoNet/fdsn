@@ -174,34 +174,6 @@ func initEventTemplate() {
 	}
 }
 
-/*
-parses the time in text as per the FDSN spec.  Pads text for parsing with
-time.RFC3339Nano.  Accepted formats are (UTC):
-
-	YYYY-MM-DDTHH:MM:SS.ssssss
-	YYYY-MM-DDTHH:MM:SS
-	YYYY-MM-DD
-
-Implements the encoding.TextUnmarshaler interface.
-*/
-func (t *Time) UnmarshalText(text []byte) (err error) {
-	s := string(text)
-	l := len(s)
-	if len(s) < 10 {
-		return fmt.Errorf("invalid time format: %s", s)
-	}
-
-	if l >= 19 && l <= 26 && l != 20 { // length 20: "YYYY-MM-DDTHH:MM:SS." invalid
-		s = s + ".000000000Z"[(l-19):] // "YYYY-MM-DDTHH:MM:SS" append to nano
-	} else if l == 10 {
-		s = s + "T00:00:00.000000000Z" // YYYY-MM-DD
-	} else {
-		return fmt.Errorf("invalid time format: %s", s)
-	}
-	t.Time, err = time.Parse(time.RFC3339Nano, s)
-	return
-}
-
 func parseEventV1(v url.Values) (fdsnEventV1, error) {
 	// All query parameters are optional and float zero values overlap
 	// with possible request ranges so the default is set to the max float val.
@@ -241,7 +213,7 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 				emptyEventType = true
 				continue
 			}
-			return e, fmt.Errorf("Invalid %s value", key)
+			return e, fmt.Errorf("invalid %s value", key)
 		}
 	}
 
@@ -289,7 +261,7 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 	// Now validate longitude, latitude, and radius
 	if e.Longitude != math.MaxFloat64 || e.Latitude != math.MaxFloat64 {
 		if e.Longitude == math.MaxFloat64 || e.Latitude == math.MaxFloat64 {
-			err = fmt.Errorf("parameter latitude and longitude must both present.")
+			err = fmt.Errorf("parameter latitude and longitude must both present")
 			return e, err
 		}
 
