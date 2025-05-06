@@ -432,6 +432,17 @@ func TestEventTypes(t *testing.T) {
 		{"experimental explosion", false, []interface{}{"experimental explosion"}},
 		{"e*,a*", false, []interface{}{"earthquake", "explosion", "anthropogenic event", "accidental explosion", "experimental explosion", "atmospheric event", "acoustic noise", "avalanche", "artillery strike", "atmospheric meteor explosion"}},
 		{"unknown", false, []interface{}{""}}, // specify "unknown" means query for empty value
+		//new event types
+		{"volcanic long-period", false, []interface{}{"volcanic long-period"}},
+		{"volcanic very-long-period", false, []interface{}{"volcanic very-long-period"}},
+		{"volcanic hybrid", false, []interface{}{"volcanic hybrid"}},
+		{"volcanic tremor", false, []interface{}{"volcanic tremor"}},
+		{"tremor pulse", false, []interface{}{"tremor pulse"}},
+		{"volcano-tectonic", false, []interface{}{"volcano-tectonic"}},
+		{"volcanic rockfall", false, []interface{}{"volcanic rockfall"}},
+		{"pyroclastic flow", false, []interface{}{"pyroclastic flow"}},
+		{"volcanic eruption", false, []interface{}{"volcanic eruption"}},
+		{"lahar", false, []interface{}{"lahar"}},
 	}
 	for _, c := range queryCases {
 		v := url.Values{}
