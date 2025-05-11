@@ -10,6 +10,14 @@ on:
         description: role to assume to push to ECR.
         type: string
         required: true
+      test-coverage-upload-role:
+        description: role to assume to upload test coverage results to S3.
+        type: string
+        required: false
+      test-coverage-upload-bucket:
+        description: S3 bucket to upload test coverage results to.
+        type: string
+        required: false
 permissions:
   packages: write
   contents: write
@@ -65,6 +73,8 @@ jobs:
         psql postgresql://fdsn_w:test@127.0.0.1/fdsn --file=./etc/ddl/drop-create.ddl
         psql postgresql://fdsn_w:test@127.0.0.1/fdsn --file=./etc/ddl/create-users.ddl
       goTestExtraArgs: -p 1
+      test-coverage-upload-role: ${{ inputs.test-coverage-upload-role }}
+      test-coverage-upload-bucket: ${{ inputs.test-coverage-upload-bucket }}
   build:
     needs: [prepare, build-app]
     strategy:
