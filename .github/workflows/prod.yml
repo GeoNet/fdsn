@@ -1,0 +1,12 @@
+name: fdsn-prod
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      ecr-registry: 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com
+      role-arn-push: arn:aws:iam::862640294325:role/github-actions-geonet-ecr-push

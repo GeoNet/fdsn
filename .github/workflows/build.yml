@@ -1,9 +1,15 @@
-name: fdsn
+name: build
 on:
-  push: {}
-  release:
-    types: [published]
-  workflow_dispatch: {}
+  workflow_call:
+    inputs:
+      ecr-registry:
+        description: the ECR registry to push to.
+        type: string
+        required: true
+      role-arn-push:
+        description: role to assume to push to ECR.
+        type: string
+        required: true
 permissions:
   packages: write
   contents: write
@@ -87,10 +93,10 @@ jobs:
       dockerfile: ${{ fromJSON(toJSON(matrix)).folder }}/${{ fromJSON(toJSON(matrix)).target }}.Dockerfile
       imageName: ${{ fromJSON(toJSON(matrix)).target }}
       platforms: linux/amd64
-      push: ${{ github.ref == 'refs/heads/main' }}
+      push: true
       tags: latest,git-${{ needs.prepare.outputs.git-rev }}
-      registryOverride: 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com
+      registryOverride: ${{ inputs.ecr-registry }}
       aws-region: ap-southeast-2
-      aws-role-arn-to-assume: arn:aws:iam::862640294325:role/github-actions-geonet-ecr-push
+      aws-role-arn-to-assume: ${{ inputs.role-arn-push }}
       aws-role-duration-seconds: "3600"
   
