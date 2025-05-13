@@ -1,9 +1,23 @@
-name: fdsn
+name: build
 on:
-  push: {}
-  release:
-    types: [published]
-  workflow_dispatch: {}
+  workflow_call:
+    inputs:
+      ecr-registry:
+        description: the ECR registry to push to.
+        type: string
+        required: true
+      role-arn-push:
+        description: role to assume to push to ECR.
+        type: string
+        required: true
+      test-coverage-upload-role:
+        description: role to assume to upload test coverage results to S3.
+        type: string
+        required: false
+      test-coverage-upload-bucket:
+        description: S3 bucket to upload test coverage results to.
+        type: string
+        required: false
 permissions:
   packages: write
   contents: write
@@ -59,6 +73,8 @@ jobs:
         psql postgresql://fdsn_w:test@127.0.0.1/fdsn --file=./etc/ddl/drop-create.ddl
         psql postgresql://fdsn_w:test@127.0.0.1/fdsn --file=./etc/ddl/create-users.ddl
       goTestExtraArgs: -p 1
+      test-coverage-upload-role: ${{ inputs.test-coverage-upload-role }}
+      test-coverage-upload-bucket: ${{ inputs.test-coverage-upload-bucket }}
   build:
     needs: [prepare, build-app]
     strategy:
@@ -87,10 +103,10 @@ jobs:
       dockerfile: ${{ fromJSON(toJSON(matrix)).folder }}/${{ fromJSON(toJSON(matrix)).target }}.Dockerfile
       imageName: ${{ fromJSON(toJSON(matrix)).target }}
       platforms: linux/amd64
-      push: ${{ github.ref == 'refs/heads/main' }}
+      push: true
       tags: latest,git-${{ needs.prepare.outputs.git-rev }}
-      registryOverride: 862640294325.dkr.ecr.ap-southeast-2.amazonaws.com
+      registryOverride: ${{ inputs.ecr-registry }}
       aws-region: ap-southeast-2
-      aws-role-arn-to-assume: arn:aws:iam::862640294325:role/github-actions-geonet-ecr-push
+      aws-role-arn-to-assume: ${{ inputs.role-arn-push }}
       aws-role-duration-seconds: "3600"
   

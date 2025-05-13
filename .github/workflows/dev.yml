@@ -1,0 +1,23 @@
+name: fdsn-dev
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    branches:
+      - main
+  workflow_dispatch: {}
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      ecr-registry: 615890063537.dkr.ecr.ap-southeast-2.amazonaws.com
+      role-arn-push: arn:aws:iam::615890063537:role/github-actions-geonet-ecr-fdsn
+  success:
+    runs-on: ubuntu-latest
+    if: success()
+    needs: [build]
+    steps:
+        - run: echo "workflow was successful"
