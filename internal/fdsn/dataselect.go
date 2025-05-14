@@ -33,9 +33,9 @@ var dataSelectNotSupported = map[string]bool{
 	"minuimumlength": true,
 }
 
-// nslcReg: FDSN spec allows all ascii, but we'll only allow alpha, number, _, ?, *, "," and "--" (exactly 2 hyphens only)
-var nslcReg = regexp.MustCompile(`^([\w*?,]+|--)$`)
-var eventTypeReg = regexp.MustCompile(`^([\w*?, ]+|--)$`) // space allowed
+// nslcReg: FDSN spec allows all ascii, but we'll only allow alpha, number, _,-, ?, *, "," and "--" (exactly 2 hyphens only)
+var nslcReg = regexp.MustCompile(`^([\w*?,]+(?:-[\w*?,]+)*|--)$`)          // space not allowed
+var eventTypeReg = regexp.MustCompile(`^([\w*?, ]+(?:[ -][\w*?,]+)*|--)$`) // space allowed
 
 // nslcRegPassPattern: This is beyond FDSN spec.
 // Any NSLC regex string doesn't match this pattern we knew it won't generate any results.
@@ -306,6 +306,7 @@ func GenRegex(input []string, emptyDash bool, allowSpace bool) ([]string, error)
 		} else {
 			matched = nslcReg.MatchString(s)
 		}
+
 		if !matched {
 			return nil, fmt.Errorf("invalid parameter:'%s'", s)
 		}

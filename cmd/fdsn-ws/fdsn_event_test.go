@@ -349,7 +349,7 @@ func TestLongitudeWrap180(t *testing.T) {
 	setup(t)
 	defer teardown()
 
-	// test data: one at 176.3257242 and another at -176.3257242
+	// test data at: 176.3257242, -176.3257242, 179.3257242
 	v := url.Values{}
 	v.Set("minlon", "177.0")
 	e, err := parseEventV1(v)
@@ -362,8 +362,8 @@ func TestLongitudeWrap180(t *testing.T) {
 		t.Error(err)
 	}
 
-	if c != 1 {
-		t.Errorf("expected 1 records got %d\n", c)
+	if c != 2 {
+		t.Errorf("expected 2 records got %d\n", c)
 	}
 
 	v = url.Values{}
@@ -379,8 +379,8 @@ func TestLongitudeWrap180(t *testing.T) {
 		t.Error(err)
 	}
 
-	if c != 2 {
-		t.Errorf("expected 2 records got %d\n", c)
+	if c != 3 {
+		t.Errorf("expected 3 records got %d\n", c)
 	}
 
 	v = url.Values{}
@@ -395,8 +395,8 @@ func TestLongitudeWrap180(t *testing.T) {
 		t.Error(err)
 	}
 
-	if c != 1 {
-		t.Errorf("expected 1 records got %d\n", c)
+	if c != 2 {
+		t.Errorf("expected 2 records got %d\n", c)
 	}
 
 	v = url.Values{}
@@ -432,6 +432,17 @@ func TestEventTypes(t *testing.T) {
 		{"experimental explosion", false, []interface{}{"experimental explosion"}},
 		{"e*,a*", false, []interface{}{"earthquake", "explosion", "anthropogenic event", "accidental explosion", "experimental explosion", "atmospheric event", "acoustic noise", "avalanche", "artillery strike", "atmospheric meteor explosion"}},
 		{"unknown", false, []interface{}{""}}, // specify "unknown" means query for empty value
+		//new event types
+		{"volcanic long-period", false, []interface{}{"volcanic long-period"}},
+		{"volcanic very-long-period", false, []interface{}{"volcanic very-long-period"}},
+		{"volcanic hybrid", false, []interface{}{"volcanic hybrid"}},
+		{"volcanic tremor", false, []interface{}{"volcanic tremor"}},
+		{"tremor pulse", false, []interface{}{"tremor pulse"}},
+		{"volcano-tectonic", false, []interface{}{"volcano-tectonic"}},
+		{"volcanic rockfall", false, []interface{}{"volcanic rockfall"}},
+		{"pyroclastic flow", false, []interface{}{"pyroclastic flow"}},
+		{"volcanic eruption", false, []interface{}{"volcanic eruption"}},
+		{"lahar", false, []interface{}{"lahar"}},
 	}
 	for _, c := range queryCases {
 		v := url.Values{}

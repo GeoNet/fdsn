@@ -22,6 +22,10 @@ var routes = wt.Requests{
 	{ID: wt.L(), URL: "/fdsnws/event/1/catalogs", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/event/1/contributors", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/event/1/application.wadl", Content: "application/xml"},
+	//event type
+	{ID: wt.L(), URL: "/fdsnws/event/1/query?starttime=2015-01-01T00:00:00&endtime=2015-12-28T22:00:00&format=text&eventtype=volcanic%20long-period", Content: "text/plain"},
+	{ID: wt.L(), URL: "/fdsnws/event/1/query?starttime=2015-01-01T00:00:00&endtime=2015-12-28T22:00:00&format=text&eventtype=volcanic%20very-long-period", Content: "text/plain"},
+	{ID: wt.L(), URL: "/fdsnws/event/1/query?starttime=2015-01-01T00:00:00&endtime=2015-12-28T22:00:00&format=text&eventtype=other%20event", Content: "text/plain"},
 
 	// fdsn-ws-dataselect
 	{ID: wt.L(), URL: "/fdsnws/dataselect/1", Content: "text/html"},
