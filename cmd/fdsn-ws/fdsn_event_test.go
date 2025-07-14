@@ -118,7 +118,7 @@ func TestTimeParse(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := tm.UnmarshalText([]byte("2015-01-12T12:12:12-09:00")); err == nil {
+	if err := tm.UnmarshalText([]byte("2015-01-12T12:12:12.invalid")); err == nil {
 		t.Error("expected an error for invalid time string.")
 	}
 }
