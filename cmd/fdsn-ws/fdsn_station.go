@@ -887,28 +887,42 @@ func (v fdsnStationV1Search) validBounding(latitude *LatitudeType, longitude *Lo
 
 // Download station XML from S3
 func downloadStationXML(since time.Time) (by *bytes.Buffer, modified time.Time, err error) {
-	s3Client, err := s3.NewWithMaxRetries(100)
-	if err != nil {
-		return
-	}
-
-	tp, err := s3Client.LastModified(s3Bucket, s3Meta, "")
-	if err != nil {
-		return
-	}
-
-	if !tp.After(since) {
-		return nil, zeroDateTime, errNotModified
-	}
-
-	log.Println("Downloading fdsn station xml file from S3: ", s3Bucket+"/"+s3Meta)
-
+	var tp time.Time
 	by = bytes.NewBuffer(nil)
-	err = s3Client.Get(s3Bucket, s3Meta, "", by)
-	if err != nil {
-		return
-	}
 
+	if s3Bucket != "local" {
+		var s3Client s3.S3
+		s3Client, err = s3.NewWithMaxRetries(100)
+		if err != nil {
+			return
+		}
+
+		tp, err = s3Client.LastModified(s3Bucket, s3Meta, "")
+		if err != nil {
+			return
+		}
+
+		if !tp.After(since) {
+			return nil, zeroDateTime, errNotModified
+		}
+
+		log.Println("Downloading fdsn station xml file from S3: ", s3Bucket+"/"+s3Meta)
+
+		err = s3Client.Get(s3Bucket, s3Meta, "", by)
+		if err != nil {
+			return
+		}
+	} else {
+		// load local, s3Meta be the path to station xml
+		var f *os.File
+		f, err = os.Open(s3Meta)
+		if err != nil {
+			return
+		}
+		defer f.Close()
+		_, err = by.ReadFrom(f)
+		tp = time.Now()
+	}
 	modified = tp
 	log.Println("Download complete.")
 	return
@@ -977,7 +991,7 @@ func levelValue(level string) (int, error) {
 	case "response":
 		return STATION_LEVEL_RESPONSE, nil
 	default:
-		return -1, fmt.Errorf("Invalid level value.")
+		return -1, fmt.Errorf("invalid level value")
 	}
 }
 
@@ -1020,14 +1034,13 @@ func (d xsdDateTime) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
 	return xml.Attr{Name: name, Value: string(t)}, nil
 }
 
-// For format=text
+// For format=text - now outputs RFC3339Nano with Z timezone
 func (d xsdDateTime) MarshalFormatText() string {
 	if time.Time(d).Equal(zeroDateTime) || time.Time(d).Equal(emptyDateTime) {
 		return ""
 	}
 
-	b, _ := d.MarshalText()
-	return string(b)
+	return time.Time(d).UTC().Format(time.RFC3339Nano)
 }
 
 func contains(slice []string, value string) bool {

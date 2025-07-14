@@ -445,17 +445,28 @@ type VoltageType struct {
 type xsdDateTime time.Time
 
 func (t *xsdDateTime) UnmarshalText(text []byte) error {
-	return _unmarshalTime(text, (*time.Time)(t), "2006-01-02T15:04:05.999999999")
+	return _unmarshalTime(text, (*time.Time)(t))
 }
 func (t *xsdDateTime) MarshalText() ([]byte, error) {
-	return []byte((*time.Time)(t).Format("2006-01-02T15:04:05.999999999")), nil
+	return []byte((*time.Time)(t).UTC().Format(time.RFC3339Nano)), nil
 }
-func _unmarshalTime(text []byte, t *time.Time, format string) (err error) {
+func _unmarshalTime(text []byte, t *time.Time) (err error) {
 	s := string(bytes.TrimSpace(text))
-	*t, err = time.Parse(format, s)
-	if _, ok := err.(*time.ParseError); ok {
-		*t, err = time.Parse(format+"Z07:00", s)
+	
+	// Try RFC3339Nano first (new format)
+	*t, err = time.Parse(time.RFC3339Nano, s)
+	if err == nil {
+		return nil
 	}
+	
+	// Try legacy format for backward compatibility
+	*t, err = time.Parse("2006-01-02T15:04:05.999999999", s)
+	if err == nil {
+		return nil
+	}
+	
+	// Try legacy format with timezone
+	*t, err = time.Parse("2006-01-02T15:04:05.999999999Z07:00", s)
 	return err
 }
 
