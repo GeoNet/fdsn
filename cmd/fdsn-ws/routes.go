@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"net/http"
 	"strings"
@@ -42,6 +43,9 @@ func initRoutes() {
 	mux.HandleFunc("/metrics/fdsnws/dataselect/1/query", weft.MakeHandler(fdsnDataMetricsV1Handler, weft.TextError))
 
 	mux.HandleFunc("/sc3ml", weft.MakeHandler(s3ml, weft.TextError))
+
+	// handle robots
+	mux.HandleFunc("/robots.txt", weft.MakeHandler(robots, weft.TextError))
 }
 
 func soh(r *http.Request, h http.Header, b *bytes.Buffer) error {
@@ -113,4 +117,19 @@ func fdsnErrorHandler(err error, h http.Header, b *bytes.Buffer, nounce string) 
 	}
 
 	return weft.TextError(err, h, b, nounce)
+}
+
+//go:embed assets/robots.txt
+var robot string
+
+// robots handler for crawlers
+func robots(r *http.Request, h http.Header, b *bytes.Buffer) error {
+	h.Set("Content-Type", "text/plain")
+	h.Set("Surrogate-Control", "max-age=3600")
+
+	_, err := b.WriteString(robot)
+	if err != nil {
+		return weft.StatusError{Code: http.StatusInternalServerError, Err: err}
+	}
+	return nil
 }
