@@ -358,7 +358,7 @@ func TestStartEnd(t *testing.T) {
 func TestFormatText(t *testing.T) {
 	setup(t)
 	defer teardown()
-	
+
 	var e fdsnStationV1Search
 	var err error
 	var v url.Values = make(map[string][]string)
