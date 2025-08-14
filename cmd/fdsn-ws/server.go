@@ -26,7 +26,7 @@ var (
 	LOG_EXTRA bool           // Whether POST body is logged.
 )
 
-var stationVersion = "1.1"
+var stationVersion = "1.2"
 var eventVersion = "1.2"
 var dataselectVersion = "1.1"
 var zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)

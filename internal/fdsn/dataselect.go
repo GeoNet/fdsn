@@ -93,15 +93,33 @@ func (t *Time) UnmarshalText(text []byte) (err error) {
 		return nil
 	}
 
-	if !strings.HasSuffix(s, "Z") {
-		s = s + "Z"
+	// Try RFC3339Nano first (new format)
+	t.Time, err = time.Parse(time.RFC3339Nano, s)
+	if err == nil {
+		return nil
 	}
 
-	t.Time, err = time.Parse(time.RFC3339Nano, s)
-	if err != nil {
-		return fmt.Errorf("invalid time format: %s", s)
+	// Try with Z suffix added for backward compatibility
+	if !strings.HasSuffix(s, "Z") {
+		t.Time, err = time.Parse(time.RFC3339Nano, s+"Z")
+		if err == nil {
+			return nil
+		}
 	}
-	return nil
+
+	// Try legacy format for backward compatibility
+	t.Time, err = time.Parse("2006-01-02T15:04:05.999999999", s)
+	if err == nil {
+		return nil
+	}
+
+	// Try legacy format with timezone
+	t.Time, err = time.Parse("2006-01-02T15:04:05.999999999Z07:00", s)
+	if err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("invalid time format: %s", s)
 }
 
 // This function helps to expose the unmarshaler to the public
