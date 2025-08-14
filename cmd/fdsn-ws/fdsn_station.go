@@ -108,8 +108,8 @@ var (
 	fdsnStations        fdsnStationObj
 	emptyDateTime       = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
 	errNotModified      = fmt.Errorf("Not modified.")
-	s3Bucket            string
-	s3Meta              string
+	stationXMLBucket    string
+	stationXMLKey       string
 )
 
 func initStationTemplate() {
@@ -134,18 +134,18 @@ func initStationTemplate() {
 
 func initStationXML() {
 	var err error
-	s3Bucket = os.Getenv("STATION_XML_BUCKET")
-	s3Meta = os.Getenv("STATION_XML_META_KEY")
+	stationXMLBucket = os.Getenv("STATION_XML_BUCKET")
+	stationXMLKey = os.Getenv("STATION_XML_META_KEY")
 
 	// Prepare the data source for station.
 	// If there's no local file available then we'll have to download first.
 	by := bytes.NewBuffer(nil)
 	modified := zeroDateTime
 	var s os.FileInfo
-	if s, err = os.Stat("etc/" + s3Meta); err == nil {
-		log.Println("Loading fdsn station xml file ", "etc/"+s3Meta)
+	if s, err = os.Stat("etc/" + stationXMLKey); err == nil {
+		log.Println("Loading fdsn station xml file ", "etc/"+stationXMLKey)
 		var f *os.File
-		if f, err = os.Open("etc/" + s3Meta); err == nil {
+		if f, err = os.Open("etc/" + stationXMLKey); err == nil {
 
 			if _, err = io.Copy(by, f); err != nil {
 				log.Println("Error copying station xml file", err)
@@ -656,7 +656,7 @@ func (r *FDSNStationXML) doFilter(params []fdsnStationV1Search) bool {
 // If this node meets at least one criteria, then we pass all the met criterion to next level.
 
 func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
-	n.TotalNumberStations = len(n.Station)
+	n.TotalNumberStations = CounterType(len(n.Station))
 	matchedParams := make([]fdsnStationV1Search, 0)
 	resultStations := make([]StationType, 0)
 
@@ -699,7 +699,7 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
 		}
 	}
 
-	n.SelectedNumberStations = len(resultStations)
+	n.SelectedNumberStations = CounterType(len(resultStations))
 	n.Station = resultStations
 
 	// this node only valid if the children matches any query
@@ -707,7 +707,7 @@ func (n *NetworkType) doFilter(params []fdsnStationV1Search) bool {
 }
 
 func (s *StationType) doFilter(params []fdsnStationV1Search) bool {
-	s.TotalNumberChannels = len(s.Channel)
+	s.TotalNumberChannels = CounterType(len(s.Channel))
 	resultChannels := make([]ChannelType, 0)
 
 	matchedParams := make([]fdsnStationV1Search, 0)
@@ -835,38 +835,30 @@ func (v fdsnStationV1Search) validStartEnd(start, end time.Time, level int) bool
 	return true
 }
 
-func (v fdsnStationV1Search) validLatLng(latitude *LatitudeType, longitude *LongitudeType) bool {
-	if v.MinLatitude != math.MaxFloat64 && (latitude == nil || latitude.Value < v.MinLatitude) {
-		// request to check latitude:
-		// 1. this node doesn't have latitude -> check failed
-		// 2. the value fall outside the range -> check failed
-		// (similar logics apply for cases below)
+func (v fdsnStationV1Search) validLatLng(latitude LatitudeType, longitude LongitudeType) bool {
+	if v.MinLatitude != math.MaxFloat64 && latitude.Value < v.MinLatitude {
 		return false
 	}
 
-	if v.MaxLatitude != math.MaxFloat64 && (latitude == nil || latitude.Value > v.MaxLatitude) {
+	if v.MaxLatitude != math.MaxFloat64 && latitude.Value > v.MaxLatitude {
 		return false
 	}
 
-	if v.MinLongitude != math.MaxFloat64 && (longitude == nil || longitude.Value < v.MinLongitude) {
+	if v.MinLongitude != math.MaxFloat64 && longitude.Value < v.MinLongitude {
 		return false
 	}
 
-	if v.MaxLongitude != math.MaxFloat64 && (longitude == nil || longitude.Value > v.MaxLongitude) {
+	if v.MaxLongitude != math.MaxFloat64 && longitude.Value > v.MaxLongitude {
 		return false
 	}
 
 	return true
 }
 
-func (v fdsnStationV1Search) validBounding(latitude *LatitudeType, longitude *LongitudeType) bool {
+func (v fdsnStationV1Search) validBounding(latitude LatitudeType, longitude LongitudeType) bool {
 	if v.Latitude == math.MaxFloat64 {
 		// not using bounding circle
 		return true
-	}
-	if latitude == nil || longitude == nil {
-		// requested bounding circle, but this node doesn't have lat/lon
-		return false
 	}
 	d, _, err := wgs84.DistanceBearing(v.Latitude, v.Longitude, latitude.Value, longitude.Value)
 	if err != nil {
@@ -890,14 +882,14 @@ func downloadStationXML(since time.Time) (by *bytes.Buffer, modified time.Time, 
 	var tp time.Time
 	by = bytes.NewBuffer(nil)
 
-	if s3Bucket != "local" {
+	if stationXMLBucket != "" {
 		var s3Client s3.S3
 		s3Client, err = s3.NewWithMaxRetries(100)
 		if err != nil {
 			return
 		}
 
-		tp, err = s3Client.LastModified(s3Bucket, s3Meta, "")
+		tp, err = s3Client.LastModified(stationXMLBucket, stationXMLKey, "")
 		if err != nil {
 			return
 		}
@@ -906,16 +898,17 @@ func downloadStationXML(since time.Time) (by *bytes.Buffer, modified time.Time, 
 			return nil, zeroDateTime, errNotModified
 		}
 
-		log.Println("Downloading fdsn station xml file from S3: ", s3Bucket+"/"+s3Meta)
+		log.Println("Downloading fdsn station xml file from S3: ", stationXMLBucket+"/"+stationXMLKey)
 
-		err = s3Client.Get(s3Bucket, s3Meta, "", by)
+		err = s3Client.Get(stationXMLBucket, stationXMLKey, "", by)
 		if err != nil {
 			return
 		}
 	} else {
-		// load local, s3Meta be the path to station xml
+		// load from local to make debugging easier.
+		// s3Meta be the path to station xml
 		var f *os.File
-		f, err = os.Open(s3Meta)
+		f, err = os.Open(stationXMLKey)
 		if err != nil {
 			return
 		}

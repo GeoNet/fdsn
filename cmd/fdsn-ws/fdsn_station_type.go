@@ -7,22 +7,64 @@ import (
 	"github.com/GeoNet/fdsn/internal/fdsn"
 )
 
-type AngleType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
-}
-
 // May be one of MACLAURIN
 type ApproximationType string
 
-// Instrument azimuth, degrees clockwise from North.
+// CounterType represents integers greater than or equal to 0
+type CounterType int
+
+// DistanceType represents distance measurements in meters
+type DistanceType struct {
+	Value             float64  `xml:",chardata"`
+	Unit              string   `xml:"unit,attr,omitempty"`
+	PlusError         *float64 `xml:"plusError,attr,omitempty"`
+	MinusError        *float64 `xml:"minusError,attr,omitempty"`
+	MeasurementMethod string   `xml:"measurementMethod,attr,omitempty"`
+}
+
+// AzimuthType represents azimuth in degrees clockwise from north (0-360)
 type AzimuthType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
+	Value             float64  `xml:",chardata"`
+	Unit              string   `xml:"unit,attr,omitempty"`
+	PlusError         *float64 `xml:"plusError,attr,omitempty"`
+	MinusError        *float64 `xml:"minusError,attr,omitempty"`
+	MeasurementMethod string   `xml:"measurementMethod,attr,omitempty"`
+}
+
+// DipType represents dip in degrees, positive down from horizontal (-90 to +90)
+type DipType struct {
+	Value             float64  `xml:",chardata"`
+	Unit              string   `xml:"unit,attr,omitempty"`
+	PlusError         *float64 `xml:"plusError,attr,omitempty"`
+	MinusError        *float64 `xml:"minusError,attr,omitempty"`
+	MeasurementMethod string   `xml:"measurementMethod,attr,omitempty"`
+}
+
+// AngleType represents angle measurements in degrees (-360 to +360)
+type AngleType struct {
+	Value             float64  `xml:",chardata"`
+	Unit              string   `xml:"unit,attr,omitempty"`
+	PlusError         *float64 `xml:"plusError,attr,omitempty"`
+	MinusError        *float64 `xml:"minusError,attr,omitempty"`
+	MeasurementMethod string   `xml:"measurementMethod,attr,omitempty"`
+}
+
+// FrequencyType represents frequency measurements in Hertz
+type FrequencyType struct {
+	Value             float64  `xml:",chardata"`
+	Unit              string   `xml:"unit,attr,omitempty"`
+	PlusError         *float64 `xml:"plusError,attr,omitempty"`
+	MinusError        *float64 `xml:"minusError,attr,omitempty"`
+	MeasurementMethod string   `xml:"measurementMethod,attr,omitempty"`
+}
+
+// SampleRateType represents sample rate in samples per second
+type SampleRateType struct {
+	Value             float64  `xml:",chardata"`
+	Unit              string   `xml:"unit,attr,omitempty"`
+	PlusError         *float64 `xml:"plusError,attr,omitempty"`
+	MinusError        *float64 `xml:"minusError,attr,omitempty"`
+	MeasurementMethod string   `xml:"measurementMethod,attr,omitempty"`
 }
 
 type BaseFilterType struct {
@@ -35,15 +77,40 @@ type BaseFilterType struct {
 }
 
 type BaseNodeType struct {
-	Code             string                `xml:"code,attr,omitempty"`
+	Code             string                `xml:"code,attr"`
 	StartDate        xsdDateTime           `xml:"startDate,attr,omitempty"`
 	EndDate          xsdDateTime           `xml:"endDate,attr,omitempty"`
 	RestrictedStatus *RestrictedStatusType `xml:"restrictedStatus,attr,omitempty"`
 	AlternateCode    string                `xml:"alternateCode,attr,omitempty"`
 	HistoricalCode   string                `xml:"historicalCode,attr,omitempty"`
+	SourceID         string                `xml:"sourceID,attr,omitempty"`
 	Items            []string              `xml:",any,omitempty"`
 	Description      string                `xml:"Description,omitempty"`
 	Comment          []CommentType         `xml:"Comment,omitempty"`
+	Identifier       []IdentifierType      `xml:"Identifier,omitempty"`
+	DataAvailability *DataAvailabilityType `xml:"DataAvailability,omitempty"`
+}
+
+type IdentifierType struct {
+	Type  string `xml:"type,attr,omitempty"`
+	Value string `xml:",chardata"`
+}
+
+type DataAvailabilityType struct {
+	Extent *DataAvailabilityExtentType `xml:"Extent,omitempty"`
+	Span   []DataAvailabilitySpanType  `xml:"Span,omitempty"`
+}
+
+type DataAvailabilityExtentType struct {
+	Start xsdDateTime `xml:"start,attr"`
+	End   xsdDateTime `xml:"end,attr"`
+}
+
+type DataAvailabilitySpanType struct {
+	Start           xsdDateTime `xml:"start,attr"`
+	End             xsdDateTime `xml:"end,attr"`
+	NumberSegments  int         `xml:"numberSegments,attr"`
+	MaximumTimeTear float64     `xml:"maximumTimeTear,attr,omitempty"`
 }
 
 // May be one of ANALOG (RADIANS/SECOND), ANALOG (HERTZ), DIGITAL
@@ -53,33 +120,25 @@ type CfTransferFunctionType string
 // response blockettes.
 type ChannelType struct {
 	BaseNodeType
-	Unit              string                  `xml:"unit,attr,omitempty"`
-	LocationCode      string                  `xml:"locationCode,attr,omitempty"`
+	LocationCode      string                  `xml:"locationCode,attr"`
 	ExternalReference []ExternalReferenceType `xml:"ExternalReference,omitempty"`
-	Latitude          *LatitudeType           `xml:"Latitude,omitempty"`
-	Longitude         *LongitudeType          `xml:"Longitude,omitempty"`
-	Elevation         *DistanceType           `xml:"Elevation,omitempty"`
-	Depth             *DistanceType           `xml:"Depth,omitempty"`
+	Latitude          LatitudeType            `xml:"Latitude"`
+	Longitude         LongitudeType           `xml:"Longitude"`
+	Elevation         DistanceType            `xml:"Elevation"`
+	Depth             DistanceType            `xml:"Depth"`
 	Azimuth           *AzimuthType            `xml:"Azimuth,omitempty"`
 	Dip               *DipType                `xml:"Dip,omitempty"`
+	WaterLevel        *FloatType              `xml:"WaterLevel,omitempty"`
 	Type              []Type                  `xml:"Type,omitempty"`
 	SampleRate        *SampleRateType         `xml:"SampleRate,omitempty"`
 	SampleRateRatio   *SampleRateRatioType    `xml:"SampleRateRatio,omitempty"`
-	StorageFormat     string                  `xml:"StorageFormat,omitempty"`
-	ClockDrift        *ClockDrift             `xml:"ClockDrift,omitempty"`
+	ClockDrift        *FloatType              `xml:"ClockDrift,omitempty"`
 	CalibrationUnits  *UnitsType              `xml:"CalibrationUnits,omitempty"`
 	Sensor            *EquipmentType          `xml:"Sensor,omitempty"`
 	PreAmplifier      *EquipmentType          `xml:"PreAmplifier,omitempty"`
 	DataLogger        *EquipmentType          `xml:"DataLogger,omitempty"`
-	Equipment         *EquipmentType          `xml:"Equipment,omitempty"`
+	Equipment         []EquipmentType         `xml:"Equipment,omitempty"`
 	Response          *ResponseType           `xml:"Response,omitempty"`
-}
-
-type ClockDrift struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
 }
 
 type Coefficient struct {
@@ -99,39 +158,23 @@ type CoefficientsType struct {
 }
 
 type CommentType struct {
+	Id                 *int         `xml:"id,attr,omitempty"`
 	Value              string       `xml:"Value,omitempty"`
 	BeginEffectiveTime xsdDateTime  `xml:"BeginEffectiveTime,omitempty"`
 	EndEffectiveTime   xsdDateTime  `xml:"EndEffectiveTime,omitempty"`
 	Author             []PersonType `xml:"Author,omitempty"`
+	Subject            string       `xml:"subject,attr,omitempty"`
 }
 
 type DecimationType struct {
-	InputSampleRate *FrequencyType `xml:"InputSampleRate,omitempty"`
-	Factor          *int           `xml:"Factor,omitempty"`
-	Offset          *int           `xml:"Offset,omitempty"`
-	Delay           *FloatType     `xml:"Delay,omitempty"`
-	Correction      *FloatType     `xml:"Correction,omitempty"`
+	InputSampleRate FrequencyType `xml:"InputSampleRate"`
+	Factor          int           `xml:"Factor"`
+	Offset          int           `xml:"Offset"`
+	Delay           FloatType     `xml:"Delay"`
+	Correction      FloatType     `xml:"Correction"`
 }
 
-// Instrument dip in degrees down from horizontal. Together azimuth and
-// dip describe the direction of the sensitive axis of the instrument.
-type DipType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
-}
-
-// Extension of FloatType for distances, elevations, and
-// depths.
-type DistanceType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
-}
-
-// Must match the pattern [\w\.\-_]+@[\w\.\-_]+
+// EmailType must match pattern [\w\.\-_]+@[\w\.\-_]+
 type EmailType string
 
 type EquipmentType struct {
@@ -154,14 +197,14 @@ type ExternalReferenceType struct {
 }
 
 type FDSNStationXML struct {
-	SchemaVersion *float64      `xml:"schemaVersion,attr,omitempty"`
+	SchemaVersion float64       `xml:"schemaVersion,attr"`
 	Items         []string      `xml:",any,omitempty"`
-	Source        string        `xml:"Source,omitempty"`
+	Source        string        `xml:"Source"`
 	Sender        string        `xml:"Sender,omitempty"`
 	Module        string        `xml:"Module,omitempty"`
 	ModuleURI     string        `xml:"ModuleURI,omitempty"`
-	Created       xsdDateTime   `xml:"Created,omitempty"`
-	Network       []NetworkType `xml:"Network,omitempty"`
+	Created       xsdDateTime   `xml:"Created"`
+	Network       []NetworkType `xml:"Network"`
 	Xmlns         string        `xml:"xmlns,attr,omitempty"`
 }
 
@@ -175,25 +218,20 @@ type FIRType struct {
 }
 
 type FloatNoUnitType struct {
-	Value      float64  `xml:",chardata"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
+	Value             float64  `xml:",chardata"`
+	PlusError         *float64 `xml:"plusError,attr,omitempty"`
+	MinusError        *float64 `xml:"minusError,attr,omitempty"`
+	MeasurementMethod string   `xml:"measurementMethod,attr,omitempty"`
 }
 
 // Representation of floating-point numbers used as
 // measurements.
 type FloatType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
-}
-
-type FrequencyType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
+	Value             float64  `xml:",chardata"`
+	Unit              string   `xml:"unit,attr,omitempty"`
+	PlusError         *float64 `xml:"plusError,attr,omitempty"`
+	MinusError        *float64 `xml:"minusError,attr,omitempty"`
+	MeasurementMethod string   `xml:"measurementMethod,attr,omitempty"`
 }
 
 type GainType struct {
@@ -204,17 +242,11 @@ type GainType struct {
 // Base latitude type. Because of the limitations of schema, defining
 // this type and then extending it to create the real latitude type is the only way to
 // restrict values while adding datum as an attribute.
-type LatitudeBaseType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
-}
 
 // Type for latitude coordinate.
 type LatitudeType struct {
 	Value float64 `xml:",chardata"`
-	LatitudeBaseType
+	FloatType
 	Datum string `xml:"datum,attr,omitempty"`
 }
 
@@ -223,17 +255,10 @@ type LogType struct {
 	Entry []CommentType `xml:"Entry,omitempty"`
 }
 
-type LongitudeBaseType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
-}
-
 // Type for longitude coordinate.
 type LongitudeType struct {
 	Value float64 `xml:",chardata"`
-	LongitudeBaseType
+	FloatType
 	Datum string `xml:"datum,attr,omitempty"`
 }
 
@@ -243,8 +268,9 @@ type LongitudeType struct {
 // more Stations.
 type NetworkType struct {
 	BaseNodeType
-	TotalNumberStations    int           `xml:"TotalNumberStations"`
-	SelectedNumberStations int           `xml:"SelectedNumberStations"`
+	Operator               []Operator    `xml:"Operator,omitempty"`
+	TotalNumberStations    CounterType   `xml:"TotalNumberStations,omitempty"`
+	SelectedNumberStations CounterType   `xml:"SelectedNumberStations,omitempty"`
 	Station                []StationType `xml:"Station,omitempty"`
 }
 
@@ -259,7 +285,7 @@ type NumeratorCoefficient struct {
 }
 
 type Operator struct {
-	Agency  []string     `xml:"Agency,omitempty"`
+	Agency  string       `xml:"Agency"`
 	Contact []PersonType `xml:"Contact,omitempty"`
 	WebSite string       `xml:"WebSite,omitempty"`
 }
@@ -271,14 +297,14 @@ type PersonType struct {
 	Phone  []PhoneNumberType `xml:"Phone,omitempty"`
 }
 
-// Must match the pattern [0-9]+-[0-9]+
+// PhoneNumber must match pattern [0-9]+-[0-9]+
 type PhoneNumber string
 
 type PhoneNumberType struct {
-	Description string       `xml:"description,attr,omitempty"`
-	CountryCode *int         `xml:"CountryCode,omitempty"`
-	AreaCode    *int         `xml:"AreaCode,omitempty"`
-	PhoneNumber *PhoneNumber `xml:"PhoneNumber,omitempty"`
+	Description string      `xml:"description,attr,omitempty"`
+	CountryCode *int        `xml:"CountryCode,omitempty"`
+	AreaCode    int         `xml:"AreaCode"`
+	PhoneNumber PhoneNumber `xml:"PhoneNumber"`
 }
 
 type PoleZeroType struct {
@@ -293,7 +319,7 @@ type PolesZerosType struct {
 	BaseFilterType
 	PzTransferFunctionType *PzTransferFunctionType `xml:"PzTransferFunctionType,omitempty"`
 	NormalizationFactor    *float64                `xml:"NormalizationFactor,omitempty"`
-	NormalizationFrequency *FrequencyType          `xml:"NormalizationFrequency,omitempty"`
+	NormalizationFrequency *FloatType              `xml:"NormalizationFrequency,omitempty"`
 	Zero                   []PoleZeroType          `xml:"Zero,omitempty"`
 	Pole                   []PoleZeroType          `xml:"Pole,omitempty"`
 }
@@ -305,8 +331,8 @@ type PolynomialType struct {
 	BaseFilterType
 	Number                  *int               `xml:"number,attr,omitempty"`
 	ApproximationType       *ApproximationType `xml:"ApproximationType,omitempty"`
-	FrequencyLowerBound     *FrequencyType     `xml:"FrequencyLowerBound,omitempty"`
-	FrequencyUpperBound     *FrequencyType     `xml:"FrequencyUpperBound,omitempty"`
+	FrequencyLowerBound     *FloatType         `xml:"FrequencyLowerBound,omitempty"`
+	FrequencyUpperBound     *FloatType         `xml:"FrequencyUpperBound,omitempty"`
 	ApproximationLowerBound *float64           `xml:"ApproximationLowerBound,omitempty"`
 	ApproximationUpperBound *float64           `xml:"ApproximationUpperBound,omitempty"`
 	MaximumError            *float64           `xml:"MaximumError,omitempty"`
@@ -317,9 +343,9 @@ type PolynomialType struct {
 type PzTransferFunctionType string
 
 type ResponseListElementType struct {
-	Frequency *FrequencyType `xml:"Frequency,omitempty"`
-	Amplitude *FloatType     `xml:"Amplitude,omitempty"`
-	Phase     *AngleType     `xml:"Phase,omitempty"`
+	Frequency FrequencyType `xml:"Frequency"`
+	Amplitude FloatType     `xml:"Amplitude"`
+	Phase     AngleType     `xml:"Phase"`
 }
 
 // Response: list of frequency, amplitude and phase values. Corresponds
@@ -350,30 +376,18 @@ type ResponseType struct {
 	Stage                 []ResponseStageType `xml:"Stage,omitempty"`
 }
 
-// May be one of open, closed, partial
+// RestrictedStatusType: open, closed, partial
 type RestrictedStatusType string
+
+const (
+	RestrictedStatusOpen    RestrictedStatusType = "open"
+	RestrictedStatusClosed  RestrictedStatusType = "closed"
+	RestrictedStatusPartial RestrictedStatusType = "partial"
+)
 
 type SampleRateRatioType struct {
 	NumberSamples *int `xml:"NumberSamples,omitempty"`
 	NumberSeconds *int `xml:"NumberSeconds,omitempty"`
-}
-
-// Sample rate in samples per second.
-type SampleRateType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
-}
-
-// A time value in seconds.
-//
-//nolint:deadcode,unused	// Struct based on FDSN spec so keep it
-type SecondType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
 }
 
 // Sensitivity and frequency ranges. The FrequencyRangeGroup is an
@@ -391,7 +405,7 @@ type SensitivityType struct {
 
 type SiteType struct {
 	Items       []string `xml:",any,omitempty"`
-	Name        string   `xml:"Name,omitempty"`
+	Name        string   `xml:"Name"`
 	Description string   `xml:"Description,omitempty"`
 	Town        string   `xml:"Town,omitempty"`
 	County      string   `xml:"County,omitempty"`
@@ -404,42 +418,52 @@ type SiteType struct {
 // start and end dates.
 type StationType struct {
 	BaseNodeType
-	Latitude               *LatitudeType           `xml:"Latitude,omitempty"`
-	Longitude              *LongitudeType          `xml:"Longitude,omitempty"`
-	Elevation              *DistanceType           `xml:"Elevation,omitempty"`
-	Site                   *SiteType               `xml:"Site,omitempty"`
+	Latitude               LatitudeType            `xml:"Latitude"`
+	Longitude              LongitudeType           `xml:"Longitude"`
+	Elevation              DistanceType            `xml:"Elevation"`
+	Site                   SiteType                `xml:"Site"`
+	WaterLevel             *FloatType              `xml:"WaterLevel,omitempty"`
 	Vault                  string                  `xml:"Vault,omitempty"`
 	Geology                string                  `xml:"Geology,omitempty"`
 	Equipment              []EquipmentType         `xml:"Equipment,omitempty"`
 	Operator               []Operator              `xml:"Operator,omitempty"`
-	Agency                 []string                `xml:"Agency,omitempty"`
-	Contact                []PersonType            `xml:"Contact,omitempty"`
-	WebSite                string                  `xml:"WebSite,omitempty"`
 	CreationDate           xsdDateTime             `xml:"CreationDate,omitempty"`
 	TerminationDate        xsdDateTime             `xml:"TerminationDate,omitempty"`
-	TotalNumberChannels    int                     `xml:"TotalNumberChannels"`
-	SelectedNumberChannels int                     `xml:"SelectedNumberChannels"`
+	TotalNumberChannels    CounterType             `xml:"TotalNumberChannels,omitempty"`
+	SelectedNumberChannels int                     `xml:"SelectedNumberChannels,omitempty"`
 	ExternalReference      []ExternalReferenceType `xml:"ExternalReference,omitempty"`
 	Channel                []ChannelType           `xml:"Channel,omitempty"`
 }
 
-// May be one of NONE, EVEN, ODD
+// Symmetry: NONE, EVEN, ODD
 type Symmetry string
 
-// May be one of TRIGGERED, CONTINUOUS, HEALTH, GEOPHYSICAL, WEATHER, FLAG, SYNTHESIZED, INPUT, EXPERIMENTAL, MAINTENANCE, BEAM
+const (
+	SymmetryNone Symmetry = "NONE"
+	SymmetryEven Symmetry = "EVEN"
+	SymmetryOdd  Symmetry = "ODD"
+)
+
+// Channel types: TRIGGERED, CONTINUOUS, HEALTH, GEOPHYSICAL, WEATHER, FLAG, SYNTHESIZED, INPUT, EXPERIMENTAL, MAINTENANCE, BEAM
 type Type string
+
+const (
+	TypeTriggered    Type = "TRIGGERED"
+	TypeContinuous   Type = "CONTINUOUS"
+	TypeHealth       Type = "HEALTH"
+	TypeGeophysical  Type = "GEOPHYSICAL"
+	TypeWeather      Type = "WEATHER"
+	TypeFlag         Type = "FLAG"
+	TypeSynthesized  Type = "SYNTHESIZED"
+	TypeInput        Type = "INPUT"
+	TypeExperimental Type = "EXPERIMENTAL"
+	TypeMaintenance  Type = "MAINTENANCE"
+	TypeBeam         Type = "BEAM"
+)
 
 type UnitsType struct {
 	Name        string `xml:"Name,omitempty"`
 	Description string `xml:"Description,omitempty"`
-}
-
-//nolint:deadcode,unused	// Struct based on FDSN spec so keep it
-type VoltageType struct {
-	Value      float64  `xml:",chardata"`
-	Unit       string   `xml:"unit,attr,omitempty"`
-	PlusError  *float64 `xml:"plusError,attr,omitempty"`
-	MinusError *float64 `xml:"minusError,attr,omitempty"`
 }
 
 type xsdDateTime time.Time
@@ -450,21 +474,31 @@ func (t *xsdDateTime) UnmarshalText(text []byte) error {
 func (t *xsdDateTime) MarshalText() ([]byte, error) {
 	return []byte((*time.Time)(t).UTC().Format(time.RFC3339Nano)), nil
 }
+
+// Helper methods for backward compatibility
+func (c CounterType) ToInt() int {
+	return int(c)
+}
+
+func IntToCounterType(i int) *CounterType {
+	c := CounterType(i)
+	return &c
+}
 func _unmarshalTime(text []byte, t *time.Time) (err error) {
 	s := string(bytes.TrimSpace(text))
-	
+
 	// Try RFC3339Nano first (new format)
 	*t, err = time.Parse(time.RFC3339Nano, s)
 	if err == nil {
 		return nil
 	}
-	
+
 	// Try legacy format for backward compatibility
 	*t, err = time.Parse("2006-01-02T15:04:05.999999999", s)
 	if err == nil {
 		return nil
 	}
-	
+
 	// Try legacy format with timezone
 	*t, err = time.Parse("2006-01-02T15:04:05.999999999Z07:00", s)
 	return err
