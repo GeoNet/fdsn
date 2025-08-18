@@ -572,7 +572,7 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 			if l, err := wgs84.ClosestNZ(latitude, longitude); err == nil {
 				loc = l.Description()
 			}
-			s := fmt.Sprintf("%s|%s|%.3f|%.3f|%.1f|GNS|GNS|GNS|%s|%s|%.1f|GNS|%s|%s\n", eventID, tm.Format("2006-01-02T15:04:05"), latitude, longitude, depth, eventID, magType, magnitude, loc, eventType)
+			s := fmt.Sprintf("%s|%s|%.3f|%.3f|%.1f|GNS|GNS|GNS|%s|%s|%.1f|GNS|%s|%s\n", eventID, tm.UTC().Format(time.RFC3339Nano), latitude, longitude, depth, eventID, magType, magnitude, loc, eventType)
 			b.WriteString(s)
 		}
 
