@@ -25,11 +25,12 @@ import (
 )
 
 const (
-	healthCheckAged    = 5 * time.Minute  //need to have a good heartbeat within this time
-	healthCheckStartup = 5 * time.Minute  //ignore heartbeat messages for this time after starting
-	healthCheckTimeout = 30 * time.Second //health check timeout
-	healthCheckService = ":7777"          //end point to listen to for SOH checks
-	healthCheckPath    = "/soh"
+	sqs_visibility_timeout = 60               //seconds
+	healthCheckAged        = 5 * time.Minute  //need to have a good heartbeat within this time
+	healthCheckStartup     = 5 * time.Minute  //ignore heartbeat messages for this time after starting
+	healthCheckTimeout     = 30 * time.Second //health check timeout
+	healthCheckService     = ":7777"          //end point to listen to for SOH checks
+	healthCheckPath        = "/soh"
 )
 
 var (
@@ -114,7 +115,7 @@ loop1:
 	for {
 		health.Ok() // update soh
 
-		r, err = sqsClient.ReceiveWithContext(ctx, queueURL, 600)
+		r, err = sqsClient.ReceiveWithContext(ctx, queueURL, sqs_visibility_timeout)
 		if err != nil {
 			switch {
 			case sqs.IsNoMessagesError(err):
@@ -132,6 +133,9 @@ loop1:
 		err = metrics.DoProcess(&n, []byte(r.Body))
 		if err != nil {
 			log.Printf("problem processing message, skipping deletion for redelivery: %s", err)
+			if err1 := sqsClient.SetMessageVisibility(queueURL, r.ReceiptHandle, 0); err1 != nil {
+				log.Printf("error changing message visibility: %s", err1.Error())
+			}
 			continue
 		}
 
