@@ -85,7 +85,7 @@ func (m Record) Int32s() ([]int32, error) {
 	case EncodingInt32:
 		return decodeInt32(m.Data, m.B1000.WordOrder, m.RecordHeader.NumberOfSamples)
 	case EncodingSTEIM1:
-		framecount := uint8(len(m.Data) / 64)
+		framecount := uint8(len(m.Data) / 64) //nolint:gosec
 		if m.B1001.FrameCount != 0 {
 			framecount = m.B1001.FrameCount
 		}
@@ -94,7 +94,7 @@ func (m Record) Int32s() ([]int32, error) {
 		}
 		return decodeSteim(1, m.Data, m.B1000.WordOrder, framecount, m.RecordHeader.NumberOfSamples)
 	case EncodingSTEIM2: //STEIM2
-		framecount := uint8(len(m.Data) / 64)
+		framecount := uint8(len(m.Data) / 64) //nolint:gosec
 		if m.B1001.FrameCount != 0 {
 			framecount = m.B1001.FrameCount
 		}

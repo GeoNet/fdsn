@@ -304,6 +304,9 @@ func writeResponseAndLogMetrics(err error, w http.ResponseWriter, r *http.Reques
 	case http.StatusServiceUnavailable:
 		metrics.StatusServiceUnavailable()
 		logger.Printf("%d %s %s %s %s", status, r.Method, r.RequestURI, name, err.Error())
+	case http.StatusTooManyRequests:
+		metrics.StatusTooManyRequests()
+		logger.Printf("%d %s %s %s %s", status, r.Method, r.RequestURI, name, err.Error())
 	}
 }
 

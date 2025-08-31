@@ -113,6 +113,12 @@ func dogHttp(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStat
 			Host:   hostName,
 		},
 		{
+			Metric: appName + ".http.429",
+			Points: []point{[2]float64{now, float64(c.StatusTooManyRequests)}},
+			Type:   "counter",
+			Host:   hostName,
+		},
+		{
 			Metric: appName + ".http.500",
 			Points: []point{[2]float64{now, float64(c.StatusInternalServerError)}},
 			Type:   "counter",
@@ -177,7 +183,7 @@ func dogHttp(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStat
 			}
 		}
 		// non nil connection error, sleep and try again
-		time.Sleep(time.Second << uint(tries))
+		time.Sleep(time.Second << uint(tries)) //nolint:gosec
 	}
 	if res != nil {
 		res.Body.Close()

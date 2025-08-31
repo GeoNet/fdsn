@@ -216,7 +216,7 @@ func dogMsg(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStats
 			}
 		}
 		// non nil connection error, sleep and try again
-		time.Sleep(time.Second << uint(tries))
+		time.Sleep(time.Second << uint(tries)) //nolint:gosec
 	}
 	if res != nil {
 		res.Body.Close()

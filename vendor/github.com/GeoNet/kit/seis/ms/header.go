@@ -107,7 +107,7 @@ func (h *RecordHeader) SetCorrection(correction time.Duration, applied bool) {
 	default:
 		h.ActivityFlags = clearBit(h.ActivityFlags, 1)
 	}
-	h.TimeCorrection = int32(correction / (100 * time.Microsecond))
+	h.TimeCorrection = int32(correction / (100 * time.Microsecond)) //nolint:gosec
 }
 
 func (h RecordHeader) Correction() time.Duration {
@@ -260,18 +260,17 @@ func DecodeRecordHeader(data []byte) RecordHeader {
 
 		RecordStartTime:      DecodeBTime(h[20:30]),
 		NumberOfSamples:      binary.BigEndian.Uint16(h[30:32]),
-		SampleRateFactor:     int16(binary.BigEndian.Uint16(h[32:34])),
-		SampleRateMultiplier: int16(binary.BigEndian.Uint16(h[34:36])),
+		SampleRateFactor:     int16(binary.BigEndian.Uint16(h[32:34])), //nolint:gosec
+		SampleRateMultiplier: int16(binary.BigEndian.Uint16(h[34:36])), //nolint:gosec
 
 		ActivityFlags:    h[36],
 		IOAndClockFlags:  h[37],
 		DataQualityFlags: h[38],
 
 		NumberOfBlockettesThatFollow: h[39],
-
-		TimeCorrection:  int32(binary.BigEndian.Uint32(h[40:44])),
-		BeginningOfData: binary.BigEndian.Uint16(h[44:46]),
-		FirstBlockette:  binary.BigEndian.Uint16(h[46:48]),
+		TimeCorrection:               int32(binary.BigEndian.Uint32(h[40:44])), //nolint:gosec
+		BeginningOfData:              binary.BigEndian.Uint16(h[44:46]),
+		FirstBlockette:               binary.BigEndian.Uint16(h[46:48]),
 	}
 }
 
@@ -290,15 +289,15 @@ func EncodeRecordHeader(hdr RecordHeader) []byte {
 
 	copy(b[20:30], EncodeBTime(hdr.RecordStartTime))
 	binary.BigEndian.PutUint16(b[30:32], hdr.NumberOfSamples)
-	binary.BigEndian.PutUint16(b[32:34], uint16(hdr.SampleRateFactor))
-	binary.BigEndian.PutUint16(b[34:36], uint16(hdr.SampleRateMultiplier))
+	binary.BigEndian.PutUint16(b[32:34], uint16(hdr.SampleRateFactor))     //nolint:gosec
+	binary.BigEndian.PutUint16(b[34:36], uint16(hdr.SampleRateMultiplier)) //nolint:gosec
 
 	b[36] = hdr.ActivityFlags
 	b[37] = hdr.IOAndClockFlags
 	b[38] = hdr.DataQualityFlags
 
 	b[39] = hdr.NumberOfBlockettesThatFollow
-	binary.BigEndian.PutUint32(b[40:44], uint32(hdr.TimeCorrection))
+	binary.BigEndian.PutUint32(b[40:44], uint32(hdr.TimeCorrection)) //nolint:gosec
 	binary.BigEndian.PutUint16(b[44:46], hdr.BeginningOfData)
 	binary.BigEndian.PutUint16(b[46:48], hdr.FirstBlockette)
 

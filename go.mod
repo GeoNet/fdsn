@@ -3,7 +3,7 @@ module github.com/GeoNet/fdsn
 go 1.23
 
 require (
-	github.com/GeoNet/kit v0.0.0-20241129025613-745247c4fb1c
+	github.com/GeoNet/kit v0.0.0-20250803205759-df08ce98e1ed
 	github.com/gorilla/schema v1.4.1
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.3

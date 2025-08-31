@@ -121,6 +121,11 @@ func (s *S3) Ready() bool {
 	return s.client != nil
 }
 
+// Client returns the underlying S3 client.
+func (s *S3) Client() *s3.Client {
+	return s.client
+}
+
 // Get gets the object referred to by key and version from bucket and writes it into b.
 // Version can be empty.
 func (s *S3) Get(bucket, key, version string, b *bytes.Buffer) error {
@@ -559,6 +564,31 @@ func (s *S3) Copy(bucket, key, source string) error {
 		CopySource: aws.String(source),
 	}
 	_, err := s.client.CopyObject(context.TODO(), &input)
+
+	return err
+}
+
+// CreateBucket creates a bucket.
+func (s *S3) CreateBucket(bucket string) error {
+	config := types.CreateBucketConfiguration{
+		LocationConstraint: types.BucketLocationConstraint(s.client.Options().Region),
+	}
+
+	input := s3.CreateBucketInput{
+		Bucket:                    aws.String(bucket),
+		CreateBucketConfiguration: &config,
+	}
+	_, err := s.client.CreateBucket(context.TODO(), &input)
+
+	return err
+}
+
+// DeleteBucket deletes a bucket.
+func (s *S3) DeleteBucket(bucket string) error {
+	input := s3.DeleteBucketInput{
+		Bucket: aws.String(bucket),
+	}
+	_, err := s.client.DeleteBucket(context.TODO(), &input)
 
 	return err
 }

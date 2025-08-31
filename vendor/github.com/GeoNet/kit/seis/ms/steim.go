@@ -6,11 +6,13 @@ import (
 )
 
 func getNibble(word []byte, index int) uint8 {
-	b := word[index/4]                //Which byte we want from within the word (4 bytes per word)
-	var res uint8                     //value
-	i := index % 4                    //which nibble we want from within the byte (4 nibbles per byte)
+	b := word[index/4] //Which byte we want from within the word (4 bytes per word)
+	var res uint8      //value
+	i := index % 4     //which nibble we want from within the byte (4 nibbles per byte)
+	//nolint:gosec
 	res = b & (0x3 << uint8((3-i)*2)) //0x3=00000011 create and apply the correct mask e.g. i=1 mask=00110000
-	res = res >> uint8((3-i)*2)       //shift the masked value fully to the right
+	//nolint:gosec
+	res = res >> uint8((3-i)*2) //shift the masked value fully to the right
 	return res
 }
 
@@ -18,6 +20,7 @@ func getNibble(word []byte, index int) uint8 {
 func writeNibble(word []byte, index int, value uint8) {
 	b := word[index/4]
 	i := index % 4
+	//nolint:gosec
 	b = b ^ (value << uint8((3-i)*2)) //set the bits
 	word[index/4] = b
 }
@@ -32,7 +35,7 @@ func uintVarToInt32(v uint32, numbits uint8) int32 {
 		v = v + 1                      //add 1 - positive nbit number
 		v = -v                         //get the negative - this gives us a proper negative int32
 	}
-	return int32(v)
+	return int32(v) //nolint:gosec
 }
 
 func int32ToUintVar(i int32, numbits uint8) uint32 {
@@ -42,7 +45,7 @@ func int32ToUintVar(i int32, numbits uint8) uint32 {
 		i = i - 1
 		i = i ^ ((1 << (numbits)) - 1) //flip all the bits
 	}
-	return uint32(i)
+	return uint32(i) //nolint:gosec
 }
 
 func applyDifferencesFromWord(w []byte, numdiffs int, diffbits uint32, d []int32) []int32 {
@@ -50,9 +53,11 @@ func applyDifferencesFromWord(w []byte, numdiffs int, diffbits uint32, d []int32
 	wint := binary.BigEndian.Uint32(w)
 
 	for i := numdiffs - 1; i >= 0; i-- {
+		//nolint:gosec
 		intn := wint & uint32(mask<<(uint32(i)*diffbits)) //apply a mask over the correct bits
-		intn = intn >> (uint32(i) * diffbits)             //shift the masked value fully to the right
-
+		//nolint:gosec
+		intn = intn >> (uint32(i) * diffbits) //shift the masked value fully to the right
+		//nolint:gosec
 		diff := uintVarToInt32(intn, uint8(diffbits)) //convert diffbits bit int to int32
 
 		d = append(d, d[len(d)-1]+diff)
@@ -70,8 +75,8 @@ func decodeSteim(version int, raw []byte, wordOrder, frameCount uint8, expectedS
 
 	//Word 1 and 2 contain x0 and xn: the uncompressed initial and final quantities (word 0 contains nibs)
 	frame0 := raw[0:64]
-	start := int32(binary.BigEndian.Uint32(frame0[4:8]))
-	end := int32(binary.BigEndian.Uint32(frame0[8:12]))
+	start := int32(binary.BigEndian.Uint32(frame0[4:8])) //nolint:gosec
+	end := int32(binary.BigEndian.Uint32(frame0[8:12]))  //nolint:gosec
 
 	d = append(d, start)
 

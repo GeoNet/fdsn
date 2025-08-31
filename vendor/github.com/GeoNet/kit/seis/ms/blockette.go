@@ -126,7 +126,7 @@ func EncodeBlockette1001(blk Blockette1001) []byte {
 	var b [Blockette1001Size]byte
 
 	b[0] = blk.TimingQuality
-	b[1] = uint8(blk.MicroSec)
+	b[1] = uint8(blk.MicroSec) //nolint:gosec
 	b[2] = blk.Reserved
 	b[3] = blk.FrameCount
 
