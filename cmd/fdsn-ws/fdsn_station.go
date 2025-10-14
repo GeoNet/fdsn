@@ -438,7 +438,7 @@ func fdsnStationVersion(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	}
 
 	h.Set("Content-Type", "text/plain")
-	_, err = b.WriteString("1.1")
+	_, err = b.WriteString("1.2")
 
 	return err
 }
