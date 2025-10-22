@@ -50,8 +50,12 @@ var routes = wt.Requests{
 	{ID: wt.L(), URL: "/fdsnws/station/1/query", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01", Content: "application/xml"},
-	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.123", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00Z", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.1", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.135", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.12345", Content: "application/xml"},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.123456", Content: "application/xml"},
+	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:00.123456Z", Content: "application/xml"}, // extra tolerance
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-01T00:00:0", Content: "text/plain; charset=utf-8", Status: http.StatusBadRequest},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?level=channel&starttime=1900-01-0", Content: "text/plain; charset=utf-8", Status: http.StatusBadRequest},
 	{ID: wt.L(), URL: "/fdsnws/station/1/query?minlat=-41&maxlon=177", Content: "application/xml"},

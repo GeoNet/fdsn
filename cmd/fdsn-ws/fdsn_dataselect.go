@@ -77,7 +77,7 @@ func fdsnDataMetricsV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) e
 
 	switch r.Method {
 	case "POST":
-		defer r.Body.Close()
+		defer func() { _ = r.Body.Close() }()
 		if err := fdsn.ParseDataSelectPost(r.Body, &params); err != nil {
 			return fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
@@ -144,7 +144,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 	switch r.Method {
 	case "POST":
-		defer r.Body.Close()
+		defer func() { _ = r.Body.Close() }()
 		if err := fdsn.ParseDataSelectPost(r.Body, &params); err != nil {
 			return 0, fdsnError{StatusError: weft.StatusError{Code: http.StatusBadRequest, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
@@ -181,7 +181,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 	for _, v := range params {
 		//flick gtHalfHour to true if the request is longer than half an hour
-		gtHalfHour = gtHalfHour || v.EndTime.Sub(time.Time(v.StartTime.Time)) > time.Minute*30
+		gtHalfHour = gtHalfHour || v.EndTime.Sub(v.StartTime.Time) > time.Minute*30
 
 		d, err := v.Regexp()
 		if err != nil {
@@ -303,7 +303,7 @@ func fdsnDataselectVersion(r *http.Request, h http.Header, b *bytes.Buffer) erro
 	}
 
 	h.Set("Content-Type", "text/plain")
-	_, err = b.WriteString("1.1")
+	_, err = b.WriteString(dataselectVersion)
 
 	return err
 }

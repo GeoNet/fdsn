@@ -3,8 +3,6 @@ package main
 import (
 	"bytes"
 	"time"
-
-	"github.com/GeoNet/fdsn/internal/fdsn"
 )
 
 // May be one of MACLAURIN
@@ -484,32 +482,9 @@ func IntToCounterType(i int) *CounterType {
 	c := CounterType(i)
 	return &c
 }
+
 func _unmarshalTime(text []byte, t *time.Time) (err error) {
 	s := string(bytes.TrimSpace(text))
-
-	// Try RFC3339Nano first (new format)
 	*t, err = time.Parse(time.RFC3339Nano, s)
-	if err == nil {
-		return nil
-	}
-
-	// Try legacy format for backward compatibility
-	*t, err = time.Parse("2006-01-02T15:04:05.999999999", s)
-	if err == nil {
-		return nil
-	}
-
-	// Try legacy format with timezone
-	*t, err = time.Parse("2006-01-02T15:04:05.999999999Z07:00", s)
 	return err
-}
-
-// for decoder.Decode
-func (t *Time) UnmarshalText(text []byte) (err error) {
-	tm, err := fdsn.UnmarshalTime(text)
-	if err != nil {
-		return err
-	}
-	t.Time = tm
-	return nil
 }

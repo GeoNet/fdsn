@@ -26,7 +26,7 @@ var (
 	LOG_EXTRA bool           // Whether POST body is logged.
 )
 
-var stationVersion = "1.2"
+var stationVersion = "1.1"
 var eventVersion = "1.2"
 var dataselectVersion = "1.1"
 var zeroDateTime = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -69,7 +69,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error with DB config: %s", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	db.SetMaxIdleConns(p.MaxIdle)
 	db.SetMaxOpenConns(p.MaxOpen)
