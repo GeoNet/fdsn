@@ -376,10 +376,10 @@ func TestFormatText(t *testing.T) {
 	c.doFilter([]fdsnStationV1Search{e})
 	b := c.marshalText(STATION_LEVEL_CHANNEL)
 	exp := `#Network | Station | Location | Channel | Latitude | Longitude | Elevation | Depth | Azimuth | Dip | SensorDescription | Scale | ScaleFreq | ScaleUnits | SampleRate | StartTime | EndTime
-NZ|ARAZ|10|EHZ|-38.627690|176.120060|420.000000|0.000000|0.000000|-90.000000|Short Period Seismometer|74574725.120000|15.000000|m/s|100.000000|2011-06-20T04:00:01Z|
+NZ|ARAZ|10|EHZ|-38.627690|176.120060|420.000000|0.000000|0.000000|-90.000000|Short Period Seismometer|74574725.120000|15.000000|m/s|100.000000|2011-06-20T04:00:01|
 `
 	if b.String() != exp {
-		t.Errorf("Incorrect text result.")
+		t.Errorf("Incorrect text result: %s", b.String())
 	}
 
 	c = *fdsnStations.fdsn
@@ -391,7 +391,7 @@ NZ|ARAZ|10|EHZ|-38.627690|176.120060|420.000000|0.000000|0.000000|-90.000000|Sho
 	c.doFilter([]fdsnStationV1Search{e})
 	b = c.marshalText(STATION_LEVEL_NETWORK)
 	exp = `#Network | Description | StartTime | EndTime | TotalStations
-NZ|New Zealand National Seismograph Network|1884-02-01T00:00:00Z||2
+NZ|New Zealand National Seismograph Network|1884-02-01T00:00:00||2
 `
 	if b.String() != exp {
 		t.Errorf("Incorrect text result.")
@@ -406,7 +406,7 @@ NZ|New Zealand National Seismograph Network|1884-02-01T00:00:00Z||2
 	c.doFilter([]fdsnStationV1Search{e})
 	b = c.marshalText(STATION_LEVEL_STATION)
 	exp = `#Network | Station | Latitude | Longitude | Elevation | SiteName | StartTime | EndTime
-NZ|ARAZ|-38.627690|176.120060|420.000000|Aratiatia Landcorp Farm|2007-05-20T23:00:00Z|
+NZ|ARAZ|-38.627690|176.120060|420.000000|Aratiatia Landcorp Farm|2007-05-20T23:00:00|
 `
 	if b.String() != exp {
 		t.Errorf("Incorrect text result.")
@@ -460,8 +460,8 @@ NZ ARA* * EHE*  2001-01-01T00:00:00 *
 NZ ARH? * EHN*  2001-01-01T00:00:00 *`
 	expected := strings.TrimSpace(`
 #Network | Station | Latitude | Longitude | Elevation | SiteName | StartTime | EndTime
-NZ|ARAZ|-38.627690|176.120060|420.000000|Aratiatia Landcorp Farm|2007-05-20T23:00:00Z|
-NZ|ARHZ|-39.263100|176.995900|270.000000|Aropaoanui|2010-03-11T00:00:00Z|`)
+NZ|ARAZ|-38.627690|176.120060|420.000000|Aratiatia Landcorp Farm|2007-05-20T23:00:00|
+NZ|ARHZ|-39.263100|176.995900|270.000000|Aropaoanui|2010-03-11T00:00:00|`)
 
 	route := wt.Request{ID: wt.L(), URL: "/fdsnws/station/1/query", Method: "POST", PostBody: []byte(body), Content: "text/plain"}
 
@@ -484,12 +484,12 @@ NZ ARH? * EHN*  2001-01-01T00:00:00 *`
 	<Source>GeoNet</Source>
 	<Sender>WEL(GNS_Test)</Sender>
 	<Module>Delta</Module>
-	<Created>2017-09-26T02:37:17</Created>
-	<Network code="NZ" startDate="1884-02-01T00:00:00" restrictedStatus="open">
+	<Created>2017-09-26T02:37:17Z</Created>
+	<Network code="NZ" startDate="1884-02-01T00:00:00Z" restrictedStatus="open">
 		<Description>New Zealand National Seismograph Network</Description>
 		<TotalNumberStations>2</TotalNumberStations>
 		<SelectedNumberStations>2</SelectedNumberStations>
-		<Station code="ARAZ" startDate="2007-05-20T23:00:00" restrictedStatus="closed">
+		<Station code="ARAZ" startDate="2007-05-20T23:00:00Z" restrictedStatus="closed">
 			<Description>Private seismograph sites</Description>
 			<Comment>
 				<Value>Location is given in NZGD2000</Value>
@@ -501,11 +501,11 @@ NZ ARH? * EHN*  2001-01-01T00:00:00 *`
 				<Name>Aratiatia Landcorp Farm</Name>
 				<Description>9 km north of Taupo</Description>
 			</Site>
-			<CreationDate>2007-05-20T23:00:00</CreationDate>
+			<CreationDate>2007-05-20T23:00:00Z</CreationDate>
 			<TotalNumberChannels>9</TotalNumberChannels>
 			<SelectedNumberChannels>3</SelectedNumberChannels>
 		</Station>
-		<Station code="ARHZ" startDate="2010-03-11T00:00:00" restrictedStatus="open">
+		<Station code="ARHZ" startDate="2010-03-11T00:00:00Z" restrictedStatus="open">
 			<Description>Hawke&#39;s Bay regional seismic network</Description>
 			<Comment>
 				<Value>Location is given in WGS84</Value>
@@ -517,7 +517,7 @@ NZ ARH? * EHN*  2001-01-01T00:00:00 *`
 				<Name>Aropaoanui</Name>
 				<Description>28 km north of Napier</Description>
 			</Site>
-			<CreationDate>2010-03-11T00:00:00</CreationDate>
+			<CreationDate>2010-03-11T00:00:00Z</CreationDate>
 			<TotalNumberChannels>6</TotalNumberChannels>
 			<SelectedNumberChannels>2</SelectedNumberChannels>
 		</Station>

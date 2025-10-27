@@ -59,32 +59,32 @@ var stationAbbreviations = map[string]string{
 
 // supported query parameters for the station service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
 type fdsnStationV1Parm struct {
-	StartTime           Time     `schema:"starttime"`    // Limit to metadata epochs starting on or after the specified start time.
-	EndTime             Time     `schema:"endtime"`      // Limit to metadata epochs ending on or before the specified end time.
-	Network             []string `schema:"network"`      // Select one or more network codes. Can be SEED network codes or data center defined codes. Multiple codes are comma-separated.
-	Station             []string `schema:"station"`      // Select one or more SEED station codes. Multiple codes are comma-separated.
-	Location            []string `schema:"location"`     // Select one or more SEED location identifiers. Multiple identifiers are comma- separated. As a special case “--“ (two dashes) will be translated to a string of two space characters to match blank location IDs.
-	Channel             []string `schema:"channel"`      // Select one or more SEED channel codes. Multiple codes are comma-separated.
-	MinLatitude         float64  `schema:"minlatitude"`  // Limit to stations with a latitude larger than or equal to the specified minimum.
-	MaxLatitude         float64  `schema:"maxlatitude"`  // Limit to stations with a latitude smaller than or equal to the specified maximum.
-	MinLongitude        float64  `schema:"minlongitude"` // Limit to stations with a longitude larger than or equal to the specified minimum.
-	MaxLongitude        float64  `schema:"maxlongitude"` // Limit to stations with a longitude smaller than or equal to the specified maximum.
-	Level               string   `schema:"level"`        // Specify the level of detail for the results.
-	Format              string   `schema:"format"`       // Format of result. Either "xml" or "text".
-	IncludeAvailability bool     `schema:"includeavailability"`
-	IncludeRestricted   bool     `schema:"includerestricted"`
-	MatchTimeSeries     bool     `schema:"matchtimeseries"`
-	Latitude            float64  `schema:"latitude"`
-	Longitude           float64  `schema:"longitude"`
-	MinRadius           float64  `schema:"minradius"`
-	MaxRadius           float64  `schema:"maxradius"`
-	StartBefore         Time     `schema:"startbefore"`
-	StartAfter          Time     `schema:"startafter"`
-	EndBefore           Time     `schema:"endbefore"`
-	EndAfter            Time     `schema:"endafter"`
-	NoData              int      `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
-	startMode           int      // BEFORE, ONBEFOREEND, AFTER
-	endMode             int      // BEFORE, ONAFTERSTART, AFTER
+	StartTime           fdsn.WsDateTime `schema:"starttime"`    // Limit to metadata epochs starting on or after the specified start time.
+	EndTime             fdsn.WsDateTime `schema:"endtime"`      // Limit to metadata epochs ending on or before the specified end time.
+	Network             []string        `schema:"network"`      // Select one or more network codes. Can be SEED network codes or data center defined codes. Multiple codes are comma-separated.
+	Station             []string        `schema:"station"`      // Select one or more SEED station codes. Multiple codes are comma-separated.
+	Location            []string        `schema:"location"`     // Select one or more SEED location identifiers. Multiple identifiers are comma- separated. As a special case “--“ (two dashes) will be translated to a string of two space characters to match blank location IDs.
+	Channel             []string        `schema:"channel"`      // Select one or more SEED channel codes. Multiple codes are comma-separated.
+	MinLatitude         float64         `schema:"minlatitude"`  // Limit to stations with a latitude larger than or equal to the specified minimum.
+	MaxLatitude         float64         `schema:"maxlatitude"`  // Limit to stations with a latitude smaller than or equal to the specified maximum.
+	MinLongitude        float64         `schema:"minlongitude"` // Limit to stations with a longitude larger than or equal to the specified minimum.
+	MaxLongitude        float64         `schema:"maxlongitude"` // Limit to stations with a longitude smaller than or equal to the specified maximum.
+	Level               string          `schema:"level"`        // Specify the level of detail for the results.
+	Format              string          `schema:"format"`       // Format of result. Either "xml" or "text".
+	IncludeAvailability bool            `schema:"includeavailability"`
+	IncludeRestricted   bool            `schema:"includerestricted"`
+	MatchTimeSeries     bool            `schema:"matchtimeseries"`
+	Latitude            float64         `schema:"latitude"`
+	Longitude           float64         `schema:"longitude"`
+	MinRadius           float64         `schema:"minradius"`
+	MaxRadius           float64         `schema:"maxradius"`
+	StartBefore         fdsn.WsDateTime `schema:"startbefore"`
+	StartAfter          fdsn.WsDateTime `schema:"startafter"`
+	EndBefore           fdsn.WsDateTime `schema:"endbefore"`
+	EndAfter            fdsn.WsDateTime `schema:"endafter"`
+	NoData              int             `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
+	startMode           int             // BEFORE, ONBEFOREEND, AFTER
+	endMode             int             // BEFORE, ONAFTERSTART, AFTER
 }
 
 type fdsnStationV1Search struct {
@@ -107,7 +107,7 @@ var (
 	fdsnStationIndex    []byte
 	fdsnStations        fdsnStationObj
 	emptyDateTime       = time.Date(9999, 1, 1, 0, 0, 0, 0, time.UTC)
-	errNotModified      = fmt.Errorf("Not modified.")
+	errNotModified      = fmt.Errorf("not modified")
 	stationXMLBucket    string
 	stationXMLKey       string
 )
@@ -145,8 +145,7 @@ func initStationXML() {
 	if s, err = os.Stat("etc/" + stationXMLKey); err == nil {
 		log.Println("Loading fdsn station xml file ", "etc/"+stationXMLKey)
 		var f *os.File
-		if f, err = os.Open("etc/" + stationXMLKey); err == nil {
-
+		if f, err = os.Open("etc/" + stationXMLKey); err == nil { // nolint:gosec
 			if _, err = io.Copy(by, f); err != nil {
 				log.Println("Error copying station xml file", err)
 			}
@@ -243,12 +242,12 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 		Level:             "station",
 		Format:            "xml",
 		IncludeRestricted: true,
-		StartTime:         Time{zeroDateTime},  // 0001-01-01T00:00:00
-		EndTime:           Time{emptyDateTime}, // 9999-01-01T00:00:00
-		StartBefore:       Time{emptyDateTime}, // 9999-01-01T00:00:00
-		EndBefore:         Time{emptyDateTime}, // 9999-01-01T00:00:00
-		StartAfter:        Time{emptyDateTime}, // 9999-01-01T00:00:00
-		EndAfter:          Time{emptyDateTime}, // 9999-01-01T00:00:00
+		StartTime:         fdsn.ZeroWsDateTime,  // 0001-01-01T00:00:00
+		EndTime:           fdsn.EmptyWsDateTime, // 9999-01-01T00:00:00
+		StartBefore:       fdsn.EmptyWsDateTime, // 9999-01-01T00:00:00
+		EndBefore:         fdsn.EmptyWsDateTime, // 9999-01-01T00:00:00
+		StartAfter:        fdsn.EmptyWsDateTime, // 9999-01-01T00:00:00
+		EndAfter:          fdsn.EmptyWsDateTime, // 9999-01-01T00:00:00
 		Latitude:          math.MaxFloat64,
 		Longitude:         math.MaxFloat64,
 		MinRadius:         0.0,
@@ -289,16 +288,16 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	}
 
 	count := 0
-	if p.StartTime.Time != zeroDateTime {
+	if p.StartTime != fdsn.ZeroWsDateTime {
 		count++
 		p.startMode = ONBEFOREEND
 	}
-	if p.StartAfter.Time != emptyDateTime {
+	if p.StartAfter != fdsn.EmptyWsDateTime {
 		count++
 		p.startMode = AFTER
 		p.StartTime = p.StartAfter
 	}
-	if p.StartBefore.Time != emptyDateTime {
+	if p.StartBefore != fdsn.EmptyWsDateTime {
 		count++
 		p.startMode = BEFORE
 		p.StartTime = p.StartBefore
@@ -308,18 +307,18 @@ func parseStationV1(v url.Values) (fdsnStationV1Search, error) {
 	}
 
 	count = 0
-	if p.EndTime.Time != emptyDateTime {
+	if p.EndTime != fdsn.EmptyWsDateTime {
 		count++
 		p.endMode = ONAFTERSTART
 	}
 
-	if p.EndAfter.Time != emptyDateTime {
+	if p.EndAfter != fdsn.EmptyWsDateTime {
 		count++
 		p.endMode = AFTER
 		p.EndTime = p.EndAfter
 	}
 
-	if p.EndBefore.Time != emptyDateTime {
+	if p.EndBefore != fdsn.EmptyWsDateTime {
 		count++
 		p.endMode = BEFORE
 		p.EndTime = p.EndBefore
@@ -438,7 +437,7 @@ func fdsnStationVersion(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	}
 
 	h.Set("Content-Type", "text/plain")
-	_, err = b.WriteString("1.2")
+	_, err = b.WriteString(stationVersion)
 
 	return err
 }
@@ -573,26 +572,26 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 	for n := 0; n < len(r.Network); n++ {
 		net := &r.Network[n]
 		if levelVal == STATION_LEVEL_NETWORK {
-			by.WriteString(fmt.Sprintf("%s|%s|%s|%s|%d\n",
+			fmt.Fprintf(by, "%s|%s|%s|%s|%d\n",
 				net.Code, net.Description,
 				net.StartDate.MarshalFormatText(), net.EndDate.MarshalFormatText(),
-				net.TotalNumberStations))
+				net.TotalNumberStations)
 		} else {
 			if levelVal == STATION_LEVEL_STATION && len(net.Station) == 0 {
 				// Write Network name only
-				by.WriteString(fmt.Sprintf("%s|||||||\n", net.Code))
+				fmt.Fprintf(by, "%s|||||||\n", net.Code)
 			}
 			for s := 0; s < len(net.Station); s++ {
 				sta := &net.Station[s]
 				if levelVal == STATION_LEVEL_STATION {
-					by.WriteString(fmt.Sprintf("%s|%s|%f|%f|%f|%s|%s|%s\n",
+					fmt.Fprintf(by, "%s|%s|%f|%f|%f|%s|%s|%s\n",
 						net.Code, sta.Code,
 						sta.Latitude.Value, sta.Longitude.Value, sta.Elevation.Value,
-						sta.Site.Name, sta.StartDate.MarshalFormatText(), sta.EndDate.MarshalFormatText()))
+						sta.Site.Name, sta.StartDate.MarshalFormatText(), sta.EndDate.MarshalFormatText())
 				} else {
 					if len(sta.Channel) == 0 {
 						// Write Station name only
-						by.WriteString(fmt.Sprintf("%s|%s|||||||||||||||\n", net.Code, sta.Code))
+						fmt.Fprintf(by, "%s|%s|||||||||||||||\n", net.Code, sta.Code)
 					}
 					for c := 0; c < len(sta.Channel); c++ {
 						cha := &sta.Channel[c]
@@ -612,7 +611,7 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 							}
 						}
 
-						by.WriteString(fmt.Sprintf("%s|%s|%s|%s|%f|%f|%f|%f|%f|%f|%s|%s|%s|%s|%f|%s|%s\n",
+						fmt.Fprintf(by, "%s|%s|%s|%s|%f|%f|%f|%f|%f|%f|%s|%s|%s|%s|%f|%s|%s\n",
 							net.Code, sta.Code, cha.LocationCode, cha.Code,
 							cha.Latitude.Value, cha.Longitude.Value, cha.Elevation.Value,
 							cha.Depth.Value, cha.Azimuth.Value, cha.Dip.Value,
@@ -621,7 +620,7 @@ func (r *FDSNStationXML) marshalText(levelVal int) *bytes.Buffer {
 							frequency,
 							unitsName,
 							cha.SampleRate.Value,
-							cha.StartDate.MarshalFormatText(), cha.EndDate.MarshalFormatText()))
+							cha.StartDate.MarshalFormatText(), cha.EndDate.MarshalFormatText())
 
 					}
 				}
@@ -799,35 +798,35 @@ func (v fdsnStationV1Search) validStartEnd(start, end time.Time, level int) bool
 		return true
 	}
 	// For start/end, the "no-value" could be "0001-01-01T00:00:00" or "9999-01-01T00:00:00"
-	if v.StartTime.Time != zeroDateTime {
+	if st := v.StartTime; st != fdsn.ZeroWsDateTime {
 		switch v.startMode {
 		case ONBEFOREEND: // startTime
-			if !end.IsZero() && end.Before(v.StartTime.Time) {
+			if !end.IsZero() && end.Before(st.Time) {
 				return false
 			}
 		case BEFORE: // startBefore
-			if !start.Equal(emptyDateTime) && !start.Before(v.StartTime.Time) {
+			if !start.Equal(fdsn.EmptyWsDateTime.Time) && !start.Before(st.Time) {
 				return false
 			}
 		case AFTER: // startAfter
-			if start.Equal(emptyDateTime) || !start.After(v.StartTime.Time) {
+			if start.Equal(emptyDateTime) || !start.After(st.Time) {
 				return false
 			}
 		}
 	}
 
-	if v.EndTime.Time != emptyDateTime {
+	if et := v.EndTime; et != fdsn.EmptyWsDateTime {
 		switch v.endMode {
 		case ONAFTERSTART: // endTime
-			if !start.Equal(emptyDateTime) && start.After(v.EndTime.Time) {
+			if !start.Equal(fdsn.EmptyWsDateTime.Time) && start.After(et.Time) {
 				return false
 			}
 		case BEFORE: // endBefore
-			if end.IsZero() || !end.Before(v.EndTime.Time) {
+			if end.IsZero() || !end.Before(et.Time) {
 				return false
 			}
 		case AFTER: // endAfter
-			if !end.IsZero() && !end.After(v.EndTime.Time) {
+			if !end.IsZero() && !end.After(et.Time) {
 				return false
 			}
 		}
@@ -895,7 +894,7 @@ func downloadStationXML(since time.Time) (by *bytes.Buffer, modified time.Time, 
 		}
 
 		if !tp.After(since) {
-			return nil, zeroDateTime, errNotModified
+			return nil, time.Time(zeroDateTime), errNotModified
 		}
 
 		log.Println("Downloading fdsn station xml file from S3: ", stationXMLBucket+"/"+stationXMLKey)
@@ -908,11 +907,11 @@ func downloadStationXML(since time.Time) (by *bytes.Buffer, modified time.Time, 
 		// load from local to make debugging easier.
 		// s3Meta be the path to station xml
 		var f *os.File
-		f, err = os.Open(stationXMLKey)
+		f, err = os.Open(stationXMLKey) // nolint:gosec
 		if err != nil {
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		_, err = by.ReadFrom(f)
 		tp = time.Now()
 	}
@@ -1015,7 +1014,7 @@ func (d xsdDateTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 
 // For attr in an XML element
 func (d xsdDateTime) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
-	if time.Time(d).Equal(zeroDateTime) || time.Time(d).Equal(emptyDateTime) {
+	if time.Time(d).Equal(time.Time(zeroDateTime)) || time.Time(d).Equal(time.Time(emptyDateTime)) {
 		return xml.Attr{}, nil
 	}
 
@@ -1027,13 +1026,13 @@ func (d xsdDateTime) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
 	return xml.Attr{Name: name, Value: string(t)}, nil
 }
 
-// For format=text - now outputs RFC3339Nano with Z timezone
+// For format=text - still marshaling into FDSN WS date-time: RFC3339 without trailing 'Z'
 func (d xsdDateTime) MarshalFormatText() string {
 	if time.Time(d).Equal(zeroDateTime) || time.Time(d).Equal(emptyDateTime) {
 		return ""
 	}
 
-	return time.Time(d).UTC().Format(time.RFC3339Nano)
+	return time.Time(d).UTC().Format(fdsn.WsMarshalTimeFormat)
 }
 
 func contains(slice []string, value string) bool {

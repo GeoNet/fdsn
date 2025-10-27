@@ -36,33 +36,29 @@ var eventAbbreviations = map[string]string{
 // supported query parameters for the event service from http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
 type fdsnEventV1 struct {
 	// required
-	StartTime    Time    `schema:"starttime"`    // limit to events on or after the specified start time.
-	EndTime      Time    `schema:"endtime"`      // limit to events on or before the specified end time.
-	MinLatitude  float64 `schema:"minlatitude"`  // limit to events with a latitude larger than or equal to the specified minimum.
-	MaxLatitude  float64 `schema:"maxlatitude"`  // limit to events with a latitude smaller than or equal to the specified maximum.
-	MinLongitude float64 `schema:"minlongitude"` // limit to events with a longitude larger than or equal to the specified minimum.
-	MaxLongitude float64 `schema:"maxlongitude"` // limit to events with a longitude smaller than or equal to the specified maximum.
-	MinDepth     float64 `schema:"mindepth"`     // limit to events with depth more than the specified minimum.
-	MaxDepth     float64 `schema:"maxdepth"`     // limit to events with depth less than the specified maximum.
-	MinMagnitude float64 `schema:"minmagnitude"` // limit to events with a magnitude larger than the specified minimum.
-	MaxMagnitude float64 `schema:"maxmagnitude"` // limit to events with a magnitude smaller than the specified maximum.
-	OrderBy      string  `schema:"orderby"`      // order the result by time or magnitude with the following possibilities: time, time-asc, magnitude, magnitude-asc
+	StartTime    fdsn.WsDateTime `schema:"starttime"`    // limit to events on or after the specified start time.
+	EndTime      fdsn.WsDateTime `schema:"endtime"`      // limit to events on or before the specified end time.
+	MinLatitude  float64         `schema:"minlatitude"`  // limit to events with a latitude larger than or equal to the specified minimum.
+	MaxLatitude  float64         `schema:"maxlatitude"`  // limit to events with a latitude smaller than or equal to the specified maximum.
+	MinLongitude float64         `schema:"minlongitude"` // limit to events with a longitude larger than or equal to the specified minimum.
+	MaxLongitude float64         `schema:"maxlongitude"` // limit to events with a longitude smaller than or equal to the specified maximum.
+	MinDepth     float64         `schema:"mindepth"`     // limit to events with depth more than the specified minimum.
+	MaxDepth     float64         `schema:"maxdepth"`     // limit to events with depth less than the specified maximum.
+	MinMagnitude float64         `schema:"minmagnitude"` // limit to events with a magnitude larger than the specified minimum.
+	MaxMagnitude float64         `schema:"maxmagnitude"` // limit to events with a magnitude smaller than the specified maximum.
+	OrderBy      string          `schema:"orderby"`      // order the result by time or magnitude with the following possibilities: time, time-asc, magnitude, magnitude-asc
 
 	// supported optionals
-	Latitude       float64       `schema:"latitude"`
-	Longitude      float64       `schema:"longitude"`
-	MinRadius      float64       `schema:"minradius"`
-	MaxRadius      float64       `schema:"maxradius"`
-	PublicID       string        `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
-	UpdatedAfter   Time          `schema:"updatedafter"` // Limit to events updated after the specified time.
-	Format         string        `schema:"format"`
-	NoData         int           `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
-	EventType      string        `schema:"eventtype"`
-	eventTypeSlice []interface{} // interal use only. holds matched eventtypes
-}
-
-type Time struct {
-	time.Time
+	Latitude       float64         `schema:"latitude"`
+	Longitude      float64         `schema:"longitude"`
+	MinRadius      float64         `schema:"minradius"`
+	MaxRadius      float64         `schema:"maxradius"`
+	PublicID       string          `schema:"eventid"`      // select a specific event by ID; event identifiers are data center specific.
+	UpdatedAfter   fdsn.WsDateTime `schema:"updatedafter"` // Limit to events updated after the specified time.
+	Format         string          `schema:"format"`
+	NoData         int             `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
+	EventType      string          `schema:"eventtype"`
+	eventTypeSlice []interface{}   // interal use only. holds matched eventtypes
 }
 
 var fdsnEventWadlFile []byte
@@ -230,11 +226,11 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 	}
 
 	if e.Format != "xml" && e.Format != "text" {
-		return e, errors.New("Invalid format.")
+		return e, errors.New("invalid format")
 	}
 
 	if e.NoData != 204 && e.NoData != 404 {
-		return e, errors.New("nodata must be 204 or 404.")
+		return e, errors.New("nodata must be 204 or 404")
 	}
 
 	// geometry bounds checking
@@ -276,17 +272,17 @@ func parseEventV1(v url.Values) (fdsnEventV1, error) {
 		}
 
 		if e.MaxRadius < 0 || e.MaxRadius > 180.0 {
-			err = fmt.Errorf("invalid maxradius value.")
+			err = fmt.Errorf("invalid maxradius value")
 			return e, err
 		}
 
 		if e.MinRadius < 0 || e.MinRadius > 180.0 {
-			err = fmt.Errorf("invalid minradius value.")
+			err = fmt.Errorf("invalid minradius value")
 			return e, err
 		}
 
 		if e.MinRadius > e.MaxRadius {
-			err = fmt.Errorf("minradius or maxradius range error.")
+			err = fmt.Errorf("minradius or maxradius range error")
 			return e, err
 		}
 	}
@@ -451,19 +447,19 @@ func (e *fdsnEventV1) filter() (q string, args []interface{}) {
 		i++
 	}
 
-	if !e.StartTime.Time.IsZero() {
+	if !e.StartTime.IsZero() {
 		q = fmt.Sprintf("%s origintime >= $%d AND", q, i)
 		args = append(args, e.StartTime.Time)
 		i++
 	}
 
-	if !e.EndTime.Time.IsZero() {
+	if !e.EndTime.IsZero() {
 		q = fmt.Sprintf("%s origintime <= $%d AND", q, i)
 		args = append(args, e.EndTime.Time)
 		i++
 	}
 
-	if !e.UpdatedAfter.Time.IsZero() {
+	if !e.UpdatedAfter.IsZero() {
 		q = fmt.Sprintf("%s modificationtime >= $%d AND", q, i)
 		args = append(args, e.UpdatedAfter.Time)
 		i++
@@ -531,7 +527,7 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 		if err != nil {
 			return fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>
 	<q:quakeml xmlns:q="http://quakeml.org/xmlns/quakeml/1.2" xmlns="http://quakeml.org/xmlns/bed/1.2">
@@ -556,7 +552,7 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 		if err != nil {
 			return fdsnError{StatusError: weft.StatusError{Code: http.StatusInternalServerError, Err: err}, url: r.URL.String(), timestamp: tm}
 		}
-		defer rows.Close()
+		defer func() { _ = rows.Close() }()
 
 		b.WriteString("#EventID | Time | Latitude | Longitude | Depth/km | Author | Catalog | Contributor | ContributorID | MagType | Magnitude | MagAuthor | EventLocationName | EventType\n")
 
@@ -572,7 +568,7 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 			if l, err := wgs84.ClosestNZ(latitude, longitude); err == nil {
 				loc = l.Description()
 			}
-			s := fmt.Sprintf("%s|%s|%.3f|%.3f|%.1f|GNS|GNS|GNS|%s|%s|%.1f|GNS|%s|%s\n", eventID, tm.UTC().Format(time.RFC3339Nano), latitude, longitude, depth, eventID, magType, magnitude, loc, eventType)
+			s := fmt.Sprintf("%s|%s|%.3f|%.3f|%.1f|GNS|GNS|GNS|%s|%s|%.1f|GNS|%s|%s\n", eventID, tm.UTC().Format(fdsn.WsMarshalTimeFormat), latitude, longitude, depth, eventID, magType, magnitude, loc, eventType)
 			b.WriteString(s)
 		}
 
@@ -591,7 +587,7 @@ func fdsnEventVersion(r *http.Request, h http.Header, b *bytes.Buffer) error {
 	}
 
 	h.Set("Content-Type", "text/plain")
-	_, err = b.WriteString("1.1")
+	_, err = b.WriteString(eventVersion)
 
 	return err
 }

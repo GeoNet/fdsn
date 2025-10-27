@@ -42,19 +42,15 @@ var eventTypeReg = regexp.MustCompile(`^([\w*?, ]+(?:[ -][\w*?,]+)*|--)$`) // sp
 var nslcRegPassPattern = regexp.MustCompile(`^(\^[A-Z0-9\*\?\.]{2,6}\$)(\|?(\^[A-Z0-9\*\?\.]{2,6}\$))*$`) // "^WEL$|^VIZ$"
 
 type DataSelect struct {
-	StartTime   Time     `schema:"starttime"` // limit to data on or after the specified start time.
-	EndTime     Time     `schema:"endtime"`   // limit to data on or before the specified end time.
-	Network     []string `schema:"network"`   // network name of data to query
-	Station     []string `schema:"station"`   // station name of data to query
-	Location    []string `schema:"location"`  // location name of data to query
-	Channel     []string `schema:"channel"`   // channel number of data to query
-	Format      string   `schema:"format"`
-	LongestOnly bool     `schema:"longestonly"`
-	NoData      int      `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
-}
-
-type Time struct {
-	time.Time
+	StartTime   WsDateTime `schema:"starttime"` // limit to data on or after the specified start time.
+	EndTime     WsDateTime `schema:"endtime"`   // limit to data on or before the specified end time.
+	Network     []string   `schema:"network"`   // network name of data to query
+	Station     []string   `schema:"station"`   // station name of data to query
+	Location    []string   `schema:"location"`  // location name of data to query
+	Channel     []string   `schema:"channel"`   // channel number of data to query
+	Format      string     `schema:"format"`
+	LongestOnly bool       `schema:"longestonly"`
+	NoData      int        `schema:"nodata"` // Select status code for “no data”, either ‘204’ (default) or ‘404’.
 }
 
 type DataSearch struct {
@@ -67,67 +63,6 @@ func init() {
 	decoder.RegisterConverter([]string{}, func(input string) reflect.Value {
 		return reflect.ValueOf(strings.Split(input, ","))
 	})
-}
-
-/*
-parses the time in text as per the FDSN spec.  Pads text for parsing with
-time.RFC3339Nano.  Accepted formats are (UTC):
-
-	YYYY-MM-DDTHH:MM:SS.ssssss[Z]  // length 26(27)
-	YYYY-MM-DDTHH:MM:SS[Z]	// length 19(20)
-	YYYY-MM-DD	// length 10
-
-Implements the encoding.TextUnmarshaler interface.
-*/
-
-func (t *Time) UnmarshalText(text []byte) (err error) {
-	s := string(text)
-	l := len(s)
-
-	if l <= 10 {
-		// date only
-		t.Time, err = time.Parse("2006-01-02", s)
-		if err != nil {
-			return fmt.Errorf("invalid time format: %s", s)
-		}
-		return nil
-	}
-
-	// Try RFC3339Nano first (new format)
-	t.Time, err = time.Parse(time.RFC3339Nano, s)
-	if err == nil {
-		return nil
-	}
-
-	// Try with Z suffix added for backward compatibility
-	if !strings.HasSuffix(s, "Z") {
-		t.Time, err = time.Parse(time.RFC3339Nano, s+"Z")
-		if err == nil {
-			return nil
-		}
-	}
-
-	// Try legacy format for backward compatibility
-	t.Time, err = time.Parse("2006-01-02T15:04:05.999999999", s)
-	if err == nil {
-		return nil
-	}
-
-	// Try legacy format with timezone
-	t.Time, err = time.Parse("2006-01-02T15:04:05.999999999Z07:00", s)
-	if err == nil {
-		return nil
-	}
-
-	return fmt.Errorf("invalid time format: %s", s)
-}
-
-// This function helps to expose the unmarshaler to the public
-// it's returning time.Time instead of fdsn.Time
-func UnmarshalTime(text []byte) (time.Time, error) {
-	t := Time{}
-	err := t.UnmarshalText(text)
-	return t.Time, err
 }
 
 // ParesDataSelectGet parses the FDSN dataselect parameters in r from a
@@ -165,12 +100,12 @@ func ParseDataSelectPost(r io.Reader, d *[]DataSelect) error {
 			return fmt.Errorf("incorrect number of fields in dataselect query POST body, expected 6 but observed: %d", len(fields))
 		}
 
-		startTime := Time{}
+		startTime := WsDateTime{}
 		if err := startTime.UnmarshalText([]byte(fields[4])); err != nil {
 			return err
 		}
 
-		endTime := Time{}
+		endTime := WsDateTime{}
 		if err := endTime.UnmarshalText([]byte(fields[5])); err != nil {
 			return err
 		}

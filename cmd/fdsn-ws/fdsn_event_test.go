@@ -6,7 +6,8 @@ import (
 	"net/url"
 	"reflect"
 	"testing"
-	"time"
+
+	"github.com/GeoNet/fdsn/internal/fdsn"
 )
 
 func TestEventV1Query(t *testing.T) {
@@ -54,13 +55,11 @@ func TestEventV1Query(t *testing.T) {
 		EventType:    "*", // default value
 	}
 
-	ex.StartTime.Time, err = time.Parse(time.RFC3339Nano, "2015-01-12T12:12:12.000000000Z")
-	if err != nil {
+	if err = ex.StartTime.UnmarshalText([]byte("2015-01-12T12:12:12.000000")); err != nil {
 		t.Error(err)
 	}
 
-	ex.EndTime.Time, err = time.Parse(time.RFC3339Nano, "2015-02-12T12:12:12.000000000Z")
-	if err != nil {
+	if err = ex.EndTime.UnmarshalText([]byte("2015-02-12T12:12:12.000000")); err != nil {
 		t.Error(err)
 	}
 
@@ -100,26 +99,6 @@ func TestEventV1OrderBy(t *testing.T) {
 	_, err := parseEventV1(v)
 	if err == nil {
 		t.Error("should error for unknown orderby option.")
-	}
-}
-
-func TestTimeParse(t *testing.T) {
-	var tm Time
-
-	if err := tm.UnmarshalText([]byte("2015-01-12T12:12:12.999999")); err != nil {
-		t.Error(err)
-	}
-
-	if err := tm.UnmarshalText([]byte("2015-01-12T12:12:12")); err != nil {
-		t.Error(err)
-	}
-
-	if err := tm.UnmarshalText([]byte("2015-01-12")); err != nil {
-		t.Error(err)
-	}
-
-	if err := tm.UnmarshalText([]byte("2015-01-12T12:12:12.invalid")); err == nil {
-		t.Error("expected an error for invalid time string.")
 	}
 }
 
@@ -334,14 +313,16 @@ func TestEventAbbreviations(t *testing.T) {
 		t.Errorf("expected 2.2 for maxmag %f.\n", e.MaxMagnitude)
 	}
 
-	tm, _ := time.Parse(time.RFC3339Nano, "2016-09-04T00:00:00.000000000Z")
-	if !e.StartTime.Equal(tm) {
-		t.Errorf("start parameter error: %s", e.StartTime.Format(time.RFC3339Nano))
+	var tm fdsn.WsDateTime
+
+	_ = tm.UnmarshalText([]byte("2016-09-04T00:00:00.000000"))
+	if !e.StartTime.Equal(tm.Time) {
+		t.Errorf("start parameter error: %v", e.StartTime)
 	}
 
-	tm, _ = time.Parse(time.RFC3339Nano, "2016-09-05T00:00:00.000000000Z")
-	if !e.EndTime.Equal(tm) {
-		t.Errorf("end parameter error: %s", e.EndTime.Format(time.RFC3339Nano))
+	_ = tm.UnmarshalText([]byte("2016-09-05T00:00:00"))
+	if !e.EndTime.Equal(tm.Time) {
+		t.Errorf("end parameter error: %v", e.EndTime)
 	}
 }
 
