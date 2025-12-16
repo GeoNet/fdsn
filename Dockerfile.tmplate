@@ -1,8 +1,8 @@
-ARG BUILDER_IMAGE=ghcr.io/geonet/base-images/golang:1.23.5-alpine3.21
+ARG CI_GO_IMAGE=ghcr.io/geonet/base-images/golang:1.23.5-alpine3.21
 ARG RUNNER_IMAGE=ghcr.io/geonet/base-images/static:latest
 ARG RUN_USER=nobody
 # Only support image based on AlpineLinux
-FROM ${BUILDER_IMAGE} as builder
+FROM ${CI_GO_IMAGE} as builder
 
 # Obtain ca-cert and tzdata, which we will add to the container
 RUN apk add --no-cache --update gcc make musl-dev
@@ -25,6 +25,7 @@ ENV GOPATH /usr/src/go
 ENV GOFLAGS -mod=vendor
 ENV GOOS linux
 ENV GOARCH amd64
+ENV GOTOOLCHAIN=local
 RUN CGO_ENABLED=0 go install -a -ldflags "-X main.Prefix=${BUILD}/${GIT_COMMIT_SHA} -extldflags -static" /repo/cmd/${BUILD}
 
 FROM ${RUNNER_IMAGE}

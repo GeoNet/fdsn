@@ -1,6 +1,7 @@
-ARG BUILDER_IMAGE=ghcr.io/geonet/base-images/golang:1.23.5-alpine3.21
+ARG CI_GO_IMAGE=ghcr.io/geonet/base-images/golang:1.23.5-alpine3.21
 
-FROM ${BUILDER_IMAGE} as builder
+FROM ${CI_GO_IMAGE} as builder
+
 # Obtain ca-cert and tzdata, which we will add to the container
 # Git commit SHA
 ARG GIT_COMMIT_SHA
@@ -15,6 +16,7 @@ ENV GOFLAGS -mod=vendor
 ENV GOOS linux
 ENV GOARCH amd64
 ENV CGO_ENABLED 0
+ENV GOTOOLCHAIN=local
 RUN go install -a -ldflags "-X main.Prefix=${BUILD}/${GIT_COMMIT_SHA}" /repo/cmd/fdsn-quake-consumer
 
 FROM ghcr.io/geonet/base-images/alpine-xslt:3.18
