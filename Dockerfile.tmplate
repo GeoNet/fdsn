@@ -1,8 +1,8 @@
-ARG BUILDER_IMAGE=ghcr.io/geonet/base-images/golang:1.23.5-alpine3.21
+ARG CI_GO_IMAGE=ghcr.io/geonet/base-images/golang:1.23.5-alpine3.21
 ARG RUNNER_IMAGE=ghcr.io/geonet/base-images/static:latest
 ARG RUN_USER=nobody
 # Only support image based on AlpineLinux
-FROM ${BUILDER_IMAGE} as builder
+FROM ${CI_GO_IMAGE} AS builder
 
 # Obtain ca-cert and tzdata, which we will add to the container
 RUN apk add --no-cache --update gcc make musl-dev
@@ -20,11 +20,12 @@ COPY vendor /repo/vendor
 COPY cmd/$BUILD /repo/cmd/$BUILD
 
 # Set a bunch of go env flags
-ENV GOBIN /repo/gobin
-ENV GOPATH /usr/src/go
-ENV GOFLAGS -mod=vendor
-ENV GOOS linux
-ENV GOARCH amd64
+ENV GOBIN=/repo/gobin
+ENV GOPATH=/usr/src/go
+ENV GOFLAGS=-mod=vendor
+ENV GOOS=linux
+ENV GOARCH=amd64
+ENV GOTOOLCHAIN=local
 RUN CGO_ENABLED=0 go install -a -ldflags "-X main.Prefix=${BUILD}/${GIT_COMMIT_SHA} -extldflags -static" /repo/cmd/${BUILD}
 
 FROM ${RUNNER_IMAGE}
@@ -37,7 +38,7 @@ EXPOSE $EXPOSE_PORT
 # Same ARG as before
 ARG BUILD
 # Need to make this an env for it to be interpolated by the shell
-ENV TZ Pacific/Auckland
+ENV TZ=Pacific/Auckland
 ENV BUILD_BIN=${BUILD}
 # We have to make our binary have a fixed name, otherwise, we cannot run it without a shell
 COPY --from=builder /repo/gobin/${BUILD} /${BUILD}
