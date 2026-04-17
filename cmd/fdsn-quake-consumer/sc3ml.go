@@ -124,12 +124,20 @@ func toQuakeMLEvent(seisComPML []byte) (string, error) {
 	if in, err = cmd.StdinPipe(); err != nil {
 		return "", err
 	}
-	defer in.Close()
+	defer func() {
+		if err := in.Close(); err != nil {
+			log.Printf("error closing xslt stdin pipe: %s", err)
+		}
+	}()
 
 	if out, err = cmd.StdoutPipe(); err != nil {
 		return "", err
 	}
-	defer out.Close()
+	defer func() {
+		if err := out.Close(); err != nil {
+			log.Printf("error closing xslt stdout pipe: %s", err)
+		}
+	}()
 
 	if err := cmd.Start(); err != nil {
 		return "", err

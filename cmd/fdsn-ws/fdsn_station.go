@@ -122,7 +122,7 @@ func initStationTemplate() {
 	}
 	err = t.ExecuteTemplate(&b, "body", os.Getenv("HOST_CNAME"))
 	if err != nil {
-		log.Printf("error executing assets/tmpl/fdsn-ws-station.wadl: %s", err.Error())
+		log.Printf("error executing assets/tmpl/fdsn-ws-station.wadl: %s", err.Error()) //nolint:gosec
 	}
 	fdsnStationWadlFile = b.Bytes()
 

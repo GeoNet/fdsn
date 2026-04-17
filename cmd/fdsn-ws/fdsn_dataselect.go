@@ -49,7 +49,7 @@ func initDataselectTemplate() {
 	}
 	err = t.ExecuteTemplate(&b, "body", os.Getenv("HOST_CNAME"))
 	if err != nil {
-		log.Printf("error executing assets/tmpl/fdsn-ws-dataselect.wadl: %s", err.Error())
+		log.Printf("error executing assets/tmpl/fdsn-ws-dataselect.wadl: %s", err.Error()) //nolint:gosec
 	}
 	fdsnDataselectWadlFile = b.Bytes()
 
@@ -169,7 +169,7 @@ func fdsnDataselectV1Handler(r *http.Request, w http.ResponseWriter) (int64, err
 
 	//Log extra information about POST request if needed
 	if r.Method == "POST" && LOG_EXTRA {
-		log.Printf("About to execute the following query params: %+v\n", params)
+		log.Printf("About to execute the following query params: %+v\n", params) //nolint:gosec
 	}
 
 	// search the holdings DB for the files to fetch from S3.

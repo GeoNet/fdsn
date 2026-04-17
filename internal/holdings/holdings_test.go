@@ -41,7 +41,9 @@ func TestHoldings(t *testing.T) {
 		}
 
 		h, err := holdings.SingleStream(r)
-		r.Close()
+		if cerr := r.Close(); cerr != nil {
+			t.Errorf("error closing file: %s", cerr)
+		}
 		if err != nil {
 			t.Errorf("%s %s", e.file, err)
 		}

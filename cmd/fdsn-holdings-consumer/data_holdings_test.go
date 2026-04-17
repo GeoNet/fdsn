@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"log"
 	"testing"
 	"time"
 
@@ -91,5 +92,7 @@ func setup(t *testing.T) {
 }
 
 func teardown() {
-	db.Close()
+	if err := db.Close(); err != nil {
+		log.Printf("error closing db: %s", err)
+	}
 }

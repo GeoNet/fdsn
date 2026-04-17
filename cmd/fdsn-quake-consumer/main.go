@@ -83,7 +83,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("error with DB config: %s", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("error closing db: %s", err)
+		}
+	}()
 
 	db.SetMaxIdleConns(p.MaxIdle)
 	db.SetMaxOpenConns(p.MaxOpen)
