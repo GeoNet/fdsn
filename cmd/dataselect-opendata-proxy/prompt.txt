@@ -1,0 +1,16 @@
+We're creating a proxy service which:
+
+- golang application
+- runs FDSN dataselect service, the request and response be the same as what's in the dataselect handler in ../fdsn-ws/.
+- we're going to change the backend by 
+  - the request being analyzed by the service to become network/station/location/channel sets (we call it NSLC here)
+  - with NSLCs and the time range, the service to fetch files from s3://geonet-open-data/waveforms/miniseed/{yyyy}/{yyyy}.{doy}/{station-4-char-code}.{network-2-char-code}/{yyyy}.{doy}.{station-4-char-code}.{location}-{channel}.{network}.D
+  - process the fetched files by:
+    - unpacking the miniseed file
+    - find the records enclosed in the parameter specified
+    - for files having size > 1024 bytes, before download full file, fetch miniseed file's header first (download from S3 partially), to check if this miniseed file contains the records the user requested. same approach applies to check the bottom of file first. 
+    - response to the client, same as in the original fdsn-ws service.
+- the files fetch from S3 is ordered by their pathnames. Once the first record meets user's request range, the service starts responding immediately and streaming the rest of data along the way.
+- should be using similary http service pattern with fdsn-ws
+- create test cases: run test server and request "/fdsnws/dataselect/1/query?network=NZ&station=AKCZ&channel=EHE&location=10&start=2026-04-01T00:22:00Z&end=2026-04-02T02:00:00Z" comparing the output of reques vs the file testdata/AKCZ.D.
+- create a README.md in explaining this service 
