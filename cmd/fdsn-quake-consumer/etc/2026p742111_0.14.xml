@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<seiscomp xmlns="http://geofon.gfz.de/ns/seiscomp-schema/0.14" version="0.14">
+  <EventParameters>
+    <origin publicID="Origin/20261002140434.382034.117950">
+      <time>
+        <value>2026-10-02T13:57:16.699857Z</value>
+        <uncertainty>0.23450213906469383</uncertainty>
+      </time>
+      <latitude>
+        <value>-39.084049224853516</value>
+        <uncertainty>1.5584071162651234</uncertainty>
+      </latitude>
+      <longitude>
+        <value>174.3247528076172</value>
+        <uncertainty>1.7503504319262482</uncertainty>
+      </longitude>
+      <depth>
+        <value>8.398130416870117</value>
+        <uncertainty>2.0611289376213389</uncertainty>
+      </depth>
+      <depthType>from location</depthType>
+      <methodID>LOCSAT</methodID>
+      <earthModelID>iasp91</earthModelID>
+      <quality>
+        <associatedPhaseCount>212</associatedPhaseCount>
+        <usedPhaseCount>170</usedPhaseCount>
+        <associatedStationCount>211</associatedStationCount>
+        <usedStationCount>169</usedStationCount>
+        <standardError>0.7100475703706789</standardError>
+        <azimuthalGap>96.75810241699219</azimuthalGap>
+        <maximumDistance>4.241168975830078</maximumDistance>
+        <minimumDistance>0.14212515950202942</minimumDistance>
+        <medianDistance>1.970474362373352</medianDistance>
+      </quality>
+      <evaluationMode>automatic</evaluationMode>
+      <creationInfo>
+        <agencyID>WEL(GNS_StagingRapid)</agencyID>
+        <creationTime>2026-10-02T14:04:34.382513Z</creationTime>
+      </creationInfo>
+      <magnitude publicID="Origin/20261002140434.382034.117950/netMag/M">
+        <magnitude>
+          <value>5.149220521545345</value>
+        </magnitude>
+        <type>M</type>
+        <methodID>weighted average</methodID>
+        <stationCount>127</stationCount>
+        <creationInfo>
+          <agencyID>WEL(GNS_StagingRapid)</agencyID>
+          <creationTime>2026-10-02T14:04:34.781409Z</creationTime>
+        </creationInfo>
+      </magnitude>
+    </origin>
+    <event publicID="2026p742111">
+      <preferredOriginID>Origin/20261002140434.382034.117950</preferredOriginID>
+      <preferredMagnitudeID>Origin/20261002140434.382034.117950/netMag/M</preferredMagnitudeID>
+      <creationInfo>
+        <agencyID>WEL(GNS_StagingRapid)</agencyID>
+        <creationTime>2026-10-02T13:57:35.201406Z</creationTime>
+        <modificationTime>2026-10-02T14:04:36.007679Z</modificationTime>
+      </creationInfo>
+      <description>
+        <text>Taranaki</text>
+        <type>region name</type>
+      </description>
+      <originReference>Origin/20261002140434.382034.117950</originReference>
+    </event>
+  </EventParameters>
+</seiscomp>

@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -182,6 +183,56 @@ func TestEventUnmarshalSC12_13(t *testing.T) {
 		if !reflect.DeepEqual(e, c) {
 			t.Errorf("c not equal to e, expected: %+v", e)
 		}
+	}
+}
+
+func TestEventUnmarshalSC14(t *testing.T) {
+	b, err := os.ReadFile("etc/2026p742111_0.14.xml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var e event
+	if err = unmarshal(b, &e); err != nil {
+		t.Fatal(err)
+	}
+	c := event{
+		PublicID:              "2026p742111",
+		Longitude:             174.3247528076172,
+		Latitude:              -39.084049224853516,
+		Depth:                 8.398130416870117,
+		DepthType:             "from location",
+		EvaluationMethod:      "LOCSAT",
+		EarthModel:            "iasp91",
+		EvaluationMode:        "automatic",
+		UsedPhaseCount:        170,
+		UsedStationCount:      169,
+		OriginError:           0.7100475703706789,
+		AzimuthalGap:          96.75810241699219,
+		MinimumDistance:       0.14212515950202942,
+		Magnitude:             5.149220521545345,
+		MagnitudeType:         "M",
+		MagnitudeStationCount: 127,
+		Sc3ml:                 string(b),
+	}
+	c.ModificationTime, _ = time.Parse(time.RFC3339Nano, "2026-10-02T14:04:36.007679Z")
+	c.OriginTime, _ = time.Parse(time.RFC3339Nano, "2026-10-02T13:57:16.699857Z")
+	if c.Quakeml12Event, err = toQuakeMLEvent(b); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(e, c) {
+		t.Errorf("event fields do not match expected values: %+v", e)
+	}
+
+	want, err := os.ReadFile("etc/2026p742111_quakeml.xml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	interTagWhitespace := regexp.MustCompile(`>\s+<`)
+	got := strings.TrimSpace(interTagWhitespace.ReplaceAllString(e.Quakeml12Event, `><`))
+	expected := strings.TrimSpace(interTagWhitespace.ReplaceAllString(string(want), `><`))
+	if got != expected {
+		t.Error("QuakeML event does not match etc/2026p742111_quakeml.xml")
 	}
 }
 
