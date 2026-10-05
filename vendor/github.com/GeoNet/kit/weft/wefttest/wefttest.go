@@ -99,7 +99,9 @@ func (r Request) Do(server string) ([]byte, error) {
 	if res, err = client.Do(req); err != nil {
 		return nil, fmt.Errorf("%s %s %s error: %s", r.ID, r.URL, r.Method, err.Error())
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if r.Status != res.StatusCode {
 		return nil, fmt.Errorf("%s %s %s got status %d expected %d", r.ID, r.URL, r.Method, res.StatusCode, r.Status)
@@ -162,7 +164,7 @@ func checkCSP(respCsp, expectedCsp map[string]string) error {
 	for k, v := range expectedCsp {
 		v1 := respCsp[k]
 		if k == "script-src" && strings.Contains(v1, "nonce-") { //check nonce
-			escapedV := strings.Replace(v, "*", "\\*", -1) // escape wildcards to avoid regex clash
+			escapedV := strings.ReplaceAll(v, "*", "\\*") // escape wildcards to avoid regex clash
 			pattern := fmt.Sprintf(noncePattern, escapedV)
 			if !patternMatch(pattern, v1) {
 				return fmt.Errorf("## Response CSP %s=%s doesn't match expected %s=%s", k, v1, k, v)

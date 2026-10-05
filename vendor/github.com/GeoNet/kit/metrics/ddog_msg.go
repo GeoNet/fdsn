@@ -33,7 +33,7 @@ type series struct {
 // AppName returns the application name.
 func AppName() string {
 	s := os.Args[0]
-	return strings.Replace(s[strings.LastIndex(s, "/")+1:], "-", "_", -1)
+	return strings.ReplaceAll(s[strings.LastIndex(s, "/")+1:], "-", "_")
 }
 
 // Hostname returns the hostname (can be empty).
@@ -216,10 +216,10 @@ func dogMsg(apiKey, hostName, appName string, m runtime.MemStats, t []TimerStats
 			}
 		}
 		// non nil connection error, sleep and try again
-		time.Sleep(time.Second << uint(tries))
+		time.Sleep(time.Second << uint(tries)) //nolint:gosec
 	}
 	if res != nil {
-		res.Body.Close()
+		_ = res.Body.Close()
 	}
 
 	return err

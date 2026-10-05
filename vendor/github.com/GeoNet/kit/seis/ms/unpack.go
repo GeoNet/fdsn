@@ -14,12 +14,12 @@ func (m *Record) Unpack(buf []byte) error {
 	}
 
 	m.RecordHeader = DecodeRecordHeader(buf[0:RecordHeaderSize])
-	if !m.RecordHeader.IsValid() {
+	if !m.IsValid() {
 		return fmt.Errorf("unpack: input is not a valid MSEED record: incorrect header")
 	}
 
-	pointer := m.RecordHeader.FirstBlockette //TODO: This could be replaced with bytes.Reader()
-	for i := 0; i < int(m.RecordHeader.NumberOfBlockettesThatFollow); i++ {
+	pointer := m.FirstBlockette //TODO: This could be replaced with bytes.Reader()
+	for i := 0; i < int(m.NumberOfBlockettesThatFollow); i++ {
 		if pointer == 0 {
 			return fmt.Errorf("unpack: next blockette pointer == 0 after %v blockettes", i-1)
 		}
@@ -47,8 +47,8 @@ func (m *Record) Unpack(buf []byte) error {
 		pointer = bhead.NextBlockette
 	}
 
-	m.Data = make([]byte, len(buf)-int(m.RecordHeader.BeginningOfData))
-	copy(m.Data, buf[m.RecordHeader.BeginningOfData:])
+	m.Data = make([]byte, len(buf)-int(m.BeginningOfData))
+	copy(m.Data, buf[m.BeginningOfData:])
 
 	return nil
 }
@@ -56,7 +56,7 @@ func (m *Record) Unpack(buf []byte) error {
 func (m Record) Bytes() ([]byte, error) {
 	switch enc := Encoding(m.B1000.Encoding); enc {
 	case EncodingASCII:
-		return trimRight(m.Data[:m.RecordHeader.NumberOfSamples]), nil
+		return trimRight(m.Data[:m.NumberOfSamples]), nil
 	default:
 		return nil, fmt.Errorf("invalid encoding %v", enc)
 	}
@@ -66,7 +66,7 @@ func (m Record) Strings() ([]string, error) {
 	switch enc := Encoding(m.B1000.Encoding); enc {
 	case EncodingASCII:
 		var lines []string
-		buf := bytes.NewBuffer(trimRight(m.Data[:m.RecordHeader.NumberOfSamples]))
+		buf := bytes.NewBuffer(trimRight(m.Data[:m.NumberOfSamples]))
 		scanner := bufio.NewScanner(buf)
 		for scanner.Scan() {
 			lines = append(lines, scanner.Text())
@@ -83,25 +83,25 @@ func (m Record) Strings() ([]string, error) {
 func (m Record) Int32s() ([]int32, error) {
 	switch enc := Encoding(m.B1000.Encoding); enc {
 	case EncodingInt32:
-		return decodeInt32(m.Data, m.B1000.WordOrder, m.RecordHeader.NumberOfSamples)
+		return decodeInt32(m.Data, m.B1000.WordOrder, m.NumberOfSamples)
 	case EncodingSTEIM1:
-		framecount := uint8(len(m.Data) / 64)
+		framecount := uint8(len(m.Data) / 64) //nolint:gosec
 		if m.B1001.FrameCount != 0 {
 			framecount = m.B1001.FrameCount
 		}
 		if int(framecount)*64 > len(m.Data) { //make sure the decoding doesn't overrun the buffer
 			return nil, fmt.Errorf("unpack: header reported more bytes then are present in data packet: %v > %v", framecount*64, len(m.Data))
 		}
-		return decodeSteim(1, m.Data, m.B1000.WordOrder, framecount, m.RecordHeader.NumberOfSamples)
+		return decodeSteim(1, m.Data, m.B1000.WordOrder, framecount, m.NumberOfSamples)
 	case EncodingSTEIM2: //STEIM2
-		framecount := uint8(len(m.Data) / 64)
+		framecount := uint8(len(m.Data) / 64) //nolint:gosec
 		if m.B1001.FrameCount != 0 {
 			framecount = m.B1001.FrameCount
 		}
 		if int(framecount)*64 > len(m.Data) { //make sure the decoding doesn't overrun the buffer
 			return nil, fmt.Errorf("unpack: header reported more bytes then are present in data packet: %v > %v", framecount*64, len(m.Data))
 		}
-		return decodeSteim(2, m.Data, m.B1000.WordOrder, framecount, m.RecordHeader.NumberOfSamples)
+		return decodeSteim(2, m.Data, m.B1000.WordOrder, framecount, m.NumberOfSamples)
 	case EncodingIEEEFloat, EncodingIEEEDouble:
 		samples, err := m.Float64s()
 		if err != nil {
@@ -130,7 +130,7 @@ func (m Record) Float64s() ([]float64, error) {
 		}
 		return res, nil
 	case EncodingIEEEFloat:
-		samples, err := decodeFloat32(m.Data, m.B1000.WordOrder, m.RecordHeader.NumberOfSamples)
+		samples, err := decodeFloat32(m.Data, m.B1000.WordOrder, m.NumberOfSamples)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +140,7 @@ func (m Record) Float64s() ([]float64, error) {
 		}
 		return res, nil
 	case EncodingIEEEDouble:
-		return decodeFloat64(m.Data, m.B1000.WordOrder, m.RecordHeader.NumberOfSamples)
+		return decodeFloat64(m.Data, m.B1000.WordOrder, m.NumberOfSamples)
 	default:
 		return nil, fmt.Errorf("invalid encoding %v", enc)
 	}
