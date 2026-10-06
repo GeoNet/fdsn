@@ -270,8 +270,8 @@ func GenRegex(input []string, emptyDash bool, allowSpace bool) ([]string, error)
 			// "--" represents blank location which should be saved as 2 white spaces.
 			r = `^\s{2}$`
 		} else {
-			s = strings.Replace(s, "*", ".*", -1)
-			s = strings.Replace(s, "?", ".", -1)
+			s = strings.ReplaceAll(s, "*", ".*")
+			s = strings.ReplaceAll(s, "?", ".")
 			r = "^" + s + "$"
 		}
 
@@ -286,7 +286,7 @@ func WillBeEmpty(s string) bool {
 	for _, t := range strings.Split(s, "|") {
 		// If a query doesn't match any of the patterns below,
 		//   the query will be empty result because it contains unwanted characters.
-		if !(t == `^\s{2}$` || t == "--" || nslcRegPassPattern.MatchString(t)) {
+		if t != `^\s{2}$` && t != "--" && !nslcRegPassPattern.MatchString(t) {
 			return true
 		}
 	}

@@ -19,7 +19,7 @@ var versions = []string{"2015p768477_0.7.xml", "2015p768477_0.8.xml", "2015p7684
 
 func TestEventUnmarshal(t *testing.T) {
 	for _, input := range versions {
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -76,7 +76,7 @@ func TestEventUnmarshal(t *testing.T) {
 
 func TestEventUnmarshalSC06(t *testing.T) {
 	for _, input := range []string{"2801727_0.6.xml"} {
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -132,7 +132,7 @@ func TestEventUnmarshalSC06(t *testing.T) {
 
 func TestEventUnmarshalSC12_13(t *testing.T) {
 	for _, input := range []string{"2024p344188_0.12.xml", "2024p344188_0.13.xml"} {
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -251,11 +251,11 @@ func TestEventUnmarshalSC13_eventTypes(t *testing.T) {
 		"volcanic eruption"} {
 
 		input := "2024p344188_0.13.xml"
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
-		b = bytes.Replace(b, []byte("<type>other</type>"), []byte(fmt.Sprintf("<type>%s</type>", eventType)), -1)
+		b = bytes.ReplaceAll(b, []byte("<type>other</type>"), []byte(fmt.Sprintf("<type>%s</type>", eventType)))
 		var e event
 
 		if err = unmarshal(b, &e); err != nil {
@@ -330,13 +330,13 @@ func TestEventType(t *testing.T) {
 		// input test file is sc3ml 0.7 change the version string below to test each
 		// sc3ml version that is supported.
 		for _, input := range versions {
-			b, err := os.ReadFile("etc/" + input)
+			b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			b = bytes.Replace(b, sc3ml07, v.version, -1)
-			b = bytes.Replace(b, []byte("<type>earthquake</type>"), v.eventType, -1)
+			b = bytes.ReplaceAll(b, sc3ml07, v.version)
+			b = bytes.ReplaceAll(b, []byte("<type>earthquake</type>"), v.eventType)
 
 			var e string
 			if e, err = toQuakeMLEvent(b); err != nil {
@@ -352,7 +352,7 @@ func TestEventType(t *testing.T) {
 
 func TestToQuakeMLEvent(t *testing.T) {
 	for _, input := range versions {
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -379,13 +379,13 @@ func TestToQuakeMLEvent(t *testing.T) {
 	if f, err = os.Open("etc/2015p768477_0.7.xml"); err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	if b, err = io.ReadAll(f); err != nil {
 		t.Fatal(err)
 	}
 
-	b = bytes.Replace(b, sc3ml07, []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.5" version="0.5">`), -1)
+	b = bytes.ReplaceAll(b, sc3ml07, []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.5" version="0.5">`))
 
 	if _, err := toQuakeMLEvent(b); err == nil {
 		t.Error("expected error for version of sc3ml with no XSLT")
@@ -404,7 +404,7 @@ func TestEventSave(t *testing.T) {
 	if f, err = os.Open("etc/2015p768477_0.7.xml"); err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	if b, err = io.ReadAll(f); err != nil {
 		t.Fatal(err)
@@ -503,7 +503,7 @@ func setup(t *testing.T) {
 }
 
 func teardown() {
-	db.Close()
+	_ = db.Close()
 }
 
 func loc() string {

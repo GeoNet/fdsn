@@ -128,12 +128,12 @@ func toQuakeMLEvent(seisComPML []byte) (string, error) {
 	if in, err = cmd.StdinPipe(); err != nil {
 		return "", err
 	}
-	defer in.Close()
+	defer func() { _ = in.Close() }()
 
 	if out, err = cmd.StdoutPipe(); err != nil {
 		return "", err
 	}
-	defer out.Close()
+	defer func() { _ = out.Close() }()
 
 	if err := cmd.Start(); err != nil {
 		return "", err
