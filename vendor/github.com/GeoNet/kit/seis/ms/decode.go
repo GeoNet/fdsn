@@ -7,6 +7,7 @@ import (
 )
 
 func decodeInt32(data []byte, order uint8, samples uint16) ([]int32, error) {
+	//nolint:gosec
 	if n := uint16(len(data) / 4); n < samples {
 		return nil, fmt.Errorf("invalid data length: %d", n)
 	}
@@ -20,13 +21,14 @@ func decodeInt32(data []byte, order uint8, samples uint16) ([]int32, error) {
 		default:
 			b = binary.BigEndian.Uint32(data[i:])
 		}
-		values = append(values, int32(b))
+		values = append(values, int32(b)) //nolint:gosec
 	}
 
 	return values, nil
 }
 
 func decodeFloat32(data []byte, order uint8, samples uint16) ([]float32, error) {
+	//nolint:gosec
 	if n := uint16(len(data) / 4); n < samples {
 		return nil, fmt.Errorf("invalid data length: %d", n)
 	}
@@ -45,6 +47,7 @@ func decodeFloat32(data []byte, order uint8, samples uint16) ([]float32, error) 
 }
 
 func decodeFloat64(data []byte, order uint8, samples uint16) ([]float64, error) {
+	//nolint:gosec
 	if n := uint16(len(data) / 8); n < samples {
 		return nil, fmt.Errorf("invalid data length: %d", n)
 	}

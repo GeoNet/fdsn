@@ -10,9 +10,9 @@ var msgCounters [4]uint64
 var msgLast [4]uint64
 var msgCurrent [4]uint64
 
-var httpCounters [8]uint64
-var httpLast [8]uint64
-var httpCurrent [8]uint64
+var httpCounters [9]uint64
+var httpLast [9]uint64
+var httpCurrent [9]uint64
 
 // A MsgCounters records message counters.
 type MsgCounters struct {
@@ -54,6 +54,9 @@ type HttpCounters struct {
 
 	// StatusServiceUnavailable is the count of http 503 responses.
 	StatusServiceUnavailable uint64
+
+	// StatusTooManyRequests is the count of http 429 responses.
+	StatusTooManyRequests uint64
 
 	// Written is the number of bytes written.
 	Written uint64
@@ -97,7 +100,8 @@ func ReadHttpCounters(m *HttpCounters) {
 	m.StatusNotFound = httpCurrent[4] - httpLast[4]
 	m.StatusInternalServerError = httpCurrent[5] - httpLast[5]
 	m.StatusServiceUnavailable = httpCurrent[6] - httpLast[6]
-	m.Written = httpCurrent[7] - httpLast[7]
+	m.StatusTooManyRequests = httpCurrent[7] - httpLast[7]
+	m.Written = httpCurrent[8] - httpLast[8]
 
 	for i := range httpCounters {
 		httpLast[i] = httpCurrent[i]
@@ -159,7 +163,12 @@ func StatusServiceUnavailable() {
 	atomic.AddUint64(&httpCounters[6], 1)
 }
 
+// StatusTooManyRequests increments the http response 429 counter. It is safe for concurrent access.
+func StatusTooManyRequests() {
+	atomic.AddUint64(&httpCounters[7], 1)
+}
+
 // Written increments the bytes sent counter by n.
 func Written(n int64) {
-	atomic.AddUint64(&httpCounters[7], uint64(n))
+	atomic.AddUint64(&httpCounters[8], uint64(n)) //nolint:gosec
 }

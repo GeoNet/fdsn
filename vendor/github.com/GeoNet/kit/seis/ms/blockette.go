@@ -116,7 +116,7 @@ func DecodeBlockette1001(data []byte) Blockette1001 {
 
 	return Blockette1001{
 		TimingQuality: b[0],
-		MicroSec:      int8(b[1]),
+		MicroSec:      int8(b[1]), //nolint:gosec // expected values will fit
 		Reserved:      b[2],
 		FrameCount:    b[3],
 	}
@@ -126,7 +126,7 @@ func EncodeBlockette1001(blk Blockette1001) []byte {
 	var b [Blockette1001Size]byte
 
 	b[0] = blk.TimingQuality
-	b[1] = uint8(blk.MicroSec)
+	b[1] = uint8(blk.MicroSec) //nolint:gosec // expected values will fit
 	b[2] = blk.Reserved
 	b[3] = blk.FrameCount
 

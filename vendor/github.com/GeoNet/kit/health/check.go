@@ -39,7 +39,7 @@ func Check(ctx context.Context, servicePath string, timeout time.Duration) ([]by
 	}
 	defer func() {
 		_, _ = io.Copy(io.Discard, resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}()
 
 	body, err := io.ReadAll(resp.Body)

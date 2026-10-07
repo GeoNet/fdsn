@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -37,7 +36,7 @@ func New() (S3, error) {
 	if err != nil {
 		return S3{}, err
 	}
-	return S3{client: s3.NewFromConfig(cfg)}, nil
+	return S3{client: newFromConfig(cfg)}, nil
 }
 
 // NewWithMaxRetries returns the same as New(), but with the
@@ -47,7 +46,7 @@ func NewWithMaxRetries(maxRetries int) (S3, error) {
 	if err != nil {
 		return S3{}, err
 	}
-	client := s3.NewFromConfig(cfg, func(options *s3.Options) {
+	client := newFromConfig(cfg, func(options *s3.Options) {
 		options.Retryer = retry.AddWithMaxAttempts(options.Retryer, maxRetries)
 	})
 	return S3{client: client}, nil
@@ -60,7 +59,7 @@ func NewWithOptions(optFns ...func(*s3.Options)) (S3, error) {
 	if err != nil {
 		return S3{}, err
 	}
-	client := s3.NewFromConfig(cfg, optFns...)
+	client := newFromConfig(cfg, optFns...)
 	return S3{client: client}, nil
 }
 
@@ -91,29 +90,28 @@ func getConfig() (aws.Config, error) {
 		return aws.Config{}, errors.New("AWS_REGION is not set")
 	}
 
-	var cfg aws.Config
-	var err error
-
-	if awsEndpoint := os.Getenv("AWS_ENDPOINT_URL"); awsEndpoint != "" {
-		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-			return aws.Endpoint{
-				PartitionID:       "aws",
-				URL:               awsEndpoint,
-				HostnameImmutable: true,
-			}, nil
-		})
-
-		cfg, err = config.LoadDefaultConfig(
-			context.TODO(),
-			config.WithEndpointResolverWithOptions(customResolver))
-	} else {
-		cfg, err = config.LoadDefaultConfig(context.TODO())
-	}
-
+	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		return aws.Config{}, err
 	}
 	return cfg, nil
+}
+
+// newFromConfig adds the UsePathStyle option to the list of options given (if
+// the AWS_ENDPOINT_URL env var is set), and returns a Client. This is to support
+// the usage of LocalStack for tests.
+func newFromConfig(config aws.Config, optFns ...func(*s3.Options)) *s3.Client {
+
+	if awsEndpoint := os.Getenv("AWS_ENDPOINT_URL"); awsEndpoint != "" {
+		customResolver := func(options *s3.Options) {
+			options.UsePathStyle = true
+		}
+		optFns = append(optFns, customResolver)
+	}
+
+	client := s3.NewFromConfig(config, optFns...)
+
+	return client
 }
 
 // Ready returns whether the S3 client has been initialised.
@@ -121,25 +119,50 @@ func (s *S3) Ready() bool {
 	return s.client != nil
 }
 
+// Client returns the underlying S3 client.
+func (s *S3) Client() *s3.Client {
+	return s.client
+}
+
 // Get gets the object referred to by key and version from bucket and writes it into b.
 // Version can be empty.
 func (s *S3) Get(bucket, key, version string, b *bytes.Buffer) error {
+	_, err := s.GetWithContext(context.Background(), bucket, key, version, b)
+	return err
+}
+
+// Get gets the object referred to by key and version from bucket and writes it into b.
+// with the provided context.
+// Version can be empty.
+func (s *S3) GetWithContext(
+	ctx context.Context,
+	bucket, key, version string,
+	w io.Writer,
+) (int64, error) {
+
 	input := s3.GetObjectInput{
-		Key:    aws.String(key),
 		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
 	}
 	if version != "" {
 		input.VersionId = aws.String(version)
 	}
-	result, err := s.client.GetObject(context.TODO(), &input)
+
+	result, err := s.client.GetObject(ctx, &input)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	defer result.Body.Close()
+	defer func() {
+		_ = result.Body.Close()
+	}()
 
-	_, err = b.ReadFrom(result.Body)
+	n, err := io.Copy(w, result.Body)
 
-	return err
+	// Distinguish cancellation from real errors
+	if ctx.Err() != nil {
+		return n, ctx.Err()
+	}
+	return n, err
 }
 
 // GetByteRange gets the specified byte range of an object referred to by key and version
@@ -158,7 +181,9 @@ func (s *S3) GetByteRange(bucket, key, version, byteRange string, b *bytes.Buffe
 	if err != nil {
 		return err
 	}
-	defer result.Body.Close()
+	defer func() {
+		_ = result.Body.Close()
+	}()
 
 	_, err = b.ReadFrom(result.Body)
 
@@ -179,7 +204,9 @@ func (s *S3) GetWithLastModified(bucket, key, version string, b *bytes.Buffer) (
 	if err != nil {
 		return time.Time{}, err
 	}
-	defer result.Body.Close()
+	defer func() {
+		_ = result.Body.Close()
+	}()
 
 	_, err = b.ReadFrom(result.Body)
 
@@ -199,7 +226,9 @@ func (s *S3) LastModified(bucket, key, version string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
-	defer result.Body.Close()
+	defer func() {
+		_ = result.Body.Close()
+	}()
 
 	return aws.ToTime(result.LastModified), nil
 }
@@ -504,7 +533,21 @@ func (s *S3) ListAllObjectsConcurrently(bucket string, prefixes []string) ([]typ
 
 // PutStream puts the data stream to key in bucket.
 func (s *S3) PutStream(bucket, key string, reader io.ReadCloser) error {
-	defer reader.Close()
+	return s.putStream(context.TODO(), bucket, key, reader)
+}
+
+// PutStreamWithContext is the same as PutStream but uses
+// the provided context.
+func (s *S3) PutStreamWithContext(ctx context.Context, bucket, key string, reader io.ReadCloser) error {
+	return s.putStream(ctx, bucket, key, reader)
+}
+
+// putStream is the common code used internally to upload a data stream to
+// an S3 bucket using the client's uploader.
+func (s *S3) putStream(ctx context.Context, bucket, key string, reader io.ReadCloser) error {
+	defer func() {
+		_ = reader.Close()
+	}()
 
 	if s.uploader == nil {
 		return errors.New("error uploading to s3, uploader not initialised")
@@ -514,9 +557,9 @@ func (s *S3) PutStream(bucket, key string, reader io.ReadCloser) error {
 		Key:    aws.String(key),
 		Body:   reader,
 	}
-	_, err := s.uploader.Upload(context.TODO(), &input)
+	_, err := s.uploader.Upload(ctx, &input)
 	if err != nil {
-		return fmt.Errorf("error uploading to s3 for key %s, error: %s", key, err.Error())
+		return err
 	}
 	return nil
 }
@@ -525,6 +568,26 @@ func (s *S3) PutStream(bucket, key string, reader io.ReadCloser) error {
 // File is split up into parts and downloaded concurrently into an os.File,
 // so is useful for getting large files. Returns number of bytes downloaded.
 func (s *S3) Download(bucket, key string, f *os.File) (int64, error) {
+	return s.download(context.TODO(), bucket, key, f)
+}
+
+// DownloadWithContext is the same as Download but uses
+// the provided context.
+func (s *S3) DownloadWithContext(
+	ctx context.Context,
+	bucket, key string,
+	f *os.File,
+) (int64, error) {
+	return s.download(ctx, bucket, key, f)
+}
+
+// download is the common code used internally to download an S3 object
+// using the downloader based on the provided input.
+func (s *S3) download(
+	ctx context.Context,
+	bucket, key string,
+	f *os.File,
+) (int64, error) {
 	if s.downloader == nil {
 		return 0, errors.New("error downloading from S3, downloader not initialised")
 	}
@@ -532,7 +595,7 @@ func (s *S3) Download(bucket, key string, f *os.File) (int64, error) {
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	}
-	numBytes, err := s.downloader.Download(context.TODO(), f, &input)
+	numBytes, err := s.downloader.Download(ctx, f, &input)
 	if err != nil {
 		return 0, err
 	}
@@ -559,6 +622,31 @@ func (s *S3) Copy(bucket, key, source string) error {
 		CopySource: aws.String(source),
 	}
 	_, err := s.client.CopyObject(context.TODO(), &input)
+
+	return err
+}
+
+// CreateBucket creates a bucket.
+func (s *S3) CreateBucket(bucket string) error {
+	config := types.CreateBucketConfiguration{
+		LocationConstraint: types.BucketLocationConstraint(s.client.Options().Region),
+	}
+
+	input := s3.CreateBucketInput{
+		Bucket:                    aws.String(bucket),
+		CreateBucketConfiguration: &config,
+	}
+	_, err := s.client.CreateBucket(context.TODO(), &input)
+
+	return err
+}
+
+// DeleteBucket deletes a bucket.
+func (s *S3) DeleteBucket(bucket string) error {
+	input := s3.DeleteBucketInput{
+		Bucket: aws.String(bucket),
+	}
+	_, err := s.client.DeleteBucket(context.TODO(), &input)
 
 	return err
 }

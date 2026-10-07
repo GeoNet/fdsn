@@ -91,5 +91,5 @@ func setup(t *testing.T) {
 }
 
 func teardown() {
-	db.Close()
+	_ = db.Close()
 }

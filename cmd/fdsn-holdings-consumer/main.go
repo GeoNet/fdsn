@@ -89,7 +89,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error with DB config: %s", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// TODO - this is duplicated in the test set up.
 	// make a struct like in fdsn-holdings-consumer and move the
@@ -117,7 +117,7 @@ func main() {
 		log.Fatalf("preparing saveHoldings statement: %s", err.Error())
 	}
 
-	defer saveHoldings.Close()
+	defer func() { _ = saveHoldings.Close() }()
 
 	db.SetMaxIdleConns(p.MaxIdle)
 	db.SetMaxOpenConns(p.MaxOpen)

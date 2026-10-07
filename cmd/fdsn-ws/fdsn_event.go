@@ -160,7 +160,7 @@ func initEventTemplate() {
 	}
 	err = t.ExecuteTemplate(&b, "body", os.Getenv("HOST_CNAME"))
 	if err != nil {
-		log.Printf("error executing assets/tmpl/fdsn-ws-event.wadl: %s", err.Error())
+		log.Printf("error executing assets/tmpl/fdsn-ws-event.wadl: %s", err)
 	}
 	fdsnEventWadlFile = b.Bytes()
 
@@ -348,7 +348,7 @@ func (e *fdsnEventV1) queryQuakeML12Event() (*sql.Rows, error) {
 		q += " ORDER BY magnitude asc"
 	}
 
-	return db.Query(q, args...)
+	return db.Query(q, args...) // #nosec G701 -- q contains fixed SQL clauses and placeholders; request values are passed as args.
 }
 
 func (e *fdsnEventV1) queryRaw() (*sql.Rows, error) {
@@ -372,7 +372,7 @@ func (e *fdsnEventV1) queryRaw() (*sql.Rows, error) {
 		q += " ORDER BY magnitude asc"
 	}
 
-	return db.Query(q, args...)
+	return db.Query(q, args...) // #nosec G701 -- q contains fixed SQL clauses and placeholders; request values are passed as args.
 }
 
 // query returns a count of events in the DB for e.
@@ -386,7 +386,7 @@ func (e *fdsnEventV1) count() (int, error) {
 	}
 
 	var c int
-	err := db.QueryRow(q, args...).Scan(&c)
+	err := db.QueryRow(q, args...).Scan(&c) // #nosec G701 -- q contains fixed SQL clauses and placeholders; request values are passed as args.
 	return c, err
 }
 
@@ -575,7 +575,7 @@ func fdsnEventV1Handler(r *http.Request, h http.Header, b *bytes.Buffer) error {
 		h.Set("Content-Type", "text/plain")
 	}
 
-	log.Printf("%s found %d events, result size %.1f (MB)", r.RequestURI, c, float64(b.Len())/1000000.0)
+	log.Printf("events found: count=%d result_size_mb=%.1f", c, float64(b.Len())/1000000.0) // #nosec G706 -- logs only numeric aggregates
 
 	return nil
 }

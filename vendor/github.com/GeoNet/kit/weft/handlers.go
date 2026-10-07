@@ -59,12 +59,12 @@ var compressibleMimes = map[string]bool{
 
 var defaultCsp = map[string]string{
 	"default-src":     "'none'",
-	"img-src":         "'self' *.geonet.org.nz data: https://*.google-analytics.com https://*.googletagmanager.com",
+	"img-src":         "'self' https://*.geonet.org.nz data: https://*.google-analytics.com https://*.googletagmanager.com",
 	"font-src":        "'self' https://fonts.gstatic.com",
 	"style-src":       "'self'",
 	"script-src":      "'self'",
 	"connect-src":     "'self' https://*.geonet.org.nz https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
-	"frame-src":       "'self' https://www.youtube.com https://www.google.com",
+	"frame-src":       "'self' https://www.youtube.com https://www.google.com https://staticcdn.co.nz",
 	"form-action":     "'self' https://*.geonet.org.nz",
 	"base-uri":        "'none'",
 	"frame-ancestors": "'self'",
@@ -263,7 +263,9 @@ func writeResponseAndLogMetrics(err error, w http.ResponseWriter, r *http.Reques
 		if strings.Contains(r.Header.Get("Accept-Encoding"), GZIP) && compressibleMimes[contentType] && b.Len() > 20 {
 			w.Header().Set("Content-Encoding", GZIP)
 			gz := gzip.NewWriter(w)
-			defer gz.Close()
+			defer func() {
+				_ = gz.Close()
+			}()
 			w.WriteHeader(status)
 			n, writeErr = b.WriteTo(gz)
 		} else {
@@ -304,6 +306,9 @@ func writeResponseAndLogMetrics(err error, w http.ResponseWriter, r *http.Reques
 	case http.StatusServiceUnavailable:
 		metrics.StatusServiceUnavailable()
 		logger.Printf("%d %s %s %s %s", status, r.Method, r.RequestURI, name, err.Error())
+	case http.StatusTooManyRequests:
+		metrics.StatusTooManyRequests()
+		logger.Printf("%d %s %s %s %s", status, r.Method, r.RequestURI, name, err.Error())
 	}
 }
 
@@ -325,7 +330,7 @@ func SetBestPracticeHeaders(w http.ResponseWriter, r *http.Request, customCsp ma
 		csp.WriteString(" ")
 
 		if k == "script-src" && nonce != "" && s != "'none'" { //add nonce to CSP
-			csp.WriteString(fmt.Sprintf(" 'nonce-%s' 'strict-dynamic' ", nonce))
+			fmt.Fprintf(&csp, " 'nonce-%s' 'strict-dynamic' ", nonce)
 		}
 		csp.WriteString(s)
 		csp.WriteString("; ")
@@ -405,6 +410,33 @@ func TextError(e error, h http.Header, b *bytes.Buffer, nonce string) error {
 		_, err = b.WriteString("service unavailable please try again soon")
 	}
 
+	return err
+}
+
+// TextInternalError exposes 500 errors to the client
+// for INTERNAL USERS!!!
+func TextInternalError(e error, h http.Header, b *bytes.Buffer, nonce string) error {
+	if b == nil {
+		return errors.New("nil *bytes.Buffer")
+	}
+
+	var msg string
+	switch Status(e) {
+	case http.StatusServiceUnavailable:
+		msg = "service unable error: " + e.Error()
+	case http.StatusInternalServerError:
+		msg = "internal server error: " + e.Error()
+	default:
+		// Fall back to the public-facing handler for all other statuses
+		return TextError(e, h, b, nonce)
+	}
+
+	// response
+	b.Reset()
+	h.Set("Surrogate-Control", "no-store")
+	h.Set("Content-Type", "text/plain; charset=utf-8")
+
+	_, err := b.WriteString(msg)
 	return err
 }
 

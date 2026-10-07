@@ -36,21 +36,21 @@ func PostgresEnv() (Postgres, error) {
 
 	switch "" {
 	case p.Host:
-		return Postgres{}, errors.New("DB_HOST env var must be set.")
+		return Postgres{}, errors.New("DB_HOST env var must be set")
 	case p.User:
-		return Postgres{}, errors.New("DB_USER env var must be set.")
+		return Postgres{}, errors.New("DB_USER env var must be set")
 	case p.Password:
-		return Postgres{}, errors.New("DB_PASSWD env var must be set.")
+		return Postgres{}, errors.New("DB_PASSWD env var must be set")
 	case p.Name:
-		return Postgres{}, errors.New("DB_NAME env var must be set.")
+		return Postgres{}, errors.New("DB_NAME env var must be set")
 	case p.SSLMode:
-		return Postgres{}, errors.New("DB_SSLMODE env var must be set.")
+		return Postgres{}, errors.New("DB_SSLMODE env var must be set")
 	case c:
-		return Postgres{}, errors.New("DB_CONN_TIMEOUT env var must be set.")
+		return Postgres{}, errors.New("DB_CONN_TIMEOUT env var must be set")
 	case idle:
-		return Postgres{}, errors.New("DB_MAX_IDLE_CONNS env var must be set.")
+		return Postgres{}, errors.New("DB_MAX_IDLE_CONNS env var must be set")
 	case open:
-		return Postgres{}, errors.New("DB_MAX_OPEN_CONNS env var must be set.")
+		return Postgres{}, errors.New("DB_MAX_OPEN_CONNS env var must be set")
 	}
 
 	var err error

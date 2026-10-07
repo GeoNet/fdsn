@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -18,7 +19,7 @@ var versions = []string{"2015p768477_0.7.xml", "2015p768477_0.8.xml", "2015p7684
 
 func TestEventUnmarshal(t *testing.T) {
 	for _, input := range versions {
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -75,7 +76,7 @@ func TestEventUnmarshal(t *testing.T) {
 
 func TestEventUnmarshalSC06(t *testing.T) {
 	for _, input := range []string{"2801727_0.6.xml"} {
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -131,7 +132,7 @@ func TestEventUnmarshalSC06(t *testing.T) {
 
 func TestEventUnmarshalSC12_13(t *testing.T) {
 	for _, input := range []string{"2024p344188_0.12.xml", "2024p344188_0.13.xml"} {
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -185,6 +186,56 @@ func TestEventUnmarshalSC12_13(t *testing.T) {
 	}
 }
 
+func TestEventUnmarshalSC14(t *testing.T) {
+	b, err := os.ReadFile("etc/2026p742111_0.14.xml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var e event
+	if err = unmarshal(b, &e); err != nil {
+		t.Fatal(err)
+	}
+	c := event{
+		PublicID:              "2026p742111",
+		Longitude:             174.3247528076172,
+		Latitude:              -39.084049224853516,
+		Depth:                 8.398130416870117,
+		DepthType:             "from location",
+		EvaluationMethod:      "LOCSAT",
+		EarthModel:            "iasp91",
+		EvaluationMode:        "automatic",
+		UsedPhaseCount:        170,
+		UsedStationCount:      169,
+		OriginError:           0.7100475703706789,
+		AzimuthalGap:          96.75810241699219,
+		MinimumDistance:       0.14212515950202942,
+		Magnitude:             5.149220521545345,
+		MagnitudeType:         "M",
+		MagnitudeStationCount: 127,
+		Sc3ml:                 string(b),
+	}
+	c.ModificationTime, _ = time.Parse(time.RFC3339Nano, "2026-10-02T14:04:36.007679Z")
+	c.OriginTime, _ = time.Parse(time.RFC3339Nano, "2026-10-02T13:57:16.699857Z")
+	if c.Quakeml12Event, err = toQuakeMLEvent(b); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(e, c) {
+		t.Errorf("event fields do not match expected values: %+v", e)
+	}
+
+	want, err := os.ReadFile("etc/2026p742111_quakeml.xml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	interTagWhitespace := regexp.MustCompile(`>\s+<`)
+	got := strings.TrimSpace(interTagWhitespace.ReplaceAllString(e.Quakeml12Event, `><`))
+	expected := strings.TrimSpace(interTagWhitespace.ReplaceAllString(string(want), `><`))
+	if got != expected {
+		t.Error("QuakeML event does not match etc/2026p742111_quakeml.xml")
+	}
+}
+
 // test new event types in SC3ML 0.13 can be unmarshalled
 func TestEventUnmarshalSC13_eventTypes(t *testing.T) {
 	for _, eventType := range []string{
@@ -200,11 +251,11 @@ func TestEventUnmarshalSC13_eventTypes(t *testing.T) {
 		"volcanic eruption"} {
 
 		input := "2024p344188_0.13.xml"
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
-		b = bytes.Replace(b, []byte("<type>other</type>"), []byte(fmt.Sprintf("<type>%s</type>", eventType)), -1)
+		b = bytes.ReplaceAll(b, []byte("<type>other</type>"), []byte(fmt.Sprintf("<type>%s</type>", eventType)))
 		var e event
 
 		if err = unmarshal(b, &e); err != nil {
@@ -279,13 +330,13 @@ func TestEventType(t *testing.T) {
 		// input test file is sc3ml 0.7 change the version string below to test each
 		// sc3ml version that is supported.
 		for _, input := range versions {
-			b, err := os.ReadFile("etc/" + input)
+			b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			b = bytes.Replace(b, sc3ml07, v.version, -1)
-			b = bytes.Replace(b, []byte("<type>earthquake</type>"), v.eventType, -1)
+			b = bytes.ReplaceAll(b, sc3ml07, v.version)
+			b = bytes.ReplaceAll(b, []byte("<type>earthquake</type>"), v.eventType)
 
 			var e string
 			if e, err = toQuakeMLEvent(b); err != nil {
@@ -301,7 +352,7 @@ func TestEventType(t *testing.T) {
 
 func TestToQuakeMLEvent(t *testing.T) {
 	for _, input := range versions {
-		b, err := os.ReadFile("etc/" + input)
+		b, err := os.ReadFile("etc/" + input) //nolint:gosec // input is a fixed fixture name
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -328,13 +379,13 @@ func TestToQuakeMLEvent(t *testing.T) {
 	if f, err = os.Open("etc/2015p768477_0.7.xml"); err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	if b, err = io.ReadAll(f); err != nil {
 		t.Fatal(err)
 	}
 
-	b = bytes.Replace(b, sc3ml07, []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.5" version="0.5">`), -1)
+	b = bytes.ReplaceAll(b, sc3ml07, []byte(`<seiscomp xmlns="http://geofon.gfz-potsdam.de/ns/seiscomp3-schema/0.5" version="0.5">`))
 
 	if _, err := toQuakeMLEvent(b); err == nil {
 		t.Error("expected error for version of sc3ml with no XSLT")
@@ -353,7 +404,7 @@ func TestEventSave(t *testing.T) {
 	if f, err = os.Open("etc/2015p768477_0.7.xml"); err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	if b, err = io.ReadAll(f); err != nil {
 		t.Fatal(err)
@@ -452,7 +503,7 @@ func setup(t *testing.T) {
 }
 
 func teardown() {
-	db.Close()
+	_ = db.Close()
 }
 
 func loc() string {
